@@ -7,8 +7,33 @@
 #include "expansionAlgorithms/DepthFirst.h"
 #include "learningAlgorithms/Ignorance.h"
 #include "domain/TreeWorld.h"
+#include "randomSearch.h"
 
 using namespace std;
+
+/*
+static int randNum(int max){
+	int x = rand() % max;
+	return x;
+}
+
+double MCTS(TreeWorld domain, int lookaheadDepth){
+		domain.initialize("mcts", lookaheadDepth);
+		TreeWorld::State cur = domain.getStartState();
+		int r;
+		double cost = 0;
+		srand(time(0));
+
+		while (!domain.isGoal(cur)){
+			vector<TreeWorld::State> children = domain.successors(cur);
+
+			r = randNum(children.size());
+			cur = children[r];
+			cost += domain.getEdgeCost(cur);
+		}
+		return cost;
+}
+*/
 
 int main(int argc, char** argv)
 {
@@ -52,6 +77,10 @@ int main(int argc, char** argv)
 	ResultContainer miniminRes = minimin.lastIncrementalDecision();
 	ResultContainer nancyRes = nancy.lastIncrementalDecision();
 
+	double randomCost;
+	RandomSearch<TreeWorld> r(world, lookaheadDepth);
+	randomCost = r.randomSearch();
+
 	string result = "{ \"K-Best 1 Pemberton Belief\": " + to_string(k1PRes.solutionCost) +
 		", \"K-Best 3 Pemberton Belief\": " + to_string(k3PRes.solutionCost) +
 		", \"K-Best 5 Pemberton Belief\": " + to_string(k5PRes.solutionCost) +
@@ -65,6 +94,7 @@ int main(int argc, char** argv)
 		", \"Bellman\": " + to_string(bellmanRes.solutionCost) +
 		", \"Minimin\": " + to_string(miniminRes.solutionCost) +
 		", \"Nancy\": " + to_string(nancyRes.solutionCost) +
+		", \"Random\": " + to_string(randomCost) +
 		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
 
 	if (argc < 3)

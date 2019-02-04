@@ -9,8 +9,33 @@
 #include "learningAlgorithms/Dijkstra.h"
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
+#include "randomSearch.h"
 
 using namespace std;
+
+/*
+static int randNum(int max){
+	int x = rand() % max;
+	return x;
+}
+
+double MCTS(TreeWorld domain, int lookaheadDepth){
+		domain.initialize("mcts", lookaheadDepth);
+		TreeWorld::State cur = domain.getStartState();
+		int r;
+		double cost = 0;
+		srand(time(0));
+
+		while (!domain.isGoal(cur)){
+			vector<TreeWorld::State> children = domain.successors(cur);
+
+			r = randNum(children.size());
+			cur = children[r];
+			cost += domain.getEdgeCost(cur);
+		}
+		return cost;
+}
+*/
 
 int main(int argc, char** argv)
 {
@@ -38,6 +63,8 @@ int main(int argc, char** argv)
 	ResultContainer pk3Res;
 	ResultContainer pk10Res;
 	ResultContainer pk30Res;
+
+	double randomCost;
 
 	if (domain == "TreeWorld")
 	{
@@ -68,6 +95,9 @@ int main(int argc, char** argv)
 		pk3Res = pk3.search();
 		pk10Res = pk10.search();
 		pk30Res = pk30.search();
+
+		RandomSearch<TreeWorld> r(world, lookaheadDepth);
+		randomCost = r.randomSearch();
 	}
 	else if (domain == "SlidingPuzzle")
 	{
@@ -105,6 +135,7 @@ int main(int argc, char** argv)
 		", \"K-Best 3 Pemberton Belief\": " + to_string(pk3Res.solutionCost) +
 		", \"K-Best 10 Pemberton Belief\": " + to_string(pk10Res.solutionCost) + 
 		", \"K-Best 30 Pemberton Belief\": " + to_string(pk30Res.solutionCost) +
+		", \"Random\": " + to_string(randomCost) +
 		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
 
 	if (argc < 4)

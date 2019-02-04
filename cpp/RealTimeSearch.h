@@ -230,7 +230,7 @@ public:
 
 		// Get the start node
 		Node* start = new Node(0, domain.heuristic(domain.getStartState()), domain.distance(domain.getStartState()),
-			domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(), 
+			domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(),
 			domain.getStartState(), NULL, -1);
 
 		while (1)
@@ -267,7 +267,7 @@ public:
 			// Decision-making Phase
 			start = decisionAlgo->backup(open, tlas, start);
 		}
-
+		
 		return res;
 	}
 
@@ -279,7 +279,8 @@ public:
 
 		// Get the start node
 		Node* start = new Node(0, domain.heuristic(domain.getStartState()), domain.distance(domain.getStartState()),
-			domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(), domain.getStartState(), NULL, -1);
+			domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(),
+			domain.getStartState(), NULL, -1);
 
 		// Check if a goal has been reached
 		if (domain.isGoal(start->getState()))
