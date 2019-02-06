@@ -81,6 +81,12 @@ int main(int argc, char** argv)
 	RandomSearch<TreeWorld> r(world, lookaheadDepth);
 	randomCost = r.randomSearch();
 
+	double sample5 = r.randomSampling(5);
+	double sample10 = r.randomSampling(10);
+	double sample50 = r.randomSampling(50);
+
+
+
 	string result = "{ \"K-Best 1 Pemberton Belief\": " + to_string(k1PRes.solutionCost) +
 		", \"K-Best 3 Pemberton Belief\": " + to_string(k3PRes.solutionCost) +
 		", \"K-Best 5 Pemberton Belief\": " + to_string(k5PRes.solutionCost) +
@@ -95,6 +101,9 @@ int main(int argc, char** argv)
 		", \"Minimin\": " + to_string(miniminRes.solutionCost) +
 		", \"Nancy\": " + to_string(nancyRes.solutionCost) +
 		", \"Random\": " + to_string(randomCost) +
+		", \"Sampling 5\": " + to_string(sample5) +
+		", \"Sampling 10\": " + to_string(sample10) +
+		", \"Sampling 50\": " + to_string(sample50) +
 		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
 
 	if (argc < 3)

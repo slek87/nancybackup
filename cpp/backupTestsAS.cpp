@@ -65,6 +65,9 @@ int main(int argc, char** argv)
 	ResultContainer pk30Res;
 
 	double randomCost;
+	double sample5;
+	double sample10;
+	double sample50;
 
 	if (domain == "TreeWorld")
 	{
@@ -98,6 +101,10 @@ int main(int argc, char** argv)
 
 		RandomSearch<TreeWorld> r(world, lookaheadDepth);
 		randomCost = r.randomSearch();
+
+		sample5 = r.randomSampling(5);
+		sample10 = r.randomSampling(10);
+		sample50 = r.randomSampling(50);
 
 	}
 	else if (domain == "SlidingPuzzle")
@@ -137,7 +144,14 @@ int main(int argc, char** argv)
 		", \"K-Best 10 Pemberton Belief\": " + to_string(pk10Res.solutionCost) +
 		", \"K-Best 30 Pemberton Belief\": " + to_string(pk30Res.solutionCost) +
 		", \"Random\": " + to_string(randomCost) +
-		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
+		", \"Sampling 5\": " + to_string(sample5) +
+		", \"Sampling 10\": " + to_string(sample10) +
+		", \"Sampling 50\": " + to_string(sample50) +
+		", \"Lookahead\": " + to_string(lookaheadDepth) + 
+		
+		
+		
+		" }";
 
 	if (argc < 4)
 	{

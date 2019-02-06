@@ -48,7 +48,7 @@ colors=["#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231", "#911eb4",
 
 algorithms = ["Minimin", "Bellman", "Nancy", "K-Best 1 Correct Belief", "K-Best 3 Correct Belief", "K-Best 5 Correct Belief", 
               "K-Best 7 Correct Belief", "Cserna Correct Belief", "K-Best 1", "K-Best 3", "K-Best 5", 
-              "K-Best 7", "Cserna"]
+              "K-Best 7", "Cserna", "Random", "Sampling 5", "Sampling 10", "Sampling 50"]
 
 instance = []
 lookAheadVals = []

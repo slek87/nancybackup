@@ -44,9 +44,9 @@ colors=["#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231", "#911eb4",
         "#46f0f0", "#f032e6", "#229954", "#fabebe", "#008080", "#e6beff", 
         "#aa6e28", "#800000", "#808000", "#D35400"]
 
-algorithms = ["Minimin", "Bellman", "Nancy", "K-Best 3", "K-Best 10", "K-Best 30", "Cserna", "K-Best 3 One Level Belief", "K-Best 10 One Level Belief", "K-Best 30 One Level Belief", "Cserna One Level Belief", "Random"]
+algorithms = ["Minimin", "Bellman", "Nancy", "K-Best 3", "K-Best 10", "K-Best 30", "Cserna", "K-Best 3 One Level Belief", "K-Best 10 One Level Belief", "K-Best 30 One Level Belief", "Cserna One Level Belief", "Random", "Sampling 5", "Sampling 10", "Sampling 50"]
 
-algorithmsAAAI19Slides = ["Minimin", "Bellman", "Nancy", "Cserna", "Random"]
+algorithmsAAAI19Slides = ["Minimin", "Bellman", "Nancy", "Cserna", "Random", "Sampling 5", "Sampling 10", "Sampling 50"]
 
 depthsDFS = [3, 7, 10]
 
