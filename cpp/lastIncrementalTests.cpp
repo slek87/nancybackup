@@ -78,12 +78,12 @@ int main(int argc, char** argv)
 	ResultContainer nancyRes = nancy.lastIncrementalDecision();
 
 	double randomCost;
-	RandomSearch<TreeWorld> r(world, lookaheadDepth);
-	randomCost = r.randomSearch();
+	RandomSearch<TreeWorld> r1(world, lookaheadDepth);
+	randomCost = r1.randomSearch();
 
-	double sample5 = r.randomSampling(5);
-	double sample10 = r.randomSampling(10);
-	double sample50 = r.randomSampling(50);
+	double randomSamplingCost;
+	RandomSearch<TreeWorld> r2(world, lookaheadDepth);
+	randomSamplingCost = r2.randomSampling();
 
 
 
@@ -101,9 +101,7 @@ int main(int argc, char** argv)
 		", \"Minimin\": " + to_string(miniminRes.solutionCost) +
 		", \"Nancy\": " + to_string(nancyRes.solutionCost) +
 		", \"Random\": " + to_string(randomCost) +
-		", \"Sampling 5\": " + to_string(sample5) +
-		", \"Sampling 10\": " + to_string(sample10) +
-		", \"Sampling 50\": " + to_string(sample50) +
+		", \"Random Sampling\": " + to_string(randomSamplingCost) +
 		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
 
 	if (argc < 3)

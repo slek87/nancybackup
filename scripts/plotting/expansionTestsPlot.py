@@ -23,9 +23,9 @@ def makeViolinPlot(width, height, xAxis, yAxis, dataframe, dodge, hue, orderList
     plt.cla()
     return
 
-def makeDifferencePlot(width, height, xAxis, yAxis, dataframe, dodge, hue, orderList, hueOrderList, xLabel, yLabel, outputName):
+def makeDifferencePlot(width, height, xAxis, yAxis, dataframe, dodge, hue, orderList, hueOrderList, xLabel, yLabel, outputName, markerList):
     sns.set(rc={'figure.figsize': (width, height), 'font.size': 26, 'text.color': 'black'})
-    ax = sns.pointplot(x=xAxis, y=yAxis, hue=hue, order=orderList, hue_order=hueOrderList, data=dataframe, ci=95, join=False, dodge=dodge, palette="Set2")
+    ax = sns.pointplot(x=xAxis, y=yAxis, hue=hue, order=orderList, hue_order=hueOrderList, data=dataframe, ci=95, errwidth=3, join=False, dodge=dodge, palette="Set2", markers=markerList)
     ax.tick_params(colors='black', labelsize=12)
     plt.ylabel(yLabel, color='black', fontsize=18)
     plt.xlabel(xLabel, color='black', fontsize=18)
@@ -35,10 +35,12 @@ def makeDifferencePlot(width, height, xAxis, yAxis, dataframe, dodge, hue, order
     plt.cla()
     return
 
+markers=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<", "p", "h", "^", "D", "X", ">"]
+
 # Hard coded result directories
-resultDirs = {"4x4-b100"}
+resultDirs = {"b2d100"}
 limits = [10, 30, 100, 300, 1000]
-algorithms = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*"]
+algorithms = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*", "Random", "Random Sampling"]
 
 instance = []
 lookAheadVals = []
@@ -49,15 +51,15 @@ differenceCost = []
 print("reading in data...")
 
 for dir in resultDirs:
-    for file in listdir("../../../results/SlidingTilePuzzle/expansionTests/Nancy/" + dir):
-        with open("../../../results/SlidingTilePuzzle/expansionTests/Nancy/" + dir + "/" + file) as json_data:
+    for file in listdir("../../../results/TreeWorld/expansionTests/Nancy/" + dir):
+        with open("../../../results/TreeWorld/expansionTests/Nancy/" + dir + "/" + file) as json_data:
             resultData = json.load(json_data)
             for algo in algorithms:
                 instance.append(str(dir))
                 lookAheadVals.append(resultData["Lookahead"])
                 algorithm.append(algo)
-                solutionCost.append(resultData[algo])
-                differenceCost.append(resultData[algo] - resultData["A*"])
+                solutionCost.append(resultData[algo.replace("A*", "A*")])
+                differenceCost.append(resultData[algo.replace("A*", "A*")] - resultData["A*"])
 
 df = pd.DataFrame({
     "instance":instance,
@@ -73,11 +75,11 @@ dfDiff = pd.DataFrame({
     "Algorithm":algorithm
 })
 
-algorithmsExpA = ["A*", "F-Hat"]
+algorithmsExpA = ["A*", "F-Hat", "Random", "Random Sampling"]
 
-algorithmsExpB = ["A*", "F-Hat", "BFS"]
+algorithmsExpB = ["A*", "F-Hat", "BFS", "Random", "Random Sampling"]
 
-algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*"]
+algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk", "Random", "Random Sampling"]
 
 print("building plots...")
 
@@ -86,14 +88,16 @@ for instance in resultDirs:
     instanceDataExp = df.loc[df["instance"] == instance]
     instanceDataDiffExp = dfDiff.loc[dfDiff["instance"] == instance]
 
-    makeViolinPlot(11, 8, "Node Expansion Limit", "Solution Cost", instanceDataExp, 0.4, "Algorithm", limits, algorithmsExpA, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment2AViolin" + instance + ".pdf")
+    makeViolinPlot(13, 10, "Node Expansion Limit", "Solution Cost", instanceDataExp, 0.4, "Algorithm", limits, algorithmsExpA, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment2AViolin" + instance + ".pdf")
 
-    makeDifferencePlot(11, 8, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpA, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2ADifference" + instance + ".pdf")
+    makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpA, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2ADifference" + instance + ".pdf", markers)
 
-    makeViolinPlot(11, 8, "Node Expansion Limit", "Solution Cost", instanceDataExp, 0.53, "Algorithm", limits, algorithmsExpB, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment2BViolin" + instance + ".pdf")
+    makeViolinPlot(13, 10, "Node Expansion Limit", "Solution Cost", instanceDataExp, 0.53, "Algorithm", limits, algorithmsExpB, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment2BViolin" + instance + ".pdf")
 
-    makeDifferencePlot(11, 8, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpB, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2BDifference" + instance + ".pdf")
+    makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpB, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2BDifference" + instance + ".pdf", markers)
 
-    makeViolinPlot(11, 8, "Node Expansion Limit", "Solution Cost", instanceDataExp, 0.59, "Algorithm", limits, algorithmsExpC, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment2CViolin" + instance + ".pdf")
+    makeViolinPlot(13, 10, "Node Expansion Limit", "Solution Cost", instanceDataExp, 0.59, "Algorithm", limits, algorithmsExpC, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment2CViolin" + instance + ".pdf")
 
-    makeDifferencePlot(11, 8, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpC, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2CDifference" + instance + ".pdf")
+    makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpC, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2CDifference" + instance + ".pdf", markers)
+
+    makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpC, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2CDifference" + instance + "AAAI19Slides.pdf", markers)

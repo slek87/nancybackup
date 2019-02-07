@@ -65,9 +65,7 @@ int main(int argc, char** argv)
 	ResultContainer pk30Res;
 
 	double randomCost;
-	double sample5;
-	double sample10;
-	double sample50;
+	double randomSamplingCost;
 
 	if (domain == "TreeWorld")
 	{
@@ -82,10 +80,10 @@ int main(int argc, char** argv)
 		RealTimeSearch<TreeWorld> pemberton(world, "a-star", "none", "k-best", lookaheadDepth, numeric_limits<double>::infinity(), "pemberton");
 		RealTimeSearch<TreeWorld> k3(world, "a-star", "none", "k-best", lookaheadDepth, 3, "normal");
 		RealTimeSearch<TreeWorld> k10(world, "a-star", "none", "k-best", lookaheadDepth, 10, "normal");
-		RealTimeSearch<TreeWorld> k30(world, "a-star", "none", "k-best", lookaheadDepth, 30, "normal");
+		// RealTimeSearch<TreeWorld> k30(world, "a-star", "none", "k-best", lookaheadDepth, 30, "normal");
 		RealTimeSearch<TreeWorld> pk3(world, "a-star", "none", "k-best", lookaheadDepth, 3, "pemberton");
 		RealTimeSearch<TreeWorld> pk10(world, "a-star", "none", "k-best", lookaheadDepth, 10, "pemberton");
-		RealTimeSearch<TreeWorld> pk30(world, "a-star", "none", "k-best", lookaheadDepth, 30, "pemberton");
+		// RealTimeSearch<TreeWorld> pk30(world, "a-star", "none", "k-best", lookaheadDepth, 30, "pemberton");
 
 		miniminRes = minimin.search();
 		bellmanRes = bellman.search();
@@ -94,17 +92,17 @@ int main(int argc, char** argv)
 		csernaRes = cserna.search();
 		k3Res = k3.search();
 		k10Res = k10.search();
-		k30Res = k30.search();
+		// k30Res = k30.search();
 		pk3Res = pk3.search();
 		pk10Res = pk10.search();
-		pk30Res = pk30.search();
+		// pk30Res = pk30.search();
 
-		RandomSearch<TreeWorld> r(world, lookaheadDepth);
-		randomCost = r.randomSearch();
+		RandomSearch<TreeWorld> r1(world, lookaheadDepth);
+		randomCost = r1.randomSearch();
 
-		sample5 = r.randomSampling(5);
-		sample10 = r.randomSampling(10);
-		sample50 = r.randomSampling(50);
+		RandomSearch<TreeWorld> r2(world, lookaheadDepth);
+		randomSamplingCost = r2.randomSampling();
+
 
 	}
 	else if (domain == "SlidingPuzzle")
@@ -135,18 +133,19 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	string result = "{ \"Minimin\": " + to_string(miniminRes.solutionCost) + ", \"Bellman\": " +
-		to_string(bellmanRes.solutionCost) + ", \"Nancy\": " + to_string(nancyRes.solutionCost) +
-		", \"Cserna\": " + to_string(csernaRes.solutionCost) + ", \"Cserna Pemberton Belief\": " +
-		to_string(pembertonRes.solutionCost) + ", \"K-Best 3\": " + to_string(k3Res.solutionCost) +
-		", \"K-Best 10\": " + to_string(k10Res.solutionCost) + ", \"K-Best 30\": " + to_string(k30Res.solutionCost) +
+	string result = "{ \"Minimin\": " + to_string(miniminRes.solutionCost) + 
+		", \"Bellman\": " +	to_string(bellmanRes.solutionCost) + 
+		", \"Nancy\": " + to_string(nancyRes.solutionCost) +
+		", \"Cserna\": " + to_string(csernaRes.solutionCost) + 
+		", \"Cserna Pemberton Belief\": " +	to_string(pembertonRes.solutionCost) + 
+		", \"K-Best 3\": " + to_string(k3Res.solutionCost) +
+		", \"K-Best 10\": " + to_string(k10Res.solutionCost) + 
+		", \"K-Best 30\": " + to_string(k30Res.solutionCost) +
 		", \"K-Best 3 Pemberton Belief\": " + to_string(pk3Res.solutionCost) +
 		", \"K-Best 10 Pemberton Belief\": " + to_string(pk10Res.solutionCost) +
 		", \"K-Best 30 Pemberton Belief\": " + to_string(pk30Res.solutionCost) +
 		", \"Random\": " + to_string(randomCost) +
-		", \"Sampling 5\": " + to_string(sample5) +
-		", \"Sampling 10\": " + to_string(sample10) +
-		", \"Sampling 50\": " + to_string(sample50) +
+		", \"Random Sampling\": " + to_string(randomSamplingCost) +
 		", \"Lookahead\": " + to_string(lookaheadDepth) + 
 		
 		

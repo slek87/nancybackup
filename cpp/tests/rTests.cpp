@@ -35,21 +35,20 @@ int main(int argc, char** argv) {
         cout << "[Random walk]" << endl;
 		cout << "Cost:\t" << randomCost << endl;
 
-		ksamples = 2;
-        cout << "[Sampling " << ksamples << "]" << endl;
-		randomCost = r.randomSampling(ksamples);
+		RandomSearch<TreeWorld> r6(world, 6);
+		randomCost = r6.randomSampling();
+		cout << "[6]" << endl;
 		cout << "Cost:\t" << randomCost << endl;
 
-		ksamples = 5;
-        cout << "[Sampling " << ksamples << "]" << endl;
-		randomCost = r.randomSampling(ksamples);
+		RandomSearch<TreeWorld> r10(world, 10);
+		randomCost = r10.randomSampling();
+		cout << "[10]" << endl;
 		cout << "Cost:\t" << randomCost << endl;
 
-		ksamples = 10;
-        cout << "[Sampling " << ksamples << "]" << endl;
-		randomCost = r.randomSampling(ksamples);
+		RandomSearch<TreeWorld> r50(world, 50);
+		randomCost = r50.randomSampling();
+		cout << "[50]" << endl;
 		cout << "Cost:\t" << randomCost << endl;
-
 
     }
 

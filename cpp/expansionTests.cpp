@@ -11,6 +11,7 @@
 #include "learningAlgorithms/Dijkstra.h"
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
+#include "randomSearch.h"
 
 using namespace std;
 
@@ -34,6 +35,9 @@ int main(int argc, char** argv)
 	ResultContainer fhatRes;
 	ResultContainer riskRes;
 	ResultContainer lsslrtaRes;
+	
+	double randomCost;
+	double randomSamplingCost;
 
 	if (domain == "TreeWorld")
 	{
@@ -51,6 +55,12 @@ int main(int argc, char** argv)
 		fhatRes = fhat.search();
 		riskRes = risk.search();
 		lsslrtaRes = lsslrta.search();
+
+		RandomSearch<TreeWorld> r1(world, lookaheadDepth);
+		randomCost = r1.randomSearch();
+
+		RandomSearch<TreeWorld> r2(world, lookaheadDepth);
+		randomSamplingCost = r2.randomSampling();
 	}
 	else if (domain == "SlidingPuzzle")
 	{
@@ -75,9 +85,13 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	string result = "{ \"BFS\": " + to_string(bfsRes.solutionCost) + ", \"A*\": " +
-		to_string(astarRes.solutionCost) + ", \"F-Hat\": " + to_string(fhatRes.solutionCost) +
-		", \"Risk\": " + to_string(riskRes.solutionCost) + ", \"LSS-LRTA*\": " + to_string(lsslrtaRes.solutionCost) +
+	string result = "{ \"BFS\": " + to_string(bfsRes.solutionCost) + 
+		", \"A*\": " +	to_string(astarRes.solutionCost) + 
+		", \"F-Hat\": " + to_string(fhatRes.solutionCost) +
+		", \"Risk\": " + to_string(riskRes.solutionCost) + 
+		", \"LSS-LRTA*\": " + to_string(lsslrtaRes.solutionCost) +
+		", \"Random\": " + to_string(randomCost) +
+		", \"Random Sampling\": " + to_string(randomSamplingCost) +
 		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
 
 	if (argc < 4)
