@@ -54,7 +54,7 @@ public:
 		// Might get tricky with tile world, will have to revisit
 		int branches = domain.getBranchingFactor();
 		int expansion_credit = lookahead / branches - 1;
-		int max_depth = pow(lookahead - branches, 1.0/branches);
+		int max_depth = pow(lookahead - branches, 1.0/branches) / 2;
 		int probe_per_child = expansion_credit / max_depth;
 
 		double totalcost = 0;
