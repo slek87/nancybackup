@@ -8,11 +8,12 @@ using namespace std;
 typedef typename PancakePuzzle::State State;
 typedef typename PancakePuzzle::Cost Cost;
 typedef double Cost;
-/*
-unsigned long long getHash(){
-    return std::hash<std::string>() ( std::string( s.getOrdering().begin(), s.getOrdering().end() ) ) ;
+
+
+unsigned long long getHash(vector<char> s){
+    return std::hash<std::string>() ( std::string( s.begin(), s.end())) ;
 }
-*/
+
 
 int main(int argc, char** argv) {
     int size = 6;
@@ -20,10 +21,11 @@ int main(int argc, char** argv) {
     int seed = 1;
 
 
-    // Testing hash usint 16! = 20,922,789,888,000
-    vector<int> v;
-    vector< vector<int> > w;
-    for (int i = 1; i <= 16; ++i){
+    // Testing hash using 12! = 479,001,600 permutations
+    // Using char to save memeory
+    vector<char> v;
+    vector< vector<char> > w;
+    for (int i = 1; i <= 12; ++i){
         v.push_back(i);
     }
 
@@ -31,10 +33,14 @@ int main(int argc, char** argv) {
         w.push_back(v);
     } while(std::next_permutation(v.begin(),v.end()));
 
-    for (vector<int> x : w){
-        for (int y: x){
-            cout << y << " ";
-        } cout << endl;
+    unordered_map<unsigned long long, char> hashes;
+
+    for (vector<char> x : w){
+        int size = hashes.size();
+        hashes[getHash(x)] = 0;
+        if (size == hashes.size()){
+            cout << "Hash collision deteceted!" << endl;
+        }
     }
 
     exit(0);
