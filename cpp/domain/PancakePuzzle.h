@@ -22,9 +22,7 @@ public:
 	public:
 		State() {}
 
-		State(std::vector<int> b, int l) : ordering(b), label(l) {
-			generateKey();
-		}
+		State(std::vector<int> b, int l) : ordering(b), label(l) {}
 
 		std::vector<int> getOrdering() const {
 			return ordering;
@@ -48,11 +46,6 @@ public:
 			return ordering != state.getOrdering();
 		}
 
-		void generateKey() {
-
-		}
-
-
 		std::string toString() const {
 			std::string s = "";
 			for (int r = 0; r < ordering.size(); r++)
@@ -69,7 +62,7 @@ public:
 
 		void markStart()
 		{
-			label = 's';
+			label = 0;
 		}
 
     private:
@@ -80,9 +73,15 @@ public:
 	struct HashState
 	{
 		// I think that this will work for puzzles up to size 255
+		// Because it will convert each int to a char, which is 8 bytes
+		// So the biggest number 255
 		std::size_t operator()(const State &s) const
 		{   
-			return std::hash<std::string>() ( std::string( s.getOrdering().begin(), s.getOrdering().end() ) ) ;
+			vector<unsigned char> v;
+			for (int u : s.getOrdering()){
+				v.push_back(u);
+			}
+			return std::hash<std::string>() ( std::string( v.begin(), v.end() ) ) ;
 		}
 	};
 
@@ -115,7 +114,7 @@ public:
         puzzleVariant = variant;
 		size = len;
 
-		startState = State(startOrdering, 's');
+		startState = State(startOrdering, 0);
     }
 
     bool isGoal(const State& s) const {
@@ -213,7 +212,7 @@ public:
 	}
 
     double getBranchingFactor() const	{
-		return size - 1; // TODO I think this is right
+		return size - 1; // I think this is right
 	}
 
     void flipOrdering(std::vector<State>& succs, std::vector<int> ordering, int loc) const {
@@ -249,12 +248,39 @@ public:
 	}
 
 	Cost getEdgeCost(State state) {
-		if (puzzleVariant == 0)
-			return 1;
-		if (puzzleVariant == 1)
-			return 1; //TODO
-		if (puzzleVariant == 2)
-			return 1; //TODO
+		// Looking at Andew's code, it looks like this is called
+		// mostly on successors being generated. So the label
+		// will tell which index the parent chose to flip at.
+
+		// Variants:
+        // 0: Regular pancake puzzle, where each flip cost 1.
+        // 1: Cost is max of two elements of each end of the set being flipped.
+        // 2: Each pancake has a weight, equal to its index. 
+        //    The cost is the sum of the indexes of pancakes being flipped.
+
+	
+		int l = state.getLabel();
+
+		if (puzzleVariant == 1){
+			int i = state.getOrdering()[0];
+			int j = state.getOrdering()[l];
+			if ( i > j)
+				return i;
+			return j; 
+		}
+
+		if (puzzleVariant == 2){
+			int sum = 0;
+			for (int i = 1; i <= l; ++i) {
+				sum += i;
+			}
+
+			return sum;
+
+		}
+
+		// Variant 1 
+		return 1; 
 	}
 
 	string getDomainInformation()

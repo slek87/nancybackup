@@ -21,11 +21,14 @@ int main(int argc, char** argv) {
     int seed = 1;
 
 
-    // Testing hash using 12! = 479,001,600 permutations
+    // Testing hash used 12! = 479,001,600 combinations on galena (pc in ai lab)
+    // 8! on local... Crappy CPU :( 8! = 40,320 combinations
     // Using char to save memeory
+    // But also used int to make sure the hashes are still the same
+    cout << "Testing hash..." << endl;
     vector<char> v;
     vector< vector<char> > w;
-    for (int i = 1; i <= 12; ++i){
+    for (int i = 1; i <= 8; ++i){
         v.push_back(i);
     }
 
@@ -37,19 +40,12 @@ int main(int argc, char** argv) {
 
     for (vector<char> x : w){
         int size = hashes.size();
+        // cout << getHash(x) << endl;
         hashes[getHash(x)] = 0;
         if (size == hashes.size()){
             cout << "Hash collision deteceted!" << endl;
         }
     }
-
-    exit(0);
-
-
-
-
-
-
 
     cout << "Initialize Pancake Puzzle Test... Parameters: " << size << " " << variant << " " << seed << endl;
     PancakePuzzle world = PancakePuzzle(6, 1, 1);
@@ -77,7 +73,7 @@ int main(int argc, char** argv) {
     vector<State> children = world.successors(cur);
     for (int i = 0; i < children.size(); ++i){
         State s = children[i];
-        cout << "[" << i << "]" << s.getLabel() << endl;
+        cout << "[" << i << "] " << s.getLabel() << endl;
         cout << s << endl;
         cout << endl;
     }
@@ -87,12 +83,10 @@ int main(int argc, char** argv) {
     for (int i = 0; i < children.size(); ++i){
         State s = children[i];
         Cost c;
-        cout << "[" << i << "] " << s.getLabel() << " ";
-        c = world.distance(s);
-        // cout << c << ", ";
-        //cout << world.distance(s) << ", ";
-        // cout << world.distanceErr(s) << ", ";
-        // cout << world.heuristic(s) << endl;
+        cout << "[" << i << "] " << s.getLabel() << ": ";
+        cout << world.distance(s) << ", ";
+        cout << world.distanceErr(s) << ", ";
+        cout << world.heuristic(s) << endl;
     }
     cout << endl;
 
