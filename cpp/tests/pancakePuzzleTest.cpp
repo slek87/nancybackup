@@ -29,11 +29,12 @@ int main(int argc, char** argv) {
     vector<char> v;
     unordered_map<unsigned long long, char> hashes;
 
-    for (int i = 1; i <= 12; ++i){
+    for (int i = 1; i <= 8; ++i){
         v.push_back(i);
     }
 
     do {
+        // cout << (int)v[0] << (int)v[1] << (int)v[2] << (int)v[3] << endl;
         int size = hashes.size();
         hashes[getHash(v)] = 0;
         if (size == hashes.size()){
