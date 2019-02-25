@@ -27,25 +27,19 @@ int main(int argc, char** argv) {
     // But also used int to make sure the hashes are still the same
     cout << "Testing hash..." << endl;
     vector<char> v;
-    vector< vector<char> > w;
-    for (int i = 1; i <= 8; ++i){
+    unordered_map<unsigned long long, char> hashes;
+
+    for (int i = 1; i <= 12; ++i){
         v.push_back(i);
     }
 
     do {
-        w.push_back(v);
-    } while(std::next_permutation(v.begin(),v.end()));
-
-    unordered_map<unsigned long long, char> hashes;
-
-    for (vector<char> x : w){
         int size = hashes.size();
-        // cout << getHash(x) << endl;
-        hashes[getHash(x)] = 0;
+        hashes[getHash(v)] = 0;
         if (size == hashes.size()){
             cout << "Hash collision deteceted!" << endl;
         }
-    }
+    } while(std::next_permutation(v.begin(),v.end()));
 
     cout << "Initialize Pancake Puzzle Test... Parameters: " << size << " " << variant << " " << seed << endl;
     PancakePuzzle world = PancakePuzzle(6, 1, 1);
@@ -55,6 +49,10 @@ int main(int argc, char** argv) {
 
     cout << "Testing << for start state..." << endl;
     cout << cur << endl;
+    cout << endl;
+
+    cout << "Getting heuristic for start state..." << endl;
+    cout << world.heuristic(cur) << endl;
     cout << endl;
 
     cout << "Testing toString() for start state..." << endl;

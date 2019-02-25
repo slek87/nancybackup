@@ -126,6 +126,24 @@ public:
 		return false;
 	}
 
+	Cost gapHeuristic(const State& state) const {
+		// Using gap heuristic from - Landmark Heuristics for the Pancake Problem
+		int size = state.getOrdering().size();
+		int plate = size + 1;
+		int sum = 0;
+		for (int i = 1; i < size; ++i ){
+			int dif = state.getOrdering()[i - 1] - state.getOrdering()[i]; 
+			if (dif > 1 || dif < -1)
+				++sum;
+		}
+
+		int dif = state.getOrdering()[size - 1] - plate;
+		if (dif > 1 || dif < -1)
+			++sum;
+		
+		return sum;
+	}
+
     Cost distance(const State& state) {
 		// Check if the distance of this state has been updated
 		if (correctedD.find(state) != correctedD.end())
@@ -133,8 +151,7 @@ public:
 			return correctedD[state];
 		}
 
-        // TODO
-		Cost d = 1;
+		Cost d = gapHeuristic(state);
 		updateDistance(state, d);
 
 		return correctedD[state];
@@ -147,9 +164,8 @@ public:
 			return correctedDerr[state];
 		}
 
-		// TODO
-		Cost d = 1;
-		updateDistance(state, d);
+		Cost d = gapHeuristic(state);
+		updateDistanceErr(state, d);
 
 		return correctedD[state];
 	}
@@ -161,8 +177,8 @@ public:
 			return correctedH[state];
 		}
 
-		Cost h = 1; //manhattanDistance(state);
-		updateHeuristic(state, h);
+		Cost d = gapHeuristic(state);
+		updateHeuristic(state, d);
 
 		return correctedH[state];
 	}
@@ -176,6 +192,8 @@ public:
 	}
 
     void updateEpsilons()	{
+		// TODO
+
 		if (expansionCounter == 0)
 		{
 			curEpsilonD = 0;
@@ -190,12 +208,28 @@ public:
 	}
 
     void pushEpsilonHGlobal(double eps)	{
+		// TODO
+
+		if (eps < 0)
+			eps = 0;
+		else if (eps > 1){
+			// eps = max cost?
+
+		}
+
+		epsilonHSum += eps;
+		expansionCounter++;
+	}
+
+	void pushEpsilonDGlobal(double eps) {
+		// TODO
+
 		if (eps < 0)
 			eps = 0;
 		else if (eps > 1)
-			eps = 1; // TODO: TreeWorld have eps = maxEdgeCost. Why?
+			eps = 1;
 
-		epsilonHSum += eps;
+		epsilonDSum += eps;
 		expansionCounter++;
 	}
 
@@ -212,7 +246,8 @@ public:
 	}
 
     double getBranchingFactor() const	{
-		return size - 1; // I think this is right
+		// TODO
+		return size - 1; //  I think this is right
 	}
 
     void flipOrdering(std::vector<State>& succs, std::vector<int> ordering, int loc) const {

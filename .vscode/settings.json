@@ -38,5 +38,6 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "algorithm": "cpp"
-    }
+    },
+    "editor.fontSize": 13.5
 }
