@@ -7,7 +7,7 @@
 #include "expansionAlgorithms/DepthFirst.h"
 #include "learningAlgorithms/Ignorance.h"
 #include "domain/TreeWorld.h"
-#include "randomSearch.h"
+#include "RandomSearch.h"
 
 using namespace std;
 

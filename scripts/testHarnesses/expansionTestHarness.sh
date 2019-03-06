@@ -90,6 +90,31 @@ then
 	  fi
     done
   done
+elif [ "$domainType" = "Pancake" ]
+then
+  dimensions=$5
+  for lookahead in "${@:6}"
+  do
+    mkdir -p ../../../results/Pancake/expansionTests/Nancy/${dimensions}
+    instance=$firstInstance
+    while ((instance < lastInstance))
+    do
+      if ((numProcs >= ${maxProcs}))
+      then
+        wait
+        numProcs=0
+      fi		  
+      if [ -f ../../../results/Pancake/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json ]
+	  then 
+	    let instance++
+	  else
+	    ./../../../build_release/expansionTests ${domainType} ${lookahead} ../../../results/Pancake/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json &
+	    let instance++
+        let numProcs++
+	  fi
+    done
+  done
+
 else
   echo "Available domain types are TreeWorld and SlidingPuzzle"
   echo "Domain variables for TreeWorld: <branching factor> <tree depth>"

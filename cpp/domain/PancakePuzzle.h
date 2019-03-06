@@ -164,10 +164,10 @@ public:
 			return correctedDerr[state];
 		}
 
-		Cost d = gapHeuristic(state);
-		updateDistanceErr(state, d);
+		Cost derr = gapHeuristic(state);
+		updateDistanceErr(state, derr);
 
-		return correctedD[state];
+		return correctedDerr[state];
 	}
 
     Cost heuristic(const State& state) {
@@ -177,8 +177,8 @@ public:
 			return correctedH[state];
 		}
 
-		Cost d = gapHeuristic(state);
-		updateHeuristic(state, d);
+		Cost h = gapHeuristic(state);
+		updateHeuristic(state, h);
 
 		return correctedH[state];
 	}
@@ -212,11 +212,11 @@ public:
 
 		if (eps < 0)
 			eps = 0;
+		/* No idea why set the limit to 1
 		else if (eps > 1){
-			// eps = max cost?
-
+			eps = 1;
 		}
-
+		*/
 		epsilonHSum += eps;
 		expansionCounter++;
 	}
@@ -226,9 +226,10 @@ public:
 
 		if (eps < 0)
 			eps = 0;
+		/*
 		else if (eps > 1)
 			eps = 1;
-
+		*/
 		epsilonDSum += eps;
 		expansionCounter++;
 	}

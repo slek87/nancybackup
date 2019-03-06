@@ -11,18 +11,29 @@
 #include "learningAlgorithms/Dijkstra.h"
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
-#include "randomSearch.h"
+#include "domain/PancakePuzzle.h"
+#include "RandomSearch.h"
 
 using namespace std;
 
+bool DEBUG = false;
+
 int main(int argc, char** argv)
 {
-	if (argc > 4 || argc < 3)
+	if ( argc < 3)
 	{
 		cout << "Wrong number of arguments: ./expansionTests.sh <Domain Type> <expansion limit> <optional: output file> < <domain file>" << endl;
-		cout << "Available domains are TreeWorld and SlidingPuzzle" << endl;
+		cout << "Available domains are Pancake, TreeWorld and SlidingPuzzle" << endl;
 		exit(1);
 	}
+
+	for (int i = 0; i < argc; ++i){
+        string input = argv[i];
+        if (input == "-debug" ){
+            DEBUG = true;
+        } 
+        
+    } 
 
 	// Get the lookahead depth
 	int lookaheadDepth = stoi(argv[2]);
@@ -39,7 +50,28 @@ int main(int argc, char** argv)
 	double randomCost;
 	double randomSamplingCost;
 
-	if (domain == "TreeWorld")
+	if (domain == "Pancake"){
+		PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
+		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "none", "k-best", lookaheadDepth, 1, "normal");
+		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "none", "k-best", lookaheadDepth, 1, "normal");
+		
+		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "none", "k-best", lookaheadDepth, 1, "normal");
+
+		RealTimeSearch<PancakePuzzle> risk(world, "risk", "none", "k-best", lookaheadDepth, 1, "normal");
+
+		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "none", "minimin", lookaheadDepth);
+
+		// bfsRes = bfs.search();
+		if (DEBUG) cout << "astar" << endl;
+		astarRes = astar.search();
+		if (DEBUG) cout << "fhat" << endl;
+		fhatRes = fhat.search();
+		if (DEBUG) cout << "risk" << endl;
+		riskRes = risk.search();
+		if (DEBUG) cout << "lsslrta" << endl;
+		lsslrtaRes = lsslrta.search();
+
+	} else if (domain == "TreeWorld")
 	{
 		// Make a tree world
 		TreeWorld world = TreeWorld(cin);
@@ -56,11 +88,11 @@ int main(int argc, char** argv)
 		riskRes = risk.search();
 		lsslrtaRes = lsslrta.search();
 
-		RandomSearch<TreeWorld> r1(world, lookaheadDepth);
-		randomCost = r1.randomSearch();
+		// RandomSearch<TreeWorld> r1(world, lookaheadDepth);
+		// randomCost = r1.randomSearch();
 
-		RandomSearch<TreeWorld> r2(world, lookaheadDepth);
-		randomSamplingCost = r2.randomSampling();
+		// RandomSearch<TreeWorld> r2(world, lookaheadDepth);
+		// randomSamplingCost = r2.randomSampling();
 	}
 	else if (domain == "SlidingPuzzle")
 	{
@@ -85,13 +117,13 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	string result = "{ \"BFS\": " + to_string(bfsRes.solutionCost) + 
-		", \"A*\": " +	to_string(astarRes.solutionCost) + 
+	// string result = "{ \"BFS\": " + to_string(bfsRes.solutionCost) + 
+	string result = "{ \"A*\": " +	to_string(astarRes.solutionCost) + 
 		", \"F-Hat\": " + to_string(fhatRes.solutionCost) +
 		", \"Risk\": " + to_string(riskRes.solutionCost) + 
 		", \"LSS-LRTA*\": " + to_string(lsslrtaRes.solutionCost) +
-		", \"Random\": " + to_string(randomCost) +
-		", \"Random Sampling\": " + to_string(randomSamplingCost) +
+		//", \"Random\": " + to_string(randomCost) +
+		//", \"Random Sampling\": " + to_string(randomSamplingCost) +
 		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
 
 	if (argc < 4)

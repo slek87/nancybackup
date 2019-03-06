@@ -9,7 +9,7 @@
 #include "learningAlgorithms/Dijkstra.h"
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
-#include "randomSearch.h"
+#include "RandomSearch.h"
 
 using namespace std;
 

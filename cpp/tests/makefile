@@ -1,9 +1,9 @@
 CC=g++
 
-all: pancake sliding tree
+all:  sliding tree
 
-pancake: pancakePuzzleTest.cpp 
-	$(CC) -g -std=c++11 pancakePuzzleTest.cpp -o pancakeTest
+: PuzzleTest.cpp 
+	$(CC) -g -std=c++11 PuzzleTest.cpp -o Test
 
 sliding: slidingPuzzleTest.cpp 
 	$(CC) -g -std=c++11 slidingPuzzleTest.cpp -o slidingPuzzleTest
@@ -12,4 +12,4 @@ tree: treeTest.cpp
 	$(CC) -g -std=c++11 treeTest.cpp -o treeTest
 	
 clean:
-	rm -f pancakeTest slidingPuzzleTest treeTest
+	rm -f Test slidingPuzzleTest treeTest

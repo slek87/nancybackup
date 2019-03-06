@@ -39,8 +39,9 @@ markers=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<", "
 
 # Hard coded result directories
 resultDirs = {"b2d100"}
-limits = [10, 30, 100, 300, 1000]
-algorithms = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*", "Random", "Random Sampling"]
+limits = [10, 30, 100, 300]
+# algorithms = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*", "Random", "Random Sampling"]
+algorithms = ["A*", "F-Hat", "Risk", "LSS-LRTA*"]
 
 instance = []
 lookAheadVals = []
@@ -50,9 +51,12 @@ differenceCost = []
 
 print("reading in data...")
 
+domain = 'Pancake'
+
+
 for dir in resultDirs:
-    for file in listdir("../../../results/TreeWorld/expansionTests/Nancy/" + dir):
-        with open("../../../results/TreeWorld/expansionTests/Nancy/" + dir + "/" + file) as json_data:
+    for file in listdir("../../../results/" +  domain + "/expansionTests/Nancy/" + dir):
+        with open("../../../results/" + domain + "/expansionTests/Nancy/" + dir + "/" + file) as json_data:
             resultData = json.load(json_data)
             for algo in algorithms:
                 instance.append(str(dir))
@@ -75,7 +79,7 @@ dfDiff = pd.DataFrame({
     "Algorithm":algorithm
 })
 
-algorithmsExpA = ["A*", "F-Hat", "Random", "Random Sampling"]
+algorithmsExpA = algorithms
 
 algorithmsExpB = ["A*", "F-Hat", "BFS", "Random", "Random Sampling"]
 
@@ -92,6 +96,7 @@ for instance in resultDirs:
 
     makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpA, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2ADifference" + instance + ".pdf", markers)
 
+    '''
     makeViolinPlot(13, 10, "Node Expansion Limit", "Solution Cost", instanceDataExp, 0.53, "Algorithm", limits, algorithmsExpB, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment2BViolin" + instance + ".pdf")
 
     makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpB, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2BDifference" + instance + ".pdf", markers)
@@ -101,3 +106,4 @@ for instance in resultDirs:
     makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpC, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2CDifference" + instance + ".pdf", markers)
 
     makeDifferencePlot(13, 10, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm", limits, algorithmsExpC, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2CDifference" + instance + "AAAI19Slides.pdf", markers)
+    '''
