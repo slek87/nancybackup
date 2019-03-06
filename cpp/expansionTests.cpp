@@ -51,24 +51,19 @@ int main(int argc, char** argv)
 	double randomSamplingCost;
 
 	if (domain == "Pancake"){
-		PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
+		// PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
+		PancakePuzzle world = PancakePuzzle(cin);
+
 		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "none", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "none", "k-best", lookaheadDepth, 1, "normal");
-		
 		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "none", "k-best", lookaheadDepth, 1, "normal");
-
 		RealTimeSearch<PancakePuzzle> risk(world, "risk", "none", "k-best", lookaheadDepth, 1, "normal");
-
 		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "none", "minimin", lookaheadDepth);
 
 		// bfsRes = bfs.search();
-		if (DEBUG) cout << "astar" << endl;
 		astarRes = astar.search();
-		if (DEBUG) cout << "fhat" << endl;
 		fhatRes = fhat.search();
-		if (DEBUG) cout << "risk" << endl;
 		riskRes = risk.search();
-		if (DEBUG) cout << "lsslrta" << endl;
 		lsslrtaRes = lsslrta.search();
 
 	} else if (domain == "TreeWorld")

@@ -99,6 +99,7 @@ then
     instance=$firstInstance
     while ((instance < lastInstance))
     do
+	  file="../../../worlds/pancake/${dimensions}/${instance}-${dimensions}.pan"
       if ((numProcs >= ${maxProcs}))
       then
         wait
@@ -108,16 +109,16 @@ then
 	  then 
 	    let instance++
 	  else
-	    ./../../../build_release/expansionTests ${domainType} ${lookahead} ../../../results/Pancake/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json &
+	    ./../../../build_release/expansionTests ${domainType} ${lookahead} ../../../results/Pancake/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json < ${file} &
 	    let instance++
         let numProcs++
 	  fi
     done
   done
-
 else
-  echo "Available domain types are TreeWorld and SlidingPuzzle"
+  echo "Available domain types are Pancake, TreeWorld, and SlidingPuzzle"
   echo "Domain variables for TreeWorld: <branching factor> <tree depth>"
   echo "Domain variables for SlidingPuzzle: <puzzle dimensions>"
+  echo "Domain variables for Pancake: <pancake size>"
   exit 1
 fi

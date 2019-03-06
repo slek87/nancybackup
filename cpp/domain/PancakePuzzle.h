@@ -22,7 +22,9 @@ public:
 	public:
 		State() {}
 
-		State(std::vector<int> b, int l) : ordering(b), label(l) {}
+		State(std::vector<int> b, int l) : ordering(b), label(l) {
+			generateKey();
+		}
 
 		std::vector<int> getOrdering() const {
 			return ordering;
@@ -44,6 +46,20 @@ public:
 
 		bool operator!=(const State& state) const {
 			return ordering != state.getOrdering();
+		}
+
+		void generateKey() {
+			// This will provide a unique hash for every state in the 15 puzzle,
+			// Other puzzle variants may/will see collisions...
+			vector<unsigned char> v;
+			for (int u : ordering){
+				v.push_back(u);
+			}
+			theKey = std::hash<std::string>() ( std::string( v.begin(), v.end() ) ) ;
+		}
+
+		unsigned long long key() const {
+			return theKey;
 		}
 
 		std::string toString() const {
@@ -68,13 +84,17 @@ public:
     private:
 		std::vector<int> ordering;
 		int label;
-	};
+		unsigned long long theKey = -1;
 
+	};
+	
 	struct HashState
 	{
 		// I think that this will work for puzzles up to size 255
 		// Because it will convert each int to a char, which is 8 bytes
 		// So the biggest number 255
+
+		/*
 		std::size_t operator()(const State &s) const
 		{   
 			vector<unsigned char> v;
@@ -83,9 +103,51 @@ public:
 			}
 			return std::hash<std::string>() ( std::string( v.begin(), v.end() ) ) ;
 		}
+		*/
+
+		std::size_t operator()(const State &s) const{
+
+			return s.key();
+		}
+
 	};
 
+	PancakePuzzle(std::istream& input) {
+		// Get the size of pancake
+		string line;
+		getline(input, line);
+		stringstream ss(line);
+		ss >> size;
 
+		if (size > 255){
+			fprintf (stderr, "Max pancake size is 255\n");
+			exit(1);
+		}
+		// Skip the next line
+		getline(input, line);
+		std::vector<int> rows(size, 0);
+
+		startOrdering = rows;
+		endOrdering = rows;
+
+		for (int i = 0; i < size; ++i){
+			getline(input, line);
+			startOrdering[i] = stoi(line);			
+		}
+		// Skip the next line
+		getline(input, line);
+
+		for (int i = 0; i < size; ++i){
+			getline(input, line);
+			endOrdering[i] = stoi(line);			
+		}
+
+		puzzleVariant = 0; // Default
+		startState = State(startOrdering, 0);
+
+	}
+
+	
     PancakePuzzle(int len, int variant, int seed ) {
         // Variants:
         // 0: Regular pancake puzzle, where each flip cost 1.
@@ -93,11 +155,15 @@ public:
         // 2: Each pancake has a weight, equal to its index. 
         //    The cost is the sum of the indexes of pancakes being flipped.
 
+		if (len > 255){
+			fprintf (stderr, "Max pancake size is 255\n");
+			exit(1);
+		}
 
         srand(seed);
 
 		std::unordered_map<int, char> numbers;
-
+	
 		// Generating random unique numbers
 		while (startOrdering.size() < len){
 			int tmp = numbers.size();
@@ -117,6 +183,10 @@ public:
 		startState = State(startOrdering, 0);
     }
 
+	void setVariant(int variant){
+		puzzleVariant = variant;
+	}
+
     bool isGoal(const State& s) const {
 		if (s.getOrdering() == endOrdering)
 		{
@@ -131,7 +201,9 @@ public:
 		int size = state.getOrdering().size();
 		int plate = size + 1;
 		int sum = 0;
+
 		for (int i = 1; i < size; ++i ){
+
 			int dif = state.getOrdering()[i - 1] - state.getOrdering()[i]; 
 			if (dif > 1 || dif < -1)
 				++sum;
@@ -310,9 +382,7 @@ public:
 			for (int i = 1; i <= l; ++i) {
 				sum += i;
 			}
-
 			return sum;
-
 		}
 
 		// Variant 1 
@@ -345,6 +415,8 @@ public:
         // Cost of starting index
         if (puzzleVariant == 2)
             return "HeavyPancakePuzzle2";
+
+		return "Unknow variant";
 	}
 
 	void initialize(string policy, int la)	{
