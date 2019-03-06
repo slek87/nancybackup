@@ -50,6 +50,5 @@ fi
 mkdir -p "$o"
 
 for (( i=1; i <= "$t"; i++ )); do
-    echo "wtf"
     ./pancakemaker "$s" > "$o/$i-$s.pan"
 done
