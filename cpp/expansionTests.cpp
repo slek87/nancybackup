@@ -27,14 +27,6 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	for (int i = 0; i < argc; ++i){
-        string input = argv[i];
-        if (input == "-debug" ){
-            DEBUG = true;
-        } 
-        
-    } 
-
 	// Get the lookahead depth
 	int lookaheadDepth = stoi(argv[2]);
 
@@ -46,9 +38,6 @@ int main(int argc, char** argv)
 	ResultContainer fhatRes;
 	ResultContainer riskRes;
 	ResultContainer lsslrtaRes;
-	
-	double randomCost;
-	double randomSamplingCost;
 
 	if (domain == "Pancake"){
 		// PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
@@ -82,12 +71,6 @@ int main(int argc, char** argv)
 		fhatRes = fhat.search();
 		riskRes = risk.search();
 		lsslrtaRes = lsslrta.search();
-
-		// RandomSearch<TreeWorld> r1(world, lookaheadDepth);
-		// randomCost = r1.randomSearch();
-
-		// RandomSearch<TreeWorld> r2(world, lookaheadDepth);
-		// randomSamplingCost = r2.randomSampling();
 	}
 	else if (domain == "SlidingPuzzle")
 	{
