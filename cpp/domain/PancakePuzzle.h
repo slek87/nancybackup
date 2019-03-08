@@ -328,7 +328,7 @@ public:
     void flipOrdering(std::vector<State>& succs, std::vector<int> ordering, int loc) const {
 		int start = 0;
 		int end = loc;
-		while(start < end){
+		while(start <= end){
 			std::swap(ordering[start++], ordering[end--]);
 		}
 		succs.push_back(State(ordering, loc));
