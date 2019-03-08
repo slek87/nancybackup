@@ -1,0 +1,7 @@
+Brian Cawley
+UNH 2019
+
+You can find the functions that I need in the mdist.h file (mdist = manhattan distance)
+Search code that is calling these functions can be found in astar.c
+
+ 

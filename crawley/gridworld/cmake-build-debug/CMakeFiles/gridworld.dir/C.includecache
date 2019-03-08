@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/aifs2/doylew/CLionProjects/gridworld/gridworld.h
+stdio.h
+-
+stdlib.h
+-
+stdbool.h
+-
+
+/home/aifs2/doylew/CLionProjects/gridworld/main.c
+stdio.h
+-
+stdlib.h
+-
+gridworld.h
+/home/aifs2/doylew/CLionProjects/gridworld/gridworld.h
+

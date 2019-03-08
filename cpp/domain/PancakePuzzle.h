@@ -147,7 +147,8 @@ public:
 
 	}
 
-	
+	/*
+	// For making pancakes with out cin files
     PancakePuzzle(int len, int variant, int seed ) {
         // Variants:
         // 0: Regular pancake puzzle, where each flip cost 1.
@@ -182,6 +183,7 @@ public:
 
 		startState = State(startOrdering, 0);
     }
+	*/
 
 	void setVariant(int variant){
 		puzzleVariant = variant;

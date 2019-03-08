@@ -38,7 +38,7 @@ def makeDifferencePlot(width, height, xAxis, yAxis, dataframe, dodge, hue, order
 markers=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<", "p", "h", "^", "D", "X", ">"]
 
 # Hard coded result directories
-resultDirs = {"b2d100"}
+resultDirs = {"16"}
 limits = [10, 30, 100, 300]
 # algorithms = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*", "Random", "Random Sampling"]
 algorithms = ["A*", "F-Hat", "Risk", "LSS-LRTA*"]

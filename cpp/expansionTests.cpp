@@ -51,6 +51,7 @@ int main(int argc, char** argv)
 
 		// bfsRes = bfs.search();
 		astarRes = astar.search();
+		
 		fhatRes = fhat.search();
 		riskRes = risk.search();
 		lsslrtaRes = lsslrta.search();
