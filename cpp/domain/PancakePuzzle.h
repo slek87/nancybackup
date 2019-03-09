@@ -22,18 +22,18 @@ public:
 	public:
 		State() {}
 
-		State(std::vector<int> b, int l) : ordering(b), label(l) {
+		State(std::vector<unsigned char> b, int l) : ordering(b), label(l) {
 			generateKey();
 		}
 
-		std::vector<int> getOrdering() const {
+		std::vector<unsigned char> getOrdering() const {
 			return ordering;
 		}
 
 		friend std::ostream& operator<<(std::ostream& stream, const PancakePuzzle::State& state) {
 			for (int r = 0; r < state.getOrdering().size(); r++)
 			{
-				stream << std::setw(3) << state.getOrdering()[r] << " ";
+				stream << std::setw(3) << (int) state.getOrdering()[r] << " ";
 			}
 			stream << endl;
 			return stream;
@@ -49,13 +49,18 @@ public:
 		}
 
 		void generateKey() {
-			// This will provide a unique hash for every state in the 15 puzzle,
-			// Other puzzle variants may/will see collisions...
-			vector<unsigned char> v;
-			for (int u : ordering){
-				v.push_back(u);
+			/* 
+				FNV-1a
+			*/
+			unsigned long long offset_basis = 0xCBF29CE484222325;
+			unsigned long long fnv_prime = 0x100000001B3;
+			int i;
+			for(i = 0; i < ordering.size(); ++i) {
+				unsigned char value = ordering[i];
+				offset_basis = offset_basis ^ value;
+				offset_basis *= fnv_prime;
 			}
-			theKey = std::hash<std::string>() ( std::string( v.begin(), v.end() ) ) ;
+			theKey = offset_basis;
 		}
 
 		unsigned long long key() const {
@@ -66,7 +71,7 @@ public:
 			std::string s = "";
 			for (int r = 0; r < ordering.size(); r++)
 			{
-				s += std::to_string(ordering[r]) + " ";
+				s += std::to_string((int)ordering[r]) + " ";
 			}
 			return s + "\n";
 		}
@@ -82,7 +87,7 @@ public:
 		}
 
     private:
-		std::vector<int> ordering;
+		std::vector<unsigned char> ordering;
 		int label;
 		unsigned long long theKey = -1;
 
@@ -125,12 +130,12 @@ public:
 		}
 		// Skip the next line
 		getline(input, line);
-		std::vector<int> rows(size, 0);
+		std::vector<unsigned char> rows(size, 0);
 
 		startOrdering = rows;
 		endOrdering = rows;
 
-		for (int i = 0; i < size; ++i){
+		for (int i = 0; i < size; ++i){	
 			getline(input, line);
 			startOrdering[i] = stoi(line);			
 		}
@@ -325,12 +330,13 @@ public:
 		return size - 1; //  I think this is right
 	}
 
-    void flipOrdering(std::vector<State>& succs, std::vector<int> ordering, int loc) const {
+    void flipOrdering(std::vector<State>& succs, std::vector<unsigned char> ordering, int loc) const {
 		int start = 0;
 		int end = loc;
-		while(start <= end){
+		while(start < end){
 			std::swap(ordering[start++], ordering[end--]);
 		}
+		
 		succs.push_back(State(ordering, loc));
         
     }
@@ -456,8 +462,8 @@ public:
 		return avg;
 	}
 
-    std::vector<int> startOrdering;
-	std::vector<int> endOrdering;
+    std::vector<unsigned char> startOrdering;
+	std::vector<unsigned char> endOrdering;
     
     State startState;
 	SlidingWindow<int> expansionDelayWindow;

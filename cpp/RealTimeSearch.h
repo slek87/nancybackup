@@ -240,7 +240,18 @@ public:
 			{
 				// Calculate path cost and return solution
 				calculateCost(start, res);
-
+				Node* trace = start;
+				vector<State> path;
+				/*
+				while(trace->getParent() != NULL){
+					path.push_back(trace->getState());
+					trace = trace->getParent();
+				}
+				*/
+				for(int q = 0; q < 4; ++q){
+					cout << trace->getState().getLabel() << endl;
+					trace = trace->getParent();
+				}
 				return res;
 			}
 			
