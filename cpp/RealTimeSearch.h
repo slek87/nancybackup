@@ -235,6 +235,8 @@ public:
 
 		while (1)
 		{
+			cout << start->getState() << endl;
+			
 			// Check if a goal has been reached
 			if (domain.isGoal(start->getState()))
 			{
