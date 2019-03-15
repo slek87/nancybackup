@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	if (domain == "Pancake"){
 		// PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
 		PancakePuzzle world = PancakePuzzle(cin);
-	
+		
 		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "none", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "none", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "none", "k-best", lookaheadDepth, 1, "normal");
@@ -51,9 +51,14 @@ int main(int argc, char** argv)
 
 		// bfsRes = bfs.search();
 		astarRes = astar.search();
+		/*
+		cout << "________________________________________________________" << endl;
 		fhatRes = fhat.search();
+		cout << "________________________________________________________" << endl;
 		riskRes = risk.search();
+		cout << "________________________________________________________" << endl;
 		lsslrtaRes = lsslrta.search();
+		*/
 
 	} else if (domain == "TreeWorld")
 	{

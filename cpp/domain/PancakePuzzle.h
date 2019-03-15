@@ -35,7 +35,6 @@ public:
 			{
 				stream << std::setw(3) << (int) state.getOrdering()[r] << " ";
 			}
-			stream << endl;
 			return stream;
 		}
 
@@ -76,10 +75,9 @@ public:
 			return s + "\n";
 		}
 
-		int getLabel() const
-			{
-				return label;
-			}
+		int getLabel() const {
+			return label;
+		}
 
 		void markStart()
 		{
@@ -205,21 +203,35 @@ public:
 
 	Cost gapHeuristic(const State& state) const {
 		// Using gap heuristic from - Landmark Heuristics for the Pancake Problem
+		// Where add 1 to heuristic if the adjacent sizes of the pancakes differs more than 1
+		// For heavy pancake problems.
+		// For each gap b/w x and y, add min(x,y) to heuristic instead of just 1
 		int size = state.getOrdering().size();
 		int plate = size + 1;
 		int sum = 0;
 
 		for (int i = 1; i < size; ++i ){
-
-			int dif = state.getOrdering()[i - 1] - state.getOrdering()[i]; 
-			if (dif > 1 || dif < -1)
-				++sum;
+			int x =  state.getOrdering()[i - 1];
+			int y = state.getOrdering()[i];
+			int dif = x - y; 
+			if (dif > 1 || dif < -1){
+				if (puzzleVariant == 0){
+					++sum;
+				} else {
+					sum += min(x,y);
+				}
+			}
 		}
 
-		int dif = state.getOrdering()[size - 1] - plate;
-		if (dif > 1 || dif < -1)
-			++sum;
-		
+		int x =  state.getOrdering()[size - 1];
+		int dif = x - plate;
+		if (dif > 1 || dif < -1){
+			if (puzzleVariant == 0){
+				++sum;
+			} else {
+				sum += x;
+			}
+		}
 		return sum;
 	}
 

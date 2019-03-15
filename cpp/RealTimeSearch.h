@@ -17,7 +17,7 @@
 #include "learningAlgorithms/LearningAlgorithm.h"
 #include "learningAlgorithms/Dijkstra.h"
 #include "learningAlgorithms/Ignorance.h"
-
+#include <iomanip>
 using namespace std;
 
 template <class Domain>
@@ -235,7 +235,10 @@ public:
 
 		while (1)
 		{
-			cout << start->getState() << endl;
+			// cout << *start << endl;
+			int move = start->getState().getLabel();
+			// cout <<  std::setw(3) << move << " |" << start->getState() << " "  <<  std::setw(3) << start->getGValue() << endl;
+			cout << *start << endl;
 			// Check if a goal has been reached
 			if (domain.isGoal(start->getState()))
 			{
