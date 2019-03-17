@@ -16,7 +16,7 @@
 
 using namespace std;
 
-bool DEBUG = false;
+bool DEBUG = true;
 
 int main(int argc, char** argv)
 {
@@ -43,21 +43,29 @@ int main(int argc, char** argv)
 		// PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
 		PancakePuzzle world = PancakePuzzle(cin);
 		
-		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "none", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "none", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "none", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> risk(world, "risk", "none", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "none", "minimin", lookaheadDepth);
+		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
+		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
+		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
+		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
+		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
 
-		// bfsRes = bfs.search();
+
+		if (DEBUG)
+			cout << "*\n*\n*\nastar ********************************************\n*\n*\n" << endl;
 		astarRes = astar.search();
-		//cout << "astar done" << endl;
+		
+		if (DEBUG)
+			cout << "*\n*\n*\nfhat ********************************************\n*\n*\n" << endl;
 		fhatRes = fhat.search();
-		//cout << "fhat done" << endl;
+
+		if (DEBUG)
+			cout << "*\n*\n*\nrisk ********************************************\n*\n*\n" << endl;
 		riskRes = risk.search();
-		//cout << "risk done" << endl;
+		
+		if (DEBUG)
+			cout << "*\n*\n*\nlsslrta ********************************************\n*\n*\n" << endl;
 		lsslrtaRes = lsslrta.search();
-		//cout << "lsslrta done" << endl;
+
 
 		
 

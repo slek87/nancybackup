@@ -93,21 +93,6 @@ public:
 	
 	struct HashState
 	{
-		// I think that this will work for puzzles up to size 255
-		// Because it will convert each int to a char, which is 8 bytes
-		// So the biggest number 255
-
-		/*
-		std::size_t operator()(const State &s) const
-		{   
-			vector<unsigned char> v;
-			for (int u : s.getOrdering()){
-				v.push_back(u);
-			}
-			return std::hash<std::string>() ( std::string( v.begin(), v.end() ) ) ;
-		}
-		*/
-
 		std::size_t operator()(const State &s) const{
 
 			return s.key();
@@ -122,10 +107,6 @@ public:
 		stringstream ss(line);
 		ss >> size;
 
-		if (size > 255){
-			fprintf (stderr, "Max pancake size is 255\n");
-			exit(1);
-		}
 		// Skip the next line
 		getline(input, line);
 		std::vector<unsigned char> rows(size, 0);

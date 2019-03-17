@@ -232,12 +232,12 @@ public:
 		Node* start = new Node(0, domain.heuristic(domain.getStartState()), domain.distance(domain.getStartState()),
 			domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(),
 			domain.getStartState(), NULL, -1);
-		cout << start->getState() << endl;
+		//cout << start->getState() << endl;
 		while (1)
 		{
-			// cout << *start << endl;
 			int move = start->getState().getLabel();
-			cout << move << endl;
+			cout << "move" << move << endl;
+			cout << *start << endl;
 			//cout <<  std::setw(3) << move << " |" << start->getState() << " | G:"  <<  std::setw(3) << start->getGValue()  << " | H:"  <<  std::setw(3) << start->getHValue() << endl;
 			// cout << *start << endl;
 			//cout << move << endl;
