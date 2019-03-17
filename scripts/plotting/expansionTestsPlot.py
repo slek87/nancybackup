@@ -62,8 +62,11 @@ for dir in resultDirs:
                 instance.append(str(dir))
                 lookAheadVals.append(resultData["Lookahead"])
                 algorithm.append(algo)
-                solutionCost.append(resultData[algo.replace("A*", "A*")])
-                differenceCost.append(resultData[algo.replace("A*", "A*")] - resultData["A*"])
+                solutionCost.append(resultData[algo])
+                differenceCost.append(resultData[algo] - resultData["A*"])
+                if (resultData[algo] < resultData["A*"]):
+                    print(file)
+
 
 df = pd.DataFrame({
     "instance":instance,

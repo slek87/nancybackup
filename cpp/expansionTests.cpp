@@ -51,14 +51,15 @@ int main(int argc, char** argv)
 
 		// bfsRes = bfs.search();
 		astarRes = astar.search();
-		/*
-		cout << "________________________________________________________" << endl;
+		//cout << "astar done" << endl;
 		fhatRes = fhat.search();
-		cout << "________________________________________________________" << endl;
+		//cout << "fhat done" << endl;
 		riskRes = risk.search();
-		cout << "________________________________________________________" << endl;
+		//cout << "risk done" << endl;
 		lsslrtaRes = lsslrta.search();
-		*/
+		//cout << "lsslrta done" << endl;
+
+		
 
 	} else if (domain == "TreeWorld")
 	{
