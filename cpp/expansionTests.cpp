@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 	if ( argc < 3)
 	{
 		cout << "Wrong number of arguments: ./expansionTests.sh <Domain Type> <expansion limit> <optional: output file> < <domain file>" << endl;
-		cout << "Available domains are Pancake, TreeWorld and SlidingPuzzle" << endl;
+		cout << "Available domains are Pancake, PancakeH1, TreeWorld and SlidingPuzzle" << endl;
 		exit(1);
 	}
 
@@ -39,10 +39,14 @@ int main(int argc, char** argv)
 	ResultContainer riskRes;
 	ResultContainer lsslrtaRes;
 
-	if (domain == "Pancake"){
+	if (domain == "Pancake" || domain == "PancakeH1" ){
 		// PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
 		PancakePuzzle world = PancakePuzzle(cin);
 		
+		if (domain == "PancakeH1"){
+			world.setVariant(1);
+		}
+
 		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");

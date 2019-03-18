@@ -39,7 +39,7 @@ markers=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<", "
 
 # Hard coded result directories
 resultDirs = {"16"}
-limits = [10, 30, 100, 300]
+limits = [10, 30, 100, 300, 500]
 # algorithms = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*", "Random", "Random Sampling"]
 algorithms = ["A*", "F-Hat", "Risk", "LSS-LRTA*"]
 
