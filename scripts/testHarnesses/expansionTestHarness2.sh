@@ -112,7 +112,7 @@ then
       echo ${instance}
 	    ./../../../build_release/expansionTests ${domainType} ${lookahead} ../../../results/Pancake/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json < ${file} | python3 pancakevalidator.py &
 	    let instance++
-        let numProcs++
+      let numProcs++
 	  fi
     done
   done

@@ -64,8 +64,6 @@ for dir in resultDirs:
                 algorithm.append(algo)
                 solutionCost.append(resultData[algo])
                 differenceCost.append(resultData[algo] - resultData["A*"])
-                if (resultData[algo] < resultData["A*"]):
-                    print(file)
 
 
 df = pd.DataFrame({

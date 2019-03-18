@@ -1,5 +1,5 @@
 ./expansionTestHarness.sh <first instance> <max instance> <# of processes> Pancake <pancake size> <lookahead, ...> 
 ./expansionTestHarness.sh 1 1000 <# of processes> Pancake 16 10 30
 ./expansionTestHarness.sh 1 1000 10 Pancake 16 30
-./expansionTestHarness.sh 1 1000 2 Pancake 16 10
+./expansionTestHarness.sh 1 10 2 Pancake 16 10
 

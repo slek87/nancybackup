@@ -109,9 +109,10 @@ then
 	  then 
 	    let instance++
 	  else
+      echo ${instance}	    
 	    ./../../../build_release/expansionTests ${domainType} ${lookahead} ../../../results/Pancake/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json < ${file} &
-	    let instance++
-        let numProcs++
+      let instance++
+      let numProcs++
 	  fi
     done
   done
