@@ -60,14 +60,33 @@ static int gapheuristic(PancakeWorld* world, PancakeState* state){
     int sum = 0;
     int dif;
     int i;
+    int x;
+    int y;
     for (i = 1; i < size; ++i ){
-        dif = state->state[i - 1] - state->state[i]; 
-        if (dif > 1 || dif < -1)
-            ++sum;
+        x = state->state[i - 1];
+        y = state->state[i];
+        dif = x - y;
+        if (dif > 1 || dif < -1){
+            if (world->puzzleVariant == 0){
+                ++sum;
+            } else {
+                if ( x < y){
+                    sum += x;
+                } else {
+                    sum += y;
+                }
+            }
+        }
     }
-    dif = state->state[size - 1] - plate;
-    if (dif > 1 || dif < -1)
-        ++sum;
+    x = state->state[size - 1];
+    dif = x - plate;
+    if (dif > 1 || dif < -1){
+        if (world->puzzleVariant == 0){
+            ++sum;
+        } else {
+            sum += x;
+        }
+    }
     return sum;
 }
 
