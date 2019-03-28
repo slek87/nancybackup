@@ -16,7 +16,7 @@
 
 using namespace std;
 
-bool DEBUG = false;
+bool DEBUG = true;
 
 int main(int argc, char** argv)
 {
@@ -49,26 +49,26 @@ int main(int argc, char** argv)
 
 		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
+		RealTimeSearch<PancakePuzzle> lsslrtb(world, "a-star", "learn", "bellman", lookaheadDepth);
 
 
-		if (DEBUG)
-			cout << "*\n*\n*\nastar ********************************************\n*\n*\n" << endl;
+		if (DEBUG) cout << "================== ASTAR ==================" << endl;
 		astarRes = astar.search();
 		
-		if (DEBUG)
-			cout << "*\n*\n*\nfhat ********************************************\n*\n*\n" << endl;
-		fhatRes = fhat.search();
 
-		if (DEBUG)
-			cout << "*\n*\n*\nrisk ********************************************\n*\n*\n" << endl;
-		riskRes = risk.search();
-		
-		if (DEBUG)
-			cout << "*\n*\n*\nlsslrta ********************************************\n*\n*\n" << endl;
+		// fhatRes = fhat.search();
+
+		// riskRes = risk.search();
+
+		if (DEBUG) cout << "================== LSSLRTA ==================" << endl;
 		lsslrtaRes = lsslrta.search();
+
+		if (DEBUG) cout << "================== LSSLRTB ==================" << endl;
+		fhatRes = lsslrtb.search();
+
 
 
 		

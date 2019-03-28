@@ -1,5 +1,5 @@
-#include "domain/TreeWorld.h"
-#include "domain/SlidingTilePuzzle.h"
+#include "../domain/TreeWorld.h"
+#include "../domain/SlidingTilePuzzle.h"
 
 using namespace std;
 
