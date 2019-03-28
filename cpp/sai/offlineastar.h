@@ -119,7 +119,7 @@ public:
 
     OfflineAStar(Domain& domain) : domain(domain) {}
 
-    void solve(){
+    ResultContainer solve(){
         ResultContainer res;
         PriorityQueue<Node*> open;
         unordered_map<State, Node*, Hash> closed;
@@ -130,18 +130,93 @@ public:
         open.swapComparator(Node::compareNodesF);
         open.push(start);
 
+
         while (!open.empty()){
-            if (domain.isGoal(start->getState()))
+			Node* cur = open.top();
+
+
+            if (domain.isGoal(cur->getState()))
 			{
                 return res;
 			}
 
-        }
+			res.nodesExpanded++;
 
+			open.pop();
+			cur->close();
+			vector<State> children = domain.successors(cur->getState());
+			res.nodesGenerated += children.size();
+
+			for (State child : children){
+				Node* childNode = new Node(cur->getGValue() + domain.getEdgeCost(child),
+					domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
+					domain.epsilonHGlobal(), domain.epsilonDGlobal(), child, cur, cur->getOwningTLA());
+				bool dup = duplicateDetection(childNode, closed, open);
+
+
+				// Duplicate detection
+				if (!dup)
+				{
+					open.push(childNode);
+					closed[child] = childNode;
+				}
+				else
+					delete childNode;
+			}
+
+        }
     }
 
 private:
+	static bool duplicateDetection(Node* node, unordered_map<State, Node*, Hash>& closed, PriorityQueue<Node*>& open)
+	{
+		// Check if this state exists 
+		typename unordered_map<State, Node*, Hash>::iterator it = closed.find(node->getState());
 
+		if (it != closed.end())
+		{
+			// This state has been generated before, check if its node is on OPEN
+			if (it->second->onOpen())
+			{
+				// This node is on OPEN, keep the better g-value
+				if (node->getGValue() < it->second->getGValue())
+				{
+					it->second->setGValue(node->getGValue());
+					it->second->setParent(node->getParent());
+					it->second->setHValue(node->getHValue());
+					it->second->setDValue(node->getDValue());
+					it->second->setDErrValue(node->getDErrValue());
+					it->second->setEpsilonH(node->getEpsilonH());
+					it->second->setEpsilonD(node->getEpsilonD());
+					it->second->setState(node->getState());
+					it->second->setOwningTLA(node->getOwningTLA());
+				}
+			}
+			else
+			{
+				// This node is on CLOSED, compare the f-values. If this new f-value is better, reset g, h, and d. 
+				// Then reopen the node.
+				if (node->getFValue() < it->second->getFValue())
+				{
+					it->second->setGValue(node->getGValue());
+					it->second->setParent(node->getParent());
+					it->second->setHValue(node->getHValue());
+					it->second->setDValue(node->getDValue());
+					it->second->setDErrValue(node->getDErrValue());
+					it->second->setEpsilonH(node->getEpsilonH());
+					it->second->setEpsilonD(node->getEpsilonD());
+					it->second->setState(node->getState());
+					it->second->setOwningTLA(node->getOwningTLA());
+					it->second->reOpen();
+					open.push(it->second);
+				}
+			}
+
+			return true;
+		}
+
+		return false;
+	}
 
 
 protected:

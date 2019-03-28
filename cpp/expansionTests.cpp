@@ -12,7 +12,7 @@
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/PancakePuzzle.h"
-#include "RandomSearch.h"
+#include "sai/offlineastar.h"
 
 using namespace std;
 
@@ -48,15 +48,17 @@ int main(int argc, char** argv)
 		}
 
 		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
 		// RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
 		// RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
-		RealTimeSearch<PancakePuzzle> lsslrtb(world, "a-star", "learn", "bellman", lookaheadDepth);
-
+		
 
 		if (DEBUG) cout << "================== ASTAR ==================" << endl;
-		astarRes = astar.search();
+		OfflineAStar<PancakePuzzle> astar(world);
+		astarRes = astar.solve();
+		
+		// astarRes = astar.search();
 		
 
 		// fhatRes = fhat.search();
@@ -66,8 +68,7 @@ int main(int argc, char** argv)
 		if (DEBUG) cout << "================== LSSLRTA ==================" << endl;
 		lsslrtaRes = lsslrta.search();
 
-		if (DEBUG) cout << "================== LSSLRTB ==================" << endl;
-		fhatRes = lsslrtb.search();
+
 
 
 
