@@ -5,9 +5,15 @@ import copy
 start = []
 end = []
 read = True
+
+
+# Takes a state 
+
+
+
+'''
 algo = 0
 algoname = ['astar', 'fhat', 'risk', 'lsslrta']
-
 for line in fileinput.input():
     if line[0] == '{':
         # A
@@ -44,3 +50,4 @@ for line in fileinput.input():
         end = copy.deepcopy(start)
         end.sort()
         
+'''

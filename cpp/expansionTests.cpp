@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 	if ( argc < 3)
 	{
 		cout << "Wrong number of arguments: ./expansionTests.sh <Domain Type> <expansion limit> <optional: output file> < <domain file>" << endl;
-		cout << "Available domains are Pancake, PancakeH1, TreeWorld and SlidingPuzzle" << endl;
+		cout << "Available domains are Pancake, PancakeDPS, TreeWorld and SlidingPuzzle" << endl;
 		exit(1);
 	}
 
@@ -39,31 +39,32 @@ int main(int argc, char** argv)
 	ResultContainer riskRes;
 	ResultContainer lsslrtaRes;
 
-	if (domain == "Pancake" || domain == "PancakeH1" ){
+	if (domain == "Pancake" || domain == "PancakeDPS" ){
 		// PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
 		PancakePuzzle world = PancakePuzzle(cin);
+		if (domain == "PancakeDPS"){
 		
-		if (domain == "PancakeH1"){
 			world.setVariant(1);
 		}
 
 		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
 		// RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
-		// RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
-		// RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
+		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
+		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
 		
 
 		if (DEBUG) cout << "================== ASTAR ==================" << endl;
 		OfflineAStar<PancakePuzzle> astar(world);
 		astarRes = astar.solve();
+		astar.printPlan();
 		
 		// astarRes = astar.search();
 		
 
-		// fhatRes = fhat.search();
+		fhatRes = fhat.search();
 
-		// riskRes = risk.search();
+		riskRes = risk.search();
 
 		if (DEBUG) cout << "================== LSSLRTA ==================" << endl;
 		lsslrtaRes = lsslrta.search();
@@ -79,14 +80,18 @@ int main(int argc, char** argv)
 		// Make a tree world
 		TreeWorld world = TreeWorld(cin);
 
-		RealTimeSearch<TreeWorld> bfs(world, "bfs", "none", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<TreeWorld> astar(world, "a-star", "none", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<TreeWorld> bfs(world, "bfs", "none", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<TreeWorld> astar(world, "a-star", "none", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<TreeWorld> fhat(world, "f-hat", "none", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<TreeWorld> risk(world, "risk", "none", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<TreeWorld> lsslrta(world, "a-star", "none", "minimin", lookaheadDepth);
 
-		bfsRes = bfs.search();
-		astarRes = astar.search();
+		// bfsRes = bfs.search();
+		// astarRes = astar.search();
+
+		OfflineAStar<TreeWorld> astar(world);
+		astarRes = astar.solve();
+
 		fhatRes = fhat.search();
 		riskRes = risk.search();
 		lsslrtaRes = lsslrta.search();
