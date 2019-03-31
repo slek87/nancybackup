@@ -396,9 +396,9 @@ public:
 		if (puzzleVariant == 0){
 			variant = "\"Pancake Puzzle\"";
 		} else if (puzzleVariant == 1){
-			variant = "\"Heavy Pancake Puzzle1\"";
+			variant = "\"Heavy Pancake DPS\"";
 		} else if (puzzleVariant == 2){
-			variant = "\"Heavy Pancake Puzzle2\"";
+			variant = "\"Heavy Pancake Sum\"";
 		}
 		string info = "{ \"Domain\": " + variant + ", \"Dimensions\": " + 
 			std::to_string(size) + " }";
@@ -411,11 +411,11 @@ public:
         
         // Cost is max of two elements of each end of the set being flipped
         if (puzzleVariant == 1)
-            return "HeavyPancakePuzzle1";
+            return "PancakePuzzleDPS";
 
         // Cost of starting index
         if (puzzleVariant == 2)
-            return "HeavyPancakePuzzle2";
+            return "PancakePuzzleSum";
 
 		return "Unknow variant";
 	}

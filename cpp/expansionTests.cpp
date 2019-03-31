@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 		// RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
+		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "bellman", lookaheadDepth);
 		
 
 		if (DEBUG) cout << "================== ASTAR ==================" << endl;
@@ -70,11 +70,6 @@ int main(int argc, char** argv)
 		lsslrtaRes = lsslrta.search();
 
 
-
-
-
-		
-
 	} else if (domain == "TreeWorld")
 	{
 		// Make a tree world
@@ -91,6 +86,8 @@ int main(int argc, char** argv)
 
 		OfflineAStar<TreeWorld> astar(world);
 		astarRes = astar.solve();
+		astar.printPlan();
+
 
 		fhatRes = fhat.search();
 		riskRes = risk.search();
@@ -101,16 +98,20 @@ int main(int argc, char** argv)
 		// Make a tile puzzle
 		SlidingTilePuzzle world = SlidingTilePuzzle(cin);
 
-		RealTimeSearch<SlidingTilePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<SlidingTilePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<SlidingTilePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<SlidingTilePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<SlidingTilePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<SlidingTilePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<SlidingTilePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
 
-		astarRes = astar.search();
+		OfflineAStar<SlidingTilePuzzle> astar(world);
+		astarRes = astar.solve();
+		astar.printPlan();
+
+		// astarRes = astar.search();
 		riskRes = risk.search();
 		fhatRes = fhat.search();
-		bfsRes = bfs.search();
+		// bfsRes = bfs.search();
 		lsslrtaRes = lsslrta.search();
 	}
 	else

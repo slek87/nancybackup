@@ -109,7 +109,7 @@ public:
             if (domain.isGoal(cur->getState()))
 			{
 				res.solutionFound = true;
-				res.solutionCost = start->getFValue();
+				res.solutionCost = cur->getFValue();
 				goal_node = cur;
 				goal_state = cur->getState().toString();
 
@@ -138,20 +138,52 @@ public:
 					delete childNode;
 			}
         }
+		
+		cout << "No goal was found" << endl;
+		return res;
     }
 
 	void printPlan(){
 		if (goal_node){
-			vector <int> plan;
-			while (goal_node->parent){
-				plan.push_back(goal_node->getState().getLabel());
-				goal_node = goal_node->parent;
+			if (domain.getDomainName() == "PancakePuzzle" || domain.getDomainName() == "PancakePuzzleDPS"){
+				vector <int> plan;
+				cout << "*Tracing from goal to starting starting:" << endl;
+				while (goal_node->parent){
+					plan.push_back(goal_node->getState().getLabel());
+					cout << goal_node->getState() << endl;
+					goal_node = goal_node->parent;
+				}
+				cout << goal_node->getState() << endl;
+				cout << "*End trace. Printing plan:" << endl;
+
+				cout << "# " << start_state;
+				for (int i = plan.size() - 1; i >= 0; --i){
+					cout << plan[i] << endl;
+				}
+				cout << "# " << goal_state;
+				cout << endl;
+
+			} else {
+
+				vector <char> plan;
+				cout << "*Tracing from goal to starting starting:" << endl;
+				while (goal_node->parent){
+					plan.push_back(goal_node->getState().getLabel());
+					cout << goal_node->getState() << endl;
+					goal_node = goal_node->parent;
+				}
+				cout << goal_node->getState() << endl;
+				cout << "*End trace. Printing plan:" << endl;
+
+				cout << "# " << start_state;
+				for (int i = plan.size() - 1; i >= 0; --i){
+					cout << plan[i] << endl;
+				}
+				cout << "# " << goal_state;
+				cout << endl;
+
 			}
-			cout << "# " << start_state;
-			for (int i = plan.size() - 1; i >= 0; --i){
-				cout << plan[i] << endl;
-			}
-			cout << "# " << goal_state;
+
 		} else {
 			cout << "No Goal." << endl;
 		}
