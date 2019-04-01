@@ -51,13 +51,13 @@ int main(int argc, char** argv)
 		// RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
 		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "bellman", lookaheadDepth);
+		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
 		
 
-		if (DEBUG) cout << "================== ASTAR ==================" << endl;
+		// if (DEBUG) cout << "================== ASTAR ==================" << endl;
 		OfflineAStar<PancakePuzzle> astar(world);
 		astarRes = astar.solve();
-		astar.printPlan();
+		// astar.printPlan();
 		
 		// astarRes = astar.search();
 		
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 
 		riskRes = risk.search();
 
-		if (DEBUG) cout << "================== LSSLRTA ==================" << endl;
+		// if (DEBUG) cout << "================== LSSLRTA ==================" << endl;
 		lsslrtaRes = lsslrta.search();
 
 
