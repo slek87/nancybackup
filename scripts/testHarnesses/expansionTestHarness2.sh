@@ -121,7 +121,7 @@ then
   dimensions=$5
   for lookahead in "${@:6}"
   do
-    mkdir -p ../../../results/PancakeDPS/expansionTests/Nancy/${dimensions}
+    mkdir -p /export/home/slk56/results/PancakeDPS/expansionTests/Nancy/${dimensions}
     instance=$firstInstance
     while ((instance < lastInstance))
     do
@@ -131,12 +131,12 @@ then
         wait
         numProcs=0
       fi		  
-      if [ -f ../../../results/PancakeDPS/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json ]
+      if [ -f /export/home/slk56/results/PancakeDPS/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json ]
 	  then 
 	    let instance++
 	  else
       echo ${instance}
-	    ./../../../build_release/expansionTests ${domainType} ${lookahead} ../../../results/PancakeDPS/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json < ${file}
+	    timeout -k 5s 4m ./../../../build_release/expansionTests ${domainType} ${lookahead} /export/home/slk56/results/PancakeDPS/expansionTests/Nancy/${dimensions}/LA${lookahead}-${instance}.json < ${file}
 	    let instance++
       let numProcs++
 	  fi

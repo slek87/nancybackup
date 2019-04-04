@@ -233,9 +233,9 @@ private:
 	}
 
 
-protected:
-	Domain & domain;
-	string start_state;
-	string goal_state;
-	Node* goal_node;
+	protected:
+		Domain & domain;
+		string start_state;
+		string goal_state;
+		Node* goal_node;
 };
