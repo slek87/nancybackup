@@ -5,8 +5,10 @@
 #include <stdbool.h>
 #include <vector>
 #include <limits>
+#include <queue>
+#include <set> 
 #include"../utility/ResultContainer.h"
-#include "../utility/PriorityQueue.h"
+// #include "../utility/PriorityQueue.h"
 
 using namespace std;
 
@@ -22,8 +24,8 @@ class THTS{
         // It is not stored, but calculated on demand
 
         State state; // State.
-        vector<Node*> successors; // Children.
-        Cost value;
+        set<Node*> successors; // Children.
+        double value; // Name this value something
         int visits; // Number of visits.
         bool lock; // Lock.
 		Node* parent;
@@ -35,33 +37,23 @@ class THTS{
         int getVisits() const {return visits;}
         bool getLock() const {return lock;}
         bool getInit() const {return initialized;}
-
-        void setParent(Node* p) { parent = p; }
     
-        Node(State state, Cost f, Cost g, Cost h, int v, bool l, Node* parent, bool i)
-			: state(state), f(f), g(g), h(h), visits(v), lock(l), parent(parent), initialized(i){}
-
-        static bool compare(const Node* n1, const Node* n2) {
-			// Tie 
-			if (n1->g == n2->g)
-			{
-				return n1->g > n2->g;
-			}
-			return n1->g < n2->g;
-		}
+        Node(State state, double val, int visit, bool lock, Node* parent, bool init)
+			: state(state), value(val), visits(visit), lock(lock), parent(parent), initialized(init){}
     };
 
     THTS(Domain& domain) : domain(domain) {
         k = 1; // TODO
         w = 1; // TODO
-        backupQueue.swapComparator(Node::compare);
-        //  state(state), f(f), g(g), h(h), visits(v), lock(l), parent(parent), initialized(i)
-        Node* initial_node = new Node(domain.getStartState(), 0, 0, domain.heuristic(domain.getStartState()), 1, false, NULL, false); // n <- n_0 
+        //  State state, double val, int visit, bool lock, Node* parent, bool init
+        initial_node = new Node(domain.getStartState(), w * domain.heuristic(domain.getStartState()), 1, false, NULL, false); // n <- n_0 
+        TT[domain.getStartState()] = initial_node;
         start_state = domain.getStartState();   
+        goal = NULL;
     }
 
-    Cost pathCost(Node* n){
-        Cost g = 0;
+    double pathCost(Node* n){
+        double g = 0;
         Node* cur = n;
         while (cur->parent){
             g +=  domain.getEdgeCost(n->getState());
@@ -70,70 +62,85 @@ class THTS{
         return g;
     }
 
-    void initalizeNode(Node* n){
+    void initalizeNode(Node* n,  priority_queue<pair<double, Node*>>& backupQueue){
+        if (DEBUG) cout << "Init " << n->state << endl;
         vector <State> children = domain.successors(n->getState());
 
         State bestChild;
-		Cost bestF = numeric_limits<double>::infinity();
+		double best_value = numeric_limits<double>::infinity();
 
         // for each action... In this case for each children
         for (State child : children){
             // child = s'
-            
-            typename unordered_map<State, Node*, Hash>::iterator it = TT.find(child);
+            auto it = TT.find(child);
             
             // If s' not in TT and not is not deadend then
             if (it == TT.end()){
                 // Node(State state, int N, Cost f, int v, Node* parent)
                 // n' <- <s', 0, w*h(s'), l, isGoal(s')>
 
-                // state(state), f(f), g(g), h(h), visits(v), lock(l), parent(parent), initialized(i)
-                Node* childNode = new Node(child, w * domain.heuristic(child), 0, 0, 1, domain.isGoal(child), n, false); // n'
+                // State state, double val, int visit, bool lock, Node* parent, bool init
+                Node* childNode = new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n, false); // n'
+
+
                 //TT[s'] <- n'
                 TT[child] = childNode;
 
                 //N(n) <- N(n) union {n'} N = succesor nodes
-                n->successors.push_back(childNode);
+                n->successors.insert(childNode);
+                if (DEBUG) cout << "Adding to TT " << childNode->state << endl;
+
+                if (domain.isGoal(child)){
+                    cout << "Goal Child" << endl;
+                    if (!goal){
+                        goal = childNode;
+                    } else {
+                        if (pathCost(goal) > pathCost(childNode)) goal = childNode;
+                    }
+                }
 
             // Else if g(n) + c(o) < g(TT[s'])
             } else if (pathCost(n) + domain.getEdgeCost(n->getState()) < pathCost(TT[child])) {
+                if (DEBUG) cout << "Already in table, but found a better path" << endl;
+                // TT[s']
                 Node * s = (TT[child]);
 
-                // backupQueue.insert(par(TT[s']))
-                backupQueue.push(s->getParent());
 
                 // N(par(TT[s'])) <- N(par(TT[s'])) \ {n'}
-                vector<Node*> updateparSucc;
-                for (Node* succ : s->getParent()->successors){
-                    if (succ != s)
-                        updateparSucc.push_back(succ);
-                }
-
-                s->getParent()->successors = updateparSucc;
+                s->parent->successors.erase(s);
 
                 // g(TT[s']) = g(n) + c(o) 
-                // TODO don't need this?
+                double g = pathCost(n) + domain.getEdgeCost(child);
                 
                 // N(n) <- N(n) union {TT[s']}
-                n->successors.push_back(s);
-                s->setParent(n);
-            
+                n->successors.insert(s);
+
+                // the actual algo has this in the begining of this block
+                // but moved here so the queue will be correct
+                // since std heap does not push up when upding value inside
+                // the heap
+                // backupQueue.insert(par(TT[s']))
+                backupQueue.push(make_pair(g, s->parent));
             }
-        
         }
+
+        n->initialized = true;
+
     }
 
 
     void backUp(Node* n){
+        cout << "Backing up " << n->state << endl;
+
         // THTS-BFS
-        Cost bestF = numeric_limits<double>::infinity();
+        double best_value = numeric_limits<double>::infinity();
         int visits = 0;
         bool lock = true;
         for (Node* child : n->successors){
             // f(n) <- min (n' in N(n)) { f(n') + k * c(n, n') }
-            Cost childF = child->f + k * domain.getEdgeCost(child->getState());
-            if (childF < bestF)
-                bestF = childF;
+            double child_value = child->value + k * domain.getEdgeCost(child->getState());
+            if (child_value < best_value)
+                best_value = child_value;
         
             // v(n) <- sum of n' in N(n) {v(n')}
             visits += child->visits;
@@ -141,52 +148,54 @@ class THTS{
             // l(n) <-
             lock = lock && child->lock;
         }
+        n->value = best_value;
+        n->visits = visits;
+        n->lock = lock;
     }
 
     Node* selectAction(Node* n){
         // THTS_BFS: return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
-        // TODO
-
         // f(n) <- min_[n' in N(n)]{ f(n') + k * c(n, n') }
-        vector <State> children = domain.successors(n->getState());
-		Cost bestF = numeric_limits<double>::infinity();
-        Node* bestN;
-
+		double best_value = numeric_limits<double>::infinity();
+        Node* best_child = NULL;
         for (Node* child : n->successors){
             if (child->lock == false){
-                Cost childF = child->f + k * domain.getEdgeCost(child->getState());
-                if (bestF < childF){
-                    bestF = childF;
-                    bestN = child;
+                double child_value = child->value + k * domain.getEdgeCost(child->state);
+                if (child_value < best_value){
+                    best_value = child_value;
+                    best_child = child;
                 }
-            }
-        }
+            } else {
 
-        return bestN;
+            }
+            cout << "  " << child->state << " val:" << child->value + k * domain.getEdgeCost(child->state) << " l:" << child->lock << endl;
+        }
+        return best_child;
     }
 
     void performTrial(){
-        
+        // PriorityQueue<Node*> backupQueue;
+        priority_queue< pair<double, Node*> > backupQueue; 
         Node* n = initial_node; // n <- n_0
 
-        while (n->getInit()){
+        if (DEBUG && n->initialized) cout << "Selecting action" << endl;
+        while (n->initialized){
+            if (DEBUG) cout << n->state << endl;
             n = selectAction(n);
         }
-
         // If n is goal
-        if (domain.isGoal(n->getState()))
+        if (domain.isGoal(n->getState())){
+            if (DEBUG) cout << "GOAL" << endl;
             return; // Extract plan and return
-        
-        initalizeNode(n);
+        }
+       
+        initalizeNode(n, backupQueue);
 
-        // backupQueue.insert(n)
-
-        backupQueue.push(n);
-        int head_index = 0;
+        backupQueue.push(make_pair(pathCost(n), n));
 
         // while backupQueue is not empty do
-        while (head_index < backupQueue.size() ){
-            n = backupQueue.top(); // m <-backupQueue.pop()
+        while (!backupQueue.empty()){
+            n = backupQueue.top().second; // m <-backupQueue.pop()
             backupQueue.pop();
 
             backUp(n);
@@ -194,7 +203,7 @@ class THTS{
             // if n != n_0
             //   backupQueue.insert(part(n))
             if (n->getState() != start_state){
-                 backupQueue.push(n->getParent());
+                 backupQueue.push(make_pair(pathCost(n->parent), n->parent));
             }
         }
 
@@ -203,9 +212,9 @@ class THTS{
     void solve(){
         // while time allows and no plan found do
         // TODO for now give infinite time
-        int trials = 10;
+        int trials = 4000;
         for(int i = 0; i < trials; ++i){
-            cout << i << endl;
+            if (DEBUG) cout << "\n----------------------------------------\nTrail " << i << endl;
             performTrial();
         }
         // return plan
@@ -213,10 +222,11 @@ class THTS{
 
 	protected:
         unordered_map<State, Node*, Hash> TT;
-        PriorityQueue<Node*> backupQueue;
         State start_state;
         Node* initial_node;
+        Node* goal;
 		double k;
         double w;
         Domain & domain;
+        bool DEBUG = true;
 };
