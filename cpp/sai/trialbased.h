@@ -31,13 +31,7 @@ class THTS{
 		Node* parent;
         bool initialized;
 
-    public:
-        Node* getParent() const {return parent;}
-        State getState() const {return state;}
-        int getVisits() const {return visits;}
-        bool getLock() const {return lock;}
-        bool getInit() const {return initialized;}
-    
+    public: 
         Node(State state, double val, int visit, bool lock, Node* parent, bool init)
 			: state(state), value(val), visits(visit), lock(lock), parent(parent), initialized(init){}
     };
@@ -46,7 +40,8 @@ class THTS{
         k = 1; // TODO
         w = 1; // TODO
         //  State state, double val, int visit, bool lock, Node* parent, bool init
-        initial_node = new Node(domain.getStartState(), w * domain.heuristic(domain.getStartState()), 1, false, NULL, false); // n <- n_0 
+        initial_node = new Node(domain.getStartState(), 
+            w * domain.heuristic(domain.getStartState()), 1, false, NULL, false); // n <- n_0 
         TT[domain.getStartState()] = initial_node;
         start_state = domain.getStartState();   
         goal = NULL;
@@ -56,15 +51,15 @@ class THTS{
         double g = 0;
         Node* cur = n;
         while (cur->parent){
-            g +=  domain.getEdgeCost(n->getState());
-            cur = cur->getParent();
+            g +=  domain.getEdgeCost(n->state);
+            cur = cur->parent;
         }
         return g;
     }
 
     void initalizeNode(Node* n,  priority_queue<pair<double, Node*>>& backupQueue){
         if (DEBUG) cout << "Init " << n->state << endl;
-        vector <State> children = domain.successors(n->getState());
+        vector <State> children = domain.successors(n->state);
 
         State bestChild;
 		double best_value = numeric_limits<double>::infinity();
@@ -89,7 +84,7 @@ class THTS{
                 //N(n) <- N(n) union {n'} N = succesor nodes
                 n->successors.insert(childNode);
                 if (DEBUG) cout << "Adding to TT " << childNode->state << endl;
-
+                cout << "Parent: " << childNode->parent->state << endl;
                 if (domain.isGoal(child)){
                     cout << "Goal Child" << endl;
                     if (!goal){
@@ -105,7 +100,7 @@ class THTS{
 
                 cout << "Already in table " << child << endl;
 
-                if (pathCost(n) + domain.getEdgeCost(n->getState()) < pathCost(TT[child])) {
+                if (pathCost(n) + domain.getEdgeCost(n->state) < pathCost(TT[child])) {
                     if (DEBUG) cout << "but found a better path" << endl;
                     // TT[s']
                     Node * s = (TT[child]);
@@ -144,7 +139,7 @@ class THTS{
         bool lock = true;
         for (Node* child : n->successors){
             // f(n) <- min (n' in N(n)) { f(n') + k * c(n, n') }
-            double child_value = child->value + k * domain.getEdgeCost(child->getState());
+            double child_value = child->value + k * domain.getEdgeCost(child->state);
             if (child_value < best_value)
                 best_value = child_value;
         
@@ -174,7 +169,8 @@ class THTS{
             } else {
 
             }
-            cout << "  " << child->state << " val:" << child->value + k * domain.getEdgeCost(child->state) << " l:" << child->lock << endl;
+            cout << "  " << child->state << " val:" << child->value + k * domain.getEdgeCost(child->state);
+            cout << " l:" << child->lock << endl;
         }
         return best_child;
     }
@@ -188,9 +184,12 @@ class THTS{
         while (n->initialized){
             if (DEBUG) cout << n->state << endl;
             n = selectAction(n);
+            
+            // All the children have been locked
+            if (!n) return;
         }
         // If n is goal
-        if (domain.isGoal(n->getState())){
+        if (domain.isGoal(n->state)){
             if (DEBUG) cout << "GOAL" << endl;
             return; // Extract plan and return
         }
@@ -204,11 +203,14 @@ class THTS{
             n = backupQueue.top().second; // m <-backupQueue.pop()
             backupQueue.pop();
 
+            // trial finished when backup is called on root
+            if (n == initial_node) return;
+
             backUp(n);
 
             // if n != n_0
             //   backupQueue.insert(part(n))
-            if (n->getState() != start_state){
+            if (n->state != start_state){
                  backupQueue.push(make_pair(pathCost(n->parent), n->parent));
             }
         }
@@ -218,12 +220,21 @@ class THTS{
     void solve(){
         // while time allows and no plan found do
         // TODO for now give infinite time
-        int trials = 4;
+        int trials = 6;
         for(int i = 0; i < trials; ++i){
             if (DEBUG) cout << "\n----------------------------------------\nTrail " << i << endl;
             performTrial();
         }
         // return plan
+        if (goal){
+            Node* cur = goal;
+            while (cur->parent){
+                cout << cur->state << endl;
+                cur = cur->parent;
+            }
+        } else {
+            cout << "No plan found." << endl;
+        }
     }
 
 	protected:

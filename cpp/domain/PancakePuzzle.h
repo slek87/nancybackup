@@ -337,6 +337,9 @@ public:
     std::vector<State> successors(const State& state) const {
 		std::vector<State> successors;
         for (int i = size - 1; i > 0; --i){
+			// Don't allow inverse actions, to cut down on branching factor
+			if (state.getLabel() == i) continue; 
+
 			flipOrdering(successors, state.getOrdering(), i);
         }
 		return successors;
