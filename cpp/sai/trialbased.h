@@ -6,7 +6,7 @@
 #include <vector>
 #include <limits>
 #include <queue>
-#include <set> 
+#include <unordered_set> 
 #include"../utility/ResultContainer.h"
 // #include "../utility/PriorityQueue.h"
 
@@ -24,7 +24,7 @@ class THTS{
         // It is not stored, but calculated on demand
 
         State state; // State.
-        set<Node*> successors; // Children.
+        unordered_set<Node*> successors; // Children.
         double value; // Name this value something
         int visits; // Number of visits.
         bool lock; // Lock.
@@ -70,10 +70,10 @@ class THTS{
 		double best_value = numeric_limits<double>::infinity();
 
         // for each action... In this case for each children
-        for (State child : children){
+        for (State child : children){            
             // child = s'
             auto it = TT.find(child);
-            
+
             // If s' not in TT and not is not deadend then
             if (it == TT.end()){
                 // Node(State state, int N, Cost f, int v, Node* parent)
@@ -100,27 +100,33 @@ class THTS{
                 }
 
             // Else if g(n) + c(o) < g(TT[s'])
-            } else if (pathCost(n) + domain.getEdgeCost(n->getState()) < pathCost(TT[child])) {
-                if (DEBUG) cout << "Already in table, but found a better path" << endl;
-                // TT[s']
-                Node * s = (TT[child]);
+            } else {
+                n->successors.insert(TT[child]);
+
+                cout << "Already in table " << child << endl;
+
+                if (pathCost(n) + domain.getEdgeCost(n->getState()) < pathCost(TT[child])) {
+                    if (DEBUG) cout << "but found a better path" << endl;
+                    // TT[s']
+                    Node * s = (TT[child]);
 
 
-                // N(par(TT[s'])) <- N(par(TT[s'])) \ {n'}
-                s->parent->successors.erase(s);
+                    // N(par(TT[s'])) <- N(par(TT[s'])) \ {n'}
+                    s->parent->successors.erase(s);
 
-                // g(TT[s']) = g(n) + c(o) 
-                double g = pathCost(n) + domain.getEdgeCost(child);
-                
-                // N(n) <- N(n) union {TT[s']}
-                n->successors.insert(s);
+                    // g(TT[s']) = g(n) + c(o) 
+                    double g = pathCost(n) + domain.getEdgeCost(child);
+                    
+                    // N(n) <- N(n) union {TT[s']}
+                    n->successors.insert(s);
 
-                // the actual algo has this in the begining of this block
-                // but moved here so the queue will be correct
-                // since std heap does not push up when upding value inside
-                // the heap
-                // backupQueue.insert(par(TT[s']))
-                backupQueue.push(make_pair(g, s->parent));
+                    // the actual algo has this in the begining of this block
+                    // but moved here so the queue will be correct
+                    // since std heap does not push up when upding value inside
+                    // the heap
+                    // backupQueue.insert(par(TT[s']))
+                    backupQueue.push(make_pair(g, s->parent));
+                }
             }
         }
 
@@ -212,7 +218,7 @@ class THTS{
     void solve(){
         // while time allows and no plan found do
         // TODO for now give infinite time
-        int trials = 4000;
+        int trials = 4;
         for(int i = 0; i < trials; ++i){
             if (DEBUG) cout << "\n----------------------------------------\nTrail " << i << endl;
             performTrial();
