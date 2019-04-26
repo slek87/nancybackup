@@ -93,6 +93,7 @@ public:
 
     ResultContainer solve(){
         ResultContainer res;
+		
         PriorityQueue<Node*> open;
         unordered_map<State, Node*, Hash> closed;
 

@@ -1,9 +1,12 @@
 CC=g++ 
 
-all: th
+all: th as
 
-th: trialbasedTest.cpp 
-	$(CC) -g -std=c++11 trialbasedTest.cpp -o th
+th: trialbasedTest.cpp trialbased.h
+	$(CC) -g -O3 -std=c++11 trialbasedTest.cpp -o th
+
+as: offlineastarTest.cpp 
+	$(CC) -g -O3 -std=c++11 offlineastarTest.cpp -o as
 	
 clean:
-	rm -f th
+	rm -f th as

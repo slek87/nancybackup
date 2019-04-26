@@ -1,0 +1,9 @@
+algorithm does not say how to get the goal, if the goal is not the start node.
+
+added a pointer that keeps track of the best goal.
+
+
+cannot get a goal node using action select fuction because goal node is always locked.
+
+
+

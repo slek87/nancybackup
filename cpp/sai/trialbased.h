@@ -34,7 +34,14 @@ class THTS{
     public: 
         Node(State state, double val, int visit, bool lock, Node* parent, bool init)
 			: state(state), value(val), visits(visit), lock(lock), parent(parent), initialized(init){}
+
     };
+
+    ~THTS(){
+        for(auto it : TT){
+            delete(it.second);
+        }
+    }
 
     THTS(Domain& domain) : domain(domain) {
         k = 1; // TODO
@@ -44,14 +51,14 @@ class THTS{
             w * domain.heuristic(domain.getStartState()), 1, false, NULL, false); // n <- n_0 
         TT[domain.getStartState()] = initial_node;
         start_state = domain.getStartState();   
-        goal = NULL;
+        goal_node = NULL;
     }
 
     double pathCost(Node* n){
         double g = 0;
         Node* cur = n;
         while (cur->parent){
-            g +=  domain.getEdgeCost(n->state);
+            g +=  domain.getEdgeCost(cur->state);
             cur = cur->parent;
         }
         return g;
@@ -60,12 +67,13 @@ class THTS{
     void initalizeNode(Node* n,  priority_queue<pair<double, Node*>>& backupQueue){
         if (DEBUG) cout << "Init " << n->state << endl;
         vector <State> children = domain.successors(n->state);
-
+        
+        res.nodesExpanded++;
         State bestChild;
 		double best_value = numeric_limits<double>::infinity();
 
         // for each action... In this case for each children
-        for (State child : children){            
+        for (State child : children){    
             // child = s'
             auto it = TT.find(child);
 
@@ -76,29 +84,26 @@ class THTS{
 
                 // State state, double val, int visit, bool lock, Node* parent, bool init
                 Node* childNode = new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n, false); // n'
-
+                res.nodesGenerated++;
 
                 //TT[s'] <- n'
                 TT[child] = childNode;
 
                 //N(n) <- N(n) union {n'} N = succesor nodes
                 n->successors.insert(childNode);
-                if (DEBUG) cout << "Adding to TT " << childNode->state << endl;
-                cout << "Parent: " << childNode->parent->state << endl;
+                if (DEBUG) cout << "Adding to TT " << childNode->state << " | Parent: " << childNode->parent->state << endl;
                 if (domain.isGoal(child)){
-                    cout << "Goal Child" << endl;
-                    if (!goal){
-                        goal = childNode;
+                    if (DEBUG) cout << "Goal Child" << endl;
+                    if (!goal_node){
+                        goal_node = childNode;
                     } else {
-                        if (pathCost(goal) > pathCost(childNode)) goal = childNode;
+                        if (pathCost(goal_node) > pathCost(childNode)) goal_node = childNode;
                     }
                 }
 
             // Else if g(n) + c(o) < g(TT[s'])
             } else {
-                n->successors.insert(TT[child]);
-
-                cout << "Already in table " << child << endl;
+                if (DEBUG) cout << "Already in table " << child << " | Parent: " << TT[child]->parent->state << endl;
 
                 if (pathCost(n) + domain.getEdgeCost(n->state) < pathCost(TT[child])) {
                     if (DEBUG) cout << "but found a better path" << endl;
@@ -114,6 +119,7 @@ class THTS{
                     
                     // N(n) <- N(n) union {TT[s']}
                     n->successors.insert(s);
+                    if (DEBUG) cout << "adding " << s->state << " to " << n->state << endl;
 
                     // the actual algo has this in the begining of this block
                     // but moved here so the queue will be correct
@@ -131,7 +137,7 @@ class THTS{
 
 
     void backUp(Node* n){
-        cout << "Backing up " << n->state << endl;
+        if (DEBUG) cout << "Backing up " << n->state << endl;
 
         // THTS-BFS
         double best_value = numeric_limits<double>::infinity();
@@ -169,8 +175,8 @@ class THTS{
             } else {
 
             }
-            cout << "  " << child->state << " val:" << child->value + k * domain.getEdgeCost(child->state);
-            cout << " l:" << child->lock << endl;
+            if (DEBUG) cout << "  " << child->state << " val:" << child->value + k * domain.getEdgeCost(child->state);
+            if (DEBUG) cout << " l:" << child->lock << endl;
         }
         return best_child;
     }
@@ -181,12 +187,22 @@ class THTS{
         Node* n = initial_node; // n <- n_0
 
         if (DEBUG && n->initialized) cout << "Selecting action" << endl;
+
+        unordered_set<Node*> dub;
+
         while (n->initialized){
+
             if (DEBUG) cout << n->state << endl;
             n = selectAction(n);
-            
             // All the children have been locked
             if (!n) return;
+            if (DEBUG) cout << n->state << " " << n->state.getLabel() << endl;
+            
+            auto it = dub.find(n);
+            if (it != dub.end()) return;
+            
+
+            dub.insert(n);
         }
         // If n is goal
         if (domain.isGoal(n->state)){
@@ -211,39 +227,126 @@ class THTS{
             // if n != n_0
             //   backupQueue.insert(part(n))
             if (n->state != start_state){
-                 backupQueue.push(make_pair(pathCost(n->parent), n->parent));
+                backupQueue.push(make_pair(pathCost(n->parent), n->parent));
             }
         }
 
     }
 
-    void solve(){
+    ResultContainer solve(int trials){
         // while time allows and no plan found do
         // TODO for now give infinite time
-        int trials = 6;
         for(int i = 0; i < trials; ++i){
             if (DEBUG) cout << "\n----------------------------------------\nTrail " << i << endl;
             performTrial();
         }
+
+        if (goal_node){
+            res.solutionFound = true;
+		    res.solutionCost = pathCost(goal_node);
+        }
+
+        return res;
+
+    }
+
+    ResultContainer solve(){
+        // while time allows and no plan found do
+        // TODO for now give infinite time
+        // int trials = 16;
+        // for(int i = 0; i < trials; ++i){
+        //     if (DEBUG) cout << "\n----------------------------------------\nTrail " << i << endl;
+        //     performTrial();
+        // }
+        int i = 0;
+        while (!goal_node)  performTrial(); if (DEBUG) cout << "\n----------------------------------------\nTrail " << i++ << endl; 
         // return plan
-        if (goal){
-            Node* cur = goal;
-            while (cur->parent){
-                cout << cur->state << endl;
-                cur = cur->parent;
+
+        if (goal_node){
+            res.solutionFound = true;
+		    res.solutionCost = pathCost(goal_node);
+            // double g = 0;
+            // Node* cur = goal_node;
+            // while (cur->parent){
+            //     g +=  domain.getEdgeCost(cur->state);
+            //     cur = cur->parent;
+            // }
+        }
+
+        return res;
+    }
+
+    void printPlan(){
+        if (goal_node){
+            string goal_state = goal_node->state.toString();
+
+            if (domain.getDomainName() == "PancakePuzzle" || domain.getDomainName() == "PancakePuzzleDPS"){
+                vector <int> plan;
+                cout << "*Tracing from goal to starting starting:" << endl;
+                while (goal_node->parent){
+                    plan.push_back(goal_node->state.getLabel());
+                    cout << goal_node->state << endl;
+                    goal_node = goal_node->parent;
+                }
+                cout << goal_node->state << endl;
+                cout << "*End trace. Printing plan:" << endl;
+
+                cout << "# " << goal_node->state.toString();
+                for (int i = plan.size() - 1; i >= 0; --i){
+                    cout << plan[i] << endl;
+                }
+                cout << "# " << goal_state;
+                cout << endl;
+
+            } else {
+
+                vector <char> plan;
+                cout << "*Tracing from goal to starting starting:" << endl;
+                while (goal_node->parent){
+                    plan.push_back(goal_node->state.getLabel());
+                    cout << goal_node->state << endl;
+                    goal_node = goal_node->parent;
+                }
+                cout << goal_node->state << endl;
+                cout << "*End trace. Printing plan:" << endl;
+
+                cout << "# " << goal_node->state.toString();
+                for (int i = plan.size() - 1; i >= 0; --i){
+                    cout << plan[i] << endl;
+                }
+                cout << "# " << goal_state;
+                cout << endl;
+
             }
+
         } else {
-            cout << "No plan found." << endl;
+            cout << "No Goal." << endl;
         }
     }
 
+    void debug(bool b){
+        DEBUG = b;
+    }
+
+    void setW(int i){
+        w = i;
+    }
+
+    void setK(int i){
+        k = i;
+    }
+
 	protected:
+        ResultContainer res;
         unordered_map<State, Node*, Hash> TT;
         State start_state;
         Node* initial_node;
-        Node* goal;
+        Node* goal_node;
 		double k;
         double w;
+
+        double lookahead;
+
         Domain & domain;
-        bool DEBUG = true;
+        bool DEBUG = false;
 };
