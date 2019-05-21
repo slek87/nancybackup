@@ -22,20 +22,20 @@ int main(int argc, char** argv) {
 			world.setVariant(1);
 		}
         THTS <PancakePuzzle> thts(world);
-        // thts.debug(false);
-        // thts.setW(5);
-        // res = thts.solve();
-        // thts.printPlan();
+        thts.debug(false);
+        thts.setW(5);
+        res = thts.solve();
+        thts.printPlan();
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
         THTS <TreeWorld> thts(world);
-        // res = thts.solve();
-        // thts.printPlan();
+        res = thts.solve();
+        thts.printPlan();
     } else if (domain == "SlidingPuzzle"){
         SlidingTilePuzzle world = SlidingTilePuzzle(cin);
         THTS <SlidingTilePuzzle> thts(world);
-        // res = thts.solve();
-        // thts.printPlan();
+        res = thts.solve();
+        thts.printPlan();
     }
 
     cout << to_string(res.solutionCost) << endl;
