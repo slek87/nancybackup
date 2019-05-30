@@ -14,6 +14,8 @@ using namespace std;
 int main(int argc, char** argv) {
     ResultContainer res;
     string domain = argv[1];
+    string algorithm = argv[2];
+
     if (domain == "Pancake" || domain == "PancakeDPS" ){
         ResultContainer result;
         PancakePuzzle world = PancakePuzzle(cin);
@@ -21,7 +23,7 @@ int main(int argc, char** argv) {
         if (domain == "PancakeDPS"){
 			world.setVariant(1);
 		}
-        THTS <PancakePuzzle> thts(world);
+        THTS <PancakePuzzle> thts(world, algorithm);
         // thts.debug(false);
         // thts.setW(5);
         // res = thts.solve();
@@ -30,12 +32,12 @@ int main(int argc, char** argv) {
         thts.getPlan();
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
-        THTS <TreeWorld> thts(world);
+        THTS <TreeWorld> thts(world, algorithm);
         // res = thts.solve();
         // thts.printPlan();
     } else if (domain == "SlidingPuzzle"){
         SlidingTilePuzzle world = SlidingTilePuzzle(cin);
-        THTS <SlidingTilePuzzle> thts(world);
+        THTS <SlidingTilePuzzle> thts(world, algorithm);
         // res = thts.solve();
         // thts.printPlan();
         thts.getPlan();
