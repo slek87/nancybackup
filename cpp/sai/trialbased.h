@@ -71,7 +71,7 @@ public:
     }
     
     void performTrial(){
-        cout << "Perform Trial:" << endl;
+        cout << "Perform Trial:_______________________________________" << endl;
 
         PQueue backupQueue; 
         shared_ptr<Node> n = root;
@@ -124,8 +124,8 @@ public:
                 //TT[s'] <- n'
                 TT[child] = childNode;
 
-                cout << "  childfval: " << childNode->fval << endl;
-                cout << child << endl;
+                // cout << "  childfval: " << childNode->fval << endl;
+                // cout << child << endl;
 
                 //N(n) <- N(n) union {n'} N = succesor nodes
                 n->successors.insert(childNode);
@@ -193,21 +193,24 @@ public:
             double denom = max - min;
             for (shared_ptr<Node> child : n->successors){
                 double child_value;
-                child_value = (children_fbar[i] - min)/denom;
+                double fb = 0;
+                double csq = (C * sqrt(log(n->visits)/child->visits));
+                
+                if (denom != 0){
+                    fb = (children_fbar[i] - min)/denom;
+                }
 
-                cout << "  fval: " << child->fval;
-                cout << "  max:" << max;
-                cout << "  min:" << min;
-                cout << "  n:" << children_fbar[i] - min;
-                cout << "  d:" << denom;
-                cout << "  fb: " << child_value;
-                cout << "  Csq: " << (C * sqrt(log(n->visits)/child->visits));
+                child_value = fb - csq;
 
-                child_value -= (C * sqrt(log(n->visits)/child->visits));
-
-                cout << "  val: " << child_value << endl; 
-
-                cout << child->state << endl;
+                // cout << "  fval: " << child->fval;
+                // cout << "  max:" << max;
+                // cout << "  min:" << min;
+                // cout << "  n:" << children_fbar[i] - min;
+                // cout << "  d:" << denom;
+                // cout << "  fb: " << fb;
+                // cout << "  csq: " << csq;
+                // cout << "  val: " << child_value << endl; 
+                // cout << child->state << endl;
 
                 if (child_value < best_value){
                     best_value = child_value;
@@ -222,7 +225,7 @@ public:
     }
 
     void backUp(shared_ptr<Node>& n){
-        cout << "Back up:\n" << n->state << endl;
+        // cout << "Back up:\n" << n->state << endl;
 
         if (n->successors.size() == 0){
             n->parent->successors.erase(n);
@@ -255,7 +258,7 @@ public:
             }
             n->fval = fval/visits;
 
-            cout << "  new fval: " << n->fval << endl;
+            // cout << "  new fval: " << n->fval << endl;
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
@@ -269,7 +272,7 @@ protected:
     Domain & domain;
     int max_time = 1000000;
     int w = 5;
-    int k = 1;
+    int k = 0;
     double C = 1.4; // exploration parameter C
     bool goal_found = false;
     shared_ptr<Node> root;
