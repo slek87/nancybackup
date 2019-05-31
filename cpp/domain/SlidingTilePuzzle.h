@@ -34,7 +34,7 @@ public:
 				{
 					stream << std::setw(3) << state.getBoard()[r][c] << " ";
 				}
-				stream << endl;
+				// stream << endl;
 			}
 			return stream;
 		}

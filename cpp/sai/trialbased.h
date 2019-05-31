@@ -8,6 +8,7 @@
 #include <queue>
 #include <limits>
 #include <math.h>
+#include "../utility/ResultContainer.h"
 
 using namespace std;
 
@@ -55,12 +56,33 @@ public:
     }
 
     THTS(Domain& domain, string algorithm) : domain(domain), algorithm(algorithm){
+        // Default:
+        // w = 1;
+        // k = 1;
+        // C = 1.4; 
+        if (algorithm == "AS"){
+
+        } else if (algorithm == "WAS"){
+            w = 5;
+        } else if (algorithm == "UCT"){
+
+        } else if (algorithm == "GUCT"){
+            k = 0;
+        } else if (algorithm == "UCTS"){
+
+        } else if (algorithm == "GUCTS"){
+            k = 0;
+        } else {
+            // cout << "Invalid algorithm: " << algorithm << endl;
+            exit(1);
+        }
+
         State root_state = domain.getStartState();  
         root.reset(new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL));
         TT[root_state] = root;
     }
 
-    void getPlan(){
+    ResultContainer getPlan(){
         // While time allows and no plan found do
         // TODO in my case, it will be the max look ahead
         int t = 0;
@@ -68,22 +90,33 @@ public:
             performTrial();
             ++t;
         }
+
+        return res;
     }
     
     void performTrial(){
-        cout << "Perform Trial:_______________________________________" << endl;
+        // cout << "Perform Trial:_______________________________________" << endl;
 
         PQueue backupQueue; 
         shared_ptr<Node> n = root;
-
+        
         while (n->initialized){
+            State old = n->state;
             selectAction(n);
-            cout << "At:\n" << n->state << "\n" << endl;
+            if (old == n->state){
+                // cout << "Deadend..." << endl;
+                exit(1);
+            }
+            // cout << "At:\n" << n->state << "\n" << endl;
         }
 
         // If n is goal
         if (domain.isGoal(n->state)){
             goal_found = true;
+
+            res.solutionFound = true;
+		    res.solutionCost = n->g;
+
             return; // Extract plan and return
         }
 
@@ -104,10 +137,13 @@ public:
     }
     
     void initalizeNode(shared_ptr<Node>& n, PQueue& backupQueue){
-        cout << "Initalize:\n" << n->state << "\n" << endl;
+        // cout << "Initalize:\n" << n->state << "\n" << endl;
+        res.nodesExpanded++;
 
         vector <State> children = domain.successors(n->state);
         // For each action... In this case for each children
+
+        res.nodesGenerated += children.size();
         for (State child : children){    
             // child = s'
             auto it = TT.find(child);
@@ -133,6 +169,12 @@ public:
                 // State already in the tree, check to see if it's a better path
                 if (n->g + domain.getEdgeCost(child) < pathCost(TT[child])) {
                     shared_ptr<Node> s = (TT[child]);
+
+                    // cout << " Better path:" << endl;
+                    // cout << child << endl;
+                    // cout << " Old parent:" << endl;
+                    // cout << s->parent->state << endl;
+
                     backupQueue.push(s->parent);
                     // N(par(TT[s'])) <- N(par(TT[s'])) \ {n'}
                     s->parent->successors.erase(s);
@@ -140,6 +182,9 @@ public:
                     s->g = n->g + domain.getEdgeCost(child);
                     s->state = child; // update label
                     n->successors.insert(s);
+
+                    // cout << " New parent:" << endl;
+                    // cout << n->state << endl;
                 }
             }
         }
@@ -147,7 +192,7 @@ public:
     }
 
     void selectAction(shared_ptr<Node>& n){   
-        cout << "Select action:" << endl;
+        // cout << "Select action:" << endl;
 
         // TODO should only be selecting a child that's not locked. But it doesn't make 
 
@@ -157,7 +202,7 @@ public:
             return;
         }
 
-        if (algorithm == "BFS"){
+        if (algorithm == "AS" || algorithm == "WAS"){
             // THTS-BFS
             // return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
             // i.e. return successor that is not locked with the lowest value
@@ -169,7 +214,7 @@ public:
                     n = child;
                 }
             }
-        } else if (algorithm == "UCT"){
+        } else if (algorithm == "UCT" || algorithm == "GUCT" || algorithm == "UCTS" || algorithm == "GUCTS" ){
             // UTC
             double best_value = numeric_limits<double>::infinity();
             double min = numeric_limits<double>::infinity();
@@ -218,10 +263,7 @@ public:
                 }
                 ++i;
             }
-        } else {
-            cout << "Invalid algorithm: " << algorithm << endl;
-            exit(1);
-        }
+        } 
     }
 
     void backUp(shared_ptr<Node>& n){
@@ -229,14 +271,16 @@ public:
 
         if (n->successors.size() == 0){
             n->parent->successors.erase(n);
-            cout << "  Dead end!" << endl;
-            cout << "  Parent's succ size: " << n->parent->successors.size();
+            // cout << "  Deadend!" << endl;
+            // cout << "  Parent's succ size: " << n->parent->successors.size() << endl;
+            // cout << n->parent->state << endl;
+            TT.erase(n->state);
             return;
         }
 
         int visits = 0;
         bool lock = true;
-        if (algorithm == "BFS"){
+        if (algorithm == "AS" || algorithm == "WAS" || algorithm == "UCTS" || algorithm == "GUCTS" ){
             // THTS-BFS
             double best_value = numeric_limits<double>::infinity();
             for (shared_ptr<Node> child : n->successors){
@@ -249,7 +293,7 @@ public:
                 lock = lock && child->lock; // l(n) <- bools of n' in N(n) {l(n')}
             }
             n->fval = best_value;
-        } else if(algorithm == "UCT"){
+        } else if(algorithm == "UCT" || algorithm == "GUCT"){
             double fval = 0;
             for (shared_ptr<Node> child : n->successors){
                 fval += child->visits * (child->fval + k * domain.getEdgeCost(child->state));
@@ -259,20 +303,22 @@ public:
             n->fval = fval/visits;
 
             // cout << "  new fval: " << n->fval << endl;
-        } else {
-            cout << "Invalid algorithm: " << algorithm << endl;
-            exit(1);
-        }
+        } 
 
         n->visits = visits;
         n->lock = lock;
     }
 
+    void setK(int v){
+        k = v;
+    }
+
 protected:
+    ResultContainer res;
     Domain & domain;
     int max_time = 1000000;
-    int w = 5;
-    int k = 0;
+    int w = 1;
+    int k = 1;
     double C = 1.4; // exploration parameter C
     bool goal_found = false;
     shared_ptr<Node> root;

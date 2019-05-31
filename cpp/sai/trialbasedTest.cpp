@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         // res = thts.solve();
         // thts.printPlan();
 
-        thts.getPlan();
+        res = thts.getPlan();
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
         THTS <TreeWorld> thts(world, algorithm);
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         THTS <SlidingTilePuzzle> thts(world, algorithm);
         // res = thts.solve();
         // thts.printPlan();
-        thts.getPlan();
+        res = thts.getPlan();
 
     }
 
