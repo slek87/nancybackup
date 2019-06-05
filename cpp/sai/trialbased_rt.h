@@ -319,6 +319,7 @@ protected:
     int max_time = 1000000;
     int w = 1;
     int k = 1;
+    int lookahead = 1;
     double C = 1.4; // exploration parameter C
     bool goal_found = false;
     shared_ptr<Node> root;
