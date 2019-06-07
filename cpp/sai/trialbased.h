@@ -13,7 +13,7 @@
 using namespace std;
 
 template <class Domain>
-class THTS_RT{
+class THTS{
     typedef typename Domain::State State;
     typedef typename Domain::Cost Cost;
     typedef typename Domain::HashState Hash;
@@ -32,7 +32,6 @@ public:
     public:
         Node(State state, double val, int visit, bool lock, shared_ptr<Node> parent) : state(state), fval(val), visits(visit), lock(lock), parent(parent){
             initialized = false;
-            deadend = false;
             g = 0;
         }
     };
@@ -84,6 +83,7 @@ public:
     }
 
     ResultContainer getPlan(){
+        cout << algorithm << endl;
         // While time allows and no plan found do
         // TODO in my case, it will be the max look ahead
         int t = 0;

@@ -4,6 +4,9 @@
 #include "trialbased.h"
 #include "../domain/TreeWorld.h"
 #include "../domain/SlidingTilePuzzle.h"
+#include "../domain/SimpleTilePuzzle.h"
+#include "../domain/HeavyTilePuzzle.h"
+#include "../domain/InverseTilePuzzle.h"
 #include "../domain/PancakePuzzle.h"
 #include "../domain/TreeWorld.h"
 #include "../utility/ResultContainer.h"
@@ -46,9 +49,22 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
+    } else if (domain == "HeavyTile"){
+        HeavyTilePuzzle world = HeavyTilePuzzle(cin);
+        THTS <HeavyTilePuzzle> thts(world, algorithm);
+        if (prune_type == "lock"){
+            thts.setPruning(prune_type);
+        }
+        res = thts.getPlan();
+    } else if (domain == "InverseTile"){
+        InverseTilePuzzle world = InverseTilePuzzle(cin);
+        THTS <InverseTilePuzzle> thts(world, algorithm);
+        if (prune_type == "lock"){
+            thts.setPruning(prune_type);
+        }
+        res = thts.getPlan();
     }
 
-    cout << "solutionCost: " + to_string(res.solutionCost) << endl;
-    cout << "nodesGenerated: " + to_string(res.nodesGenerated) << endl;
-	cout << "nodesExpanded: " + to_string(res.nodesExpanded) << endl;
+    cout << "{\"" + algorithm << "\":[" + to_string(res.solutionCost) + ", " + 
+    to_string(res.nodesGenerated)  + ", " + to_string(res.nodesExpanded) + "]}" << endl;
 }

@@ -92,7 +92,7 @@ public:
     OfflineAStar(Domain& domain) : domain(domain) {}
 
     ResultContainer solve(){
-        ResultContainer res;
+        
 		
         PriorityQueue<Node*> open;
         unordered_map<State, Node*, Hash> closed;
@@ -130,13 +130,12 @@ public:
 				bool dup = duplicateDetection(childNode, closed, open);
 
 				// Duplicate detection
-				if (!dup)
-				{
+				if (!dup){
 					open.push(childNode);
 					closed[child] = childNode;
-				}
-				else
+				} else {
 					delete childNode;
+				}
 			}
         }
 		
@@ -191,7 +190,7 @@ public:
 	}
 
 private:
-	static bool duplicateDetection(Node* node, unordered_map<State, Node*, Hash>& closed, PriorityQueue<Node*>& open)
+	bool duplicateDetection(Node* node, unordered_map<State, Node*, Hash>& closed, PriorityQueue<Node*>& open)
 	{
 		// Check if this state exists 
 		typename unordered_map<State, Node*, Hash>::iterator it = closed.find(node->getState());
@@ -224,6 +223,7 @@ private:
 					it->second->setState(node->getState());
 					it->second->reOpen();
 					open.push(it->second);
+					res.nodesExpanded--;
 				}
 			}
 
@@ -235,6 +235,7 @@ private:
 
 
 	protected:
+		ResultContainer res;
 		Domain & domain;
 		string start_state;
 		string goal_state;
