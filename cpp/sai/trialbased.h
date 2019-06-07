@@ -26,12 +26,13 @@ public:
         double g; // TODO Path costs from root node to a node is g(n). It is not stored, but calculated on demand
         int visits; // Number of visits
         bool lock; // Lock
-        shared_ptr<Node> parent;
+		shared_ptr<Node> parent;
         bool initialized;
 
     public:
         Node(State state, double val, int visit, bool lock, shared_ptr<Node> parent) : state(state), fval(val), visits(visit), lock(lock), parent(parent){
             initialized = false;
+            deadend = false;
             g = 0;
         }
     };
@@ -121,7 +122,7 @@ public:
         }
 
         initalizeNode(n, backupQueue);
-        if (n) backupQueue.push(n);
+        backupQueue.push(n);
 
         // while backupQueue is not empty do
         while (!backupQueue.empty()){
@@ -153,8 +154,12 @@ public:
             if (it == TT.end()){
                 // Node(State state, int N, Cost f, int v, Node* parent)
                 // n' <- <s', 0, w*h(s'), l, isGoal(s')>
-                shared_ptr<Node> childNode(new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n)); // n'
+                // shared_ptr<Node> childNode(new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n)); // n'
 
+
+                // TODO, don't lock the child if it's goal even when the paper says to
+                shared_ptr<Node> childNode(new Node(child, w * domain.heuristic(child), 1, false, n)); // n'
+                
                 childNode->g = pathCost(childNode);    // TODO this was not supposed to be stored in the node
 
                 //TT[s'] <- n'
@@ -208,6 +213,9 @@ public:
             // i.e. return successor that is not locked with the lowest value
             double best_value = numeric_limits<double>::infinity();
             for (shared_ptr<Node> child : n->successors){
+                if (prune_type == "lock" && child->lock){
+                    continue;
+                }
                 double child_value = child->fval + k * domain.getEdgeCost(child->state);
                 if (child_value < best_value){
                     best_value = child_value;
@@ -223,6 +231,9 @@ public:
 
             // Finiding the max and min to use for normalization
             for (shared_ptr<Node> child : n->successors){
+                if (prune_type == "lock" && child->lock){
+                    continue;
+                }
                 double child_value = child->fval + k * domain.getEdgeCost(child->state);
 
                 if (child_value < min){
@@ -237,6 +248,9 @@ public:
             int i  = 0;
             double denom = max - min;
             for (shared_ptr<Node> child : n->successors){
+                if (prune_type == "lock" && child->lock){
+                    continue;
+                }
                 double child_value;
                 double fb = 0;
                 double csq = (C * sqrt(log(n->visits)/child->visits));
@@ -270,11 +284,15 @@ public:
         // cout << "Back up:\n" << n->state << endl;
 
         if (n->successors.size() == 0){
-            n->parent->successors.erase(n);
-            // cout << "  Deadend!" << endl;
-            // cout << "  Parent's succ size: " << n->parent->successors.size() << endl;
-            // cout << n->parent->state << endl;
-            TT.erase(n->state);
+            if (prune_type == "erase"){
+                n->parent->successors.erase(n);
+                // cout << "  Deadend!" << endl;
+                // cout << "  Parent's succ size: " << n->parent->successors.size() << endl;
+                // cout << n->parent->state << endl;
+                TT.erase(n->state);
+            } else if (prune_type == "lock"){
+                n->lock = true;
+            }
             return;
         }
 
@@ -313,10 +331,14 @@ public:
         k = v;
     }
 
+    void setPruning(string type){
+        prune_type = type;
+    }
+
 protected:
     ResultContainer res;
     Domain & domain;
-    int max_time = 1000000;
+    int max_time = 5000000;
     int w = 1;
     int k = 1;
     double C = 1.4; // exploration parameter C
@@ -324,4 +346,5 @@ protected:
     shared_ptr<Node> root;
     unordered_map<State, shared_ptr<Node>, Hash> TT;
     string algorithm;
+    string prune_type = "erase"; // default to removing deadends
 };
