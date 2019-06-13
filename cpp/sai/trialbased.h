@@ -43,18 +43,6 @@ public:
         }
     };
 
-    typedef priority_queue<shared_ptr<Node>, vector<shared_ptr<Node>>, compare_g> PQueue;
-
-    double pathCost(shared_ptr<Node>& n){
-        double g = 0;
-        shared_ptr<Node> cur = n;
-        while (cur->parent){
-            g +=  domain.getEdgeCost(cur->state);
-            cur = cur->parent;
-        }
-        return g;
-    }
-
     THTS(Domain& domain, string algorithm) : domain(domain), algorithm(algorithm){
         // Default:
         // w = 1;
@@ -81,6 +69,20 @@ public:
         root.reset(new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL));
         TT[root_state] = root;
     }
+    
+    typedef priority_queue<shared_ptr<Node>, vector<shared_ptr<Node>>, compare_g> PQueue;
+
+    double pathCost(shared_ptr<Node>& n){
+        double g = 0;
+        shared_ptr<Node> cur = n;
+        while (cur->parent){
+            g +=  domain.getEdgeCost(cur->state);
+            cur = cur->parent;
+        }
+        return g;
+    }
+
+    
 
     ResultContainer getPlan(){
         cout << algorithm << endl;
