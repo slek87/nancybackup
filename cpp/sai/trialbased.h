@@ -43,6 +43,8 @@ public:
         }
     };
 
+    typedef priority_queue<shared_ptr<Node>, vector<shared_ptr<Node>>, compare_g> PQueue;
+    
     THTS(Domain& domain, string algorithm) : domain(domain), algorithm(algorithm){
         // Default:
         // w = 1;
@@ -70,7 +72,6 @@ public:
         TT[root_state] = root;
     }
     
-    typedef priority_queue<shared_ptr<Node>, vector<shared_ptr<Node>>, compare_g> PQueue;
 
     double pathCost(shared_ptr<Node>& n){
         double g = 0;
@@ -107,7 +108,7 @@ public:
             State old = n->state;
             selectAction(n);
             if (old == n->state){
-                // cout << "Deadend..." << endl;
+                cout << "Deadend..." << endl;
                 exit(1);
             }
             // cout << "At:\n" << n->state << "\n" << endl;
