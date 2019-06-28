@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <memory>
 #include <unordered_set>
 #include <unordered_map>
 #include <queue>
 #include <limits>
 #include <math.h>
 #include "../utility/ResultContainer.h"
+#include "../utility/DiscreteDistribution.h"
 
 using namespace std;
 
@@ -21,29 +21,48 @@ class THTS_RT{
 public:
     struct Node {
         State state; // State
-        unordered_set<shared_ptr<Node>> successors; // Children
+        unordered_set<Node*> successors; // Children
         double fval; // Name this value something
         double g; // TODO Path costs from root node to a node is g(n). It is not stored, but calculated on demand
         int visits; // Number of visits
         bool lock; // Lock
-		shared_ptr<Node> parent;
+		Node* parent;
         bool initialized;
+        
+        // DiscreteDistribution distribution;
+        double h;
+        double d;
+        double derr;
+        double epsH;
+        double epsD;
+        Node* bestKNode;
+
 
     public:
-        Node(State state, double val, int visit, bool lock, shared_ptr<Node> parent) : state(state), fval(val), visits(visit), lock(lock), parent(parent){
+        Node(State state, double val, int visit, bool lock, Node* parent) : state(state), fval(val), visits(visit), lock(lock), parent(parent){
             initialized = false;
             g = 0;
+            bestKNode = NULL;
         }
+
+        double getGValue() const { return g; }
+		double getHValue() const { return h; }
+		double getDValue() const { return d; }
+        double getFValue() const { return g + h; }
+        double getFHatValue() const { return g + getHHatValue(); }
+        double getDHatValue() const { return (derr / (1.0 - epsD)); }
+        double getHHatValue() const { return h + getDHatValue() * epsH; }
+
     };
 
     struct compare_g {
-        bool operator()(const shared_ptr<Node> lhs, const shared_ptr<Node> rhs){
+        bool operator()(const Node* lhs, const Node* rhs){
             // return lhs->g + lhs->h  > rhs->g + rhs->h;
             return lhs->g > rhs->g;
         }
     };
 
-    typedef priority_queue<shared_ptr<Node>, vector<shared_ptr<Node>>, compare_g> PQueue;
+    typedef priority_queue<Node*, vector<Node*>, compare_g> PQueue;
     
     THTS_RT(Domain& domain, string algorithm, int lookahead)  : domain(domain), algorithm(algorithm), lookahead(lookahead){
         // Default:
@@ -62,18 +81,35 @@ public:
 
         } else if (algorithm == "GUCTS"){
             k = 0;
+        }  else if (algorithm == "GUCTS-F"){
+            action = "best-f";
+            k = 0;
+        } else if (algorithm == "GUCTS-N"){
+            // Greedy UCT expansion with Nancy backup and 
+            action = "nancy";
+            k = 0;
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
         }
+        // State root_state = domain.getStartState();
+        // cout << root_state << endl;  
+        // cout <<  to_string( w * domain.heuristic(root_state)) << endl;        
 
-        
     }
     
+    // Info needed for Nancy Backup
+    void nacyNodeUpdate(Node* n, double h, double d, double derr, double epsH, double epsD){
+        n->d = d;
+        n->h = h;
+        n->derr = derr;
+        n->epsH = epsH;
+        n->epsD = epsD;
+    }
 
-    double pathCost(shared_ptr<Node>& n){
+    double pathCost(Node* n){
         double g = 0;
-        shared_ptr<Node> cur = n;
+        Node* cur = n;
         while (cur->parent){
             g +=  domain.getEdgeCost(cur->state);
             cur = cur->parent;
@@ -81,23 +117,25 @@ public:
         return g;
     }
 
-    
 
     ResultContainer getPlan(){
-        cout << algorithm << endl;
-        // While time allows and no plan found do
-        // TODO in my case, it will be the max look ahead
-        // int t = 0;
-        // while (t < max_time && goal_found == false){
-        //     performTrial();
-        //     ++t;
-        // }
-
+        // cout << algorithm << endl;
+        domain.initialize(algorithm, lookahead);
+        ResultContainer res;
         State root_state = domain.getStartState();
-        shared_ptr<Node> root(new Node(root_state, w * domain.heuristic(root_state), 1, false, nullptr));
+        root = new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL);
+        if (action == "nancy"){
+            nacyNodeUpdate(root, 0, domain.distance(root_state), 
+                            domain.distanceErr(root_state), domain.epsilonHGlobal(), domain.epsilonDGlobal());
+            openList.insert(root);
+        }
+
+        if (algorithm == "GUCTS-F" || algorithm == "GUCTS-N"){
+            algorithm = "GUCTS";
+        }
 
         int t = 0;
-        while(t < max_time){           
+        while(t < max_time){     
             if (domain.isGoal(root->state)){
                 res.solutionCost = root->g;
                 res.solutionFound = true;
@@ -105,12 +143,17 @@ public:
             }
 
             int exp = res.nodesExpanded;
-            unordered_map<State, shared_ptr<Node>, Hash> TT;
+            unordered_map<State, Node*, Hash> TT;
             TT[root->state] = root;
 
             // Expansion phase
+
+            if (action == "nancy"){
+                domain.updateEpsilons();
+            }
+
             while (res.nodesExpanded - exp < lookahead){
-                performTrial(root, TT);
+                performTrial(TT, res);
                 if (goal_found){
                     goal_found = false;
                     break;
@@ -121,22 +164,46 @@ public:
             // Change current state h to the sencond best, RTA* style
             // Does not work well with little lookahead
             priority_queue<double, vector<double>, greater<double>> minheap;
-            for (shared_ptr<Node> child : root->successors){
-                minheap.push(domain.getEdgeCost(child->state) + domain.heuristic(child->state));
+            for (Node* child : root->successors){
+                minheap.push(root->g + domain.getEdgeCost(child->state) + domain.heuristic(child->state));
+                // minheap.push(root->fval);
+
             } 
             if (minheap.size() > 1){
                 minheap.pop();
             }
             domain.updateHeuristic(root->state, minheap.top());
-
-
+            
             // Action selection phase
-            selectActionOnBest(root);
-            root->parent = nullptr;
-            // root->successors.clear();
+            if (action == "best-f"){
+                root = selectActionOnBestF(root);
+            } else if (action == "nancy"){
+                root = selectActionNancy(root);
+                openList.clear();
+                openList.insert(root);
+            } else {
+                root = selectAction(root);
+            }
+
+            root->parent = NULL;
+            root->successors.clear();
             root->initialized = false;
+            
+            // Add this step to the path taken so far
+            res.path.push(root->state.getLabel());
+            // cout << root->state << endl;
+		
+
             ++t;
+
+            for (auto it : TT){
+                if (it.second != root){
+                    delete(it.second);
+                }
+            }
         }
+
+        delete(root);
 
         if (t == max_time){
             cout << "Time limit reached." << endl;
@@ -146,13 +213,12 @@ public:
         return res;
     }
 
-    void performTrial(shared_ptr<Node>& root, unordered_map<State, shared_ptr<Node>, Hash>& TT){
-        PQueue backupQueue;
-        shared_ptr<Node> n = root;
-
-        while (n->initialized){
+    void performTrial(unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
+        PQueue backUpQueue;
+        Node* n = root;
+        while (n->initialized){           
             State old = n->state;
-            selectAction(n);
+            n = selectAction(n);
             if (old == n->state){
                 cout << "Deadend..." << endl;
                 exit(1);
@@ -171,23 +237,26 @@ public:
             return; // Extract plan and return
         }
 
-        initalizeNode(n, backupQueue, TT);
-        backupQueue.push(n);
+        initalizeNode(n, backUpQueue, TT, res);
+        backUpQueue.push(n);
 
-        // while backupQueue is not empty do
-        while (!backupQueue.empty()){
-            n = backupQueue.top(); // m <-backupQueue.pop()
-            backupQueue.pop();
+        // while backUpQueue is not empty do
+        while (!backUpQueue.empty()){
+            n = backUpQueue.top(); // m <-backUpQueue.pop()
+            backUpQueue.pop();
             backUp(n, TT);
 
             if (n != root){
-                backupQueue.push(n->parent);
+                backUpQueue.push(n->parent);
+                if(TT.find(n->state) == TT.end()){
+                    delete(n);
+                }
             }
 
         }
     }
 
-    void initalizeNode(shared_ptr<Node>& n, PQueue& backupQueue, unordered_map<State, shared_ptr<Node>, Hash>& TT){
+    void initalizeNode(Node* n, PQueue& backUpQueue, unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
         // cout << "Initalize:\n" << n->state << "\n" << endl;
         res.nodesExpanded++;
 
@@ -195,6 +264,11 @@ public:
         // For each action... In this case for each children
 
         res.nodesGenerated += children.size();
+
+
+        State bestChild;
+		double bestF = numeric_limits<double>::infinity();
+
         for (State child : children){
             // child = s'
             auto it = TT.find(child);
@@ -204,14 +278,26 @@ public:
             if (it == TT.end()){
                 // Node(State state, int N, Cost f, int v, Node* parent)
                 // n' <- <s', 0, w*h(s'), l, isGoal(s')>
-                // shared_ptr<Node> childNode(new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n)); // n'
+                // Node* childNode(new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n)); // n'
 
 
                 // TODO, don't lock the child if it's goal even when the paper says to
-                shared_ptr<Node> childNode(new Node(child, w * domain.heuristic(child), 1, false, n)); // n'
+                Node* childNode = new Node(child, w * domain.heuristic(child), 1, false, n); // n'
                 
                 // childNode->g = pathCost(childNode);    // TODO this was not supposed to be stored in the node
                 childNode->g = n->g + domain.getEdgeCost(child);
+                
+                // Added for Nancy backup
+                if (action == "nancy"){
+                    nacyNodeUpdate(childNode, domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
+                                    domain.epsilonHGlobal(), domain.epsilonDGlobal());
+                    if (childNode->getFValue() < bestF){
+                        bestF = childNode->getFValue();
+                        bestChild = child;
+                    }
+
+                    openList.insert(childNode);
+                }
 
                 //TT[s'] <- n'
                 TT[child] = childNode;
@@ -221,20 +307,22 @@ public:
 
                 //N(n) <- N(n) union {n'} N = succesor nodes
                 n->successors.insert(childNode);
+
+
             } else {
                 // State already in the tree, check to see if it's a better path
                 // if (n->g + domain.getEdgeCost(child) < pathCost(TT[child])) {
                 int path = n->g + domain.getEdgeCost(child);
                 if (path < (TT[child])->g) {
 
-                    shared_ptr<Node> s = (TT[child]);
+                    Node* s = (TT[child]);
 
                     // cout << " Better path:" << endl;
                     // cout << child << endl;
                     // cout << " Old parent:" << endl;
                     // cout << s->parent->state << endl;
 
-                    backupQueue.push(s->parent);
+                    backUpQueue.push(s->parent);
                     // N(par(TT[s'])) <- N(par(TT[s'])) \ {n'}
                     s->parent->successors.erase(s);
                     s->parent = n;
@@ -247,10 +335,23 @@ public:
                 }
             }
         }
+        
+        if (action == "nancy"){
+            openList.erase(n);
+
+            // Learn one-step error
+            if (bestF != numeric_limits<double>::infinity()){
+                double epsD = (1 + domain.distance(bestChild)) - n->getDValue();
+                double epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) - n->getHValue();
+                domain.pushEpsilonHGlobal(epsH);
+                domain.pushEpsilonDGlobal(epsD);
+            }
+        }
+
         n->initialized = true;
     }
 
-    void selectActionOnBest(shared_ptr<Node>& n){
+    Node* selectActionOnBestF(Node* n){
         // cout << "Select action:" << endl;
 
         // TODO should only be selecting a child that's not locked. But it doesn't make 
@@ -258,14 +359,14 @@ public:
         // If there's only one child   
         if (n->successors.size() == 1){
             n = *(n->successors.begin());
-            return;
+            return n;
         }
 
         // THTS-BFS
         // return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
         // i.e. return successor that is not locked with the lowest value
         double best_value = numeric_limits<double>::infinity();
-        for (shared_ptr<Node> child : n->successors){
+        for (Node* child : n->successors){
             if (prune_type == "lock" && child->lock){
                 continue;
             }
@@ -275,10 +376,66 @@ public:
                 n = child;
             }
         }
-        
+        return n;
     }
 
-    void selectAction(shared_ptr<Node>& n){
+    Node* selectActionNancy(Node* n){
+
+        // If there's only one child   
+        if (n->successors.size() == 1){
+            n = *(n->successors.begin());
+            return n;
+        }
+
+        for (Node* node : openList){
+            node->bestKNode = node;
+        }
+
+        // Iterate through the open list and update bestKNode
+        // i.e. back up frontier's nodes f hat value
+        for (Node* node : openList){
+            Node* cur = node->parent;
+            // Push kBest node up to TLA node
+            while(cur != root){
+                if (cur->bestKNode){
+                    // Check to see which f hat is better, push that one up
+                    if (cur->bestKNode->getFHatValue() == node->getFHatValue()){
+                        // Tie break on g-value
+                        if (node->getGValue() < cur->bestKNode->getGValue()){
+                            cur->bestKNode = node;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        if (node->getFHatValue() < cur->bestKNode->getFHatValue()){
+                            cur->bestKNode = node;
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    cur->bestKNode = node;
+                }
+                cur = cur->parent;
+            }
+        }
+
+        // At this point, all TLA nodes will have the k-best frontire node
+        double best_value = numeric_limits<double>::infinity();
+        for (Node* child : n->successors){
+            Node* best = child->bestKNode;
+            DiscreteDistribution d = DiscreteDistribution(100, best->getFValue(), best->getFHatValue(),
+						    best->getDValue(), best->getFHatValue() - best->getFValue());
+            double expectedMinimumPathCost = d.expectedCost();
+            if (expectedMinimumPathCost < best_value){
+                best_value = expectedMinimumPathCost;
+                n = child;
+            }
+        }
+        return n;
+    }
+
+    Node* selectAction(Node* n){
         // cout << "Select action:" << endl;
 
         // TODO should only be selecting a child that's not locked. But it doesn't make 
@@ -286,7 +443,7 @@ public:
         // If there's only one child   
         if (n->successors.size() == 1){
             n = *(n->successors.begin());
-            return;
+            return n;
         }
 
         if (algorithm == "AS" || algorithm == "WAS"){
@@ -294,7 +451,7 @@ public:
             // return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
             // i.e. return successor that is not locked with the lowest value
             double best_value = numeric_limits<double>::infinity();
-            for (shared_ptr<Node> child : n->successors){
+            for (Node* child : n->successors){
                 if (prune_type == "lock" && child->lock){
                     continue;
                 }
@@ -304,7 +461,7 @@ public:
                     n = child;
                 }
             }
-        } else if (algorithm == "UCT" || algorithm == "GUCT" || algorithm == "UCTS" || algorithm == "GUCTS" ){
+        } else if (algorithm == "UCT" || algorithm == "GUCT" || algorithm == "UCTS" || algorithm == "GUCTS"){
             // UTC
             double best_value = numeric_limits<double>::infinity();
             double min = numeric_limits<double>::infinity();
@@ -312,7 +469,7 @@ public:
             vector <double> children_fbar;
 
             // Finiding the max and min to use for normalization
-            for (shared_ptr<Node> child : n->successors){
+            for (Node* child : n->successors){
                 if (prune_type == "lock" && child->lock){
                     continue;
                 }
@@ -329,7 +486,7 @@ public:
 
             int i  = 0;
             double denom = max - min;
-            for (shared_ptr<Node> child : n->successors){
+            for (Node* child : n->successors){
                 if (prune_type == "lock" && child->lock){
                     continue;
                 }
@@ -360,9 +517,11 @@ public:
                 ++i;
             }
         }
+
+        return n;
     }
 
-    void backUp(shared_ptr<Node>& n, unordered_map<State, shared_ptr<Node>, Hash>& TT){
+    void backUp(Node* n, unordered_map<State, Node*, Hash>& TT){
         // cout << "Back up:\n" << n->state << endl;
 
         if (n->successors.size() == 0){
@@ -383,7 +542,7 @@ public:
         if (algorithm == "AS" || algorithm == "WAS" || algorithm == "UCTS" || algorithm == "GUCTS" ){
             // THTS-BFS
             double best_value = numeric_limits<double>::infinity();
-            for (shared_ptr<Node> child : n->successors){
+            for (Node* child : n->successors){
                 // f(n) <- min (n' in N(n)) { f(n') + k * c(n, n') }
                 double child_value = child->fval + k * domain.getEdgeCost(child->state);
                 if (child_value < best_value){
@@ -395,7 +554,7 @@ public:
             n->fval = best_value;
         } else if(algorithm == "UCT" || algorithm == "GUCT"){
             double fval = 0;
-            for (shared_ptr<Node> child : n->successors){
+            for (Node* child : n->successors){
                 fval += child->visits * (child->fval + k * domain.getEdgeCost(child->state));
                 visits += child->visits;
                 lock = lock && child->lock;
@@ -403,14 +562,21 @@ public:
             n->fval = fval/visits;
 
             // cout << "  new fval: " << n->fval << endl;
+        } else {
+            cout << "Invalid backup algorithm: " << algorithm << endl;
+            exit(1);
         }
 
         n->visits = visits;
         n->lock = lock;
     }
 
-    void setK(int v){
+    void setK(double v){
         k = v;
+    }
+
+    void setW(double v){
+        w = v;
     }
 
     void setPruning(string type){
@@ -418,15 +584,16 @@ public:
     }
 
 protected:
-    ResultContainer res;
-    Domain & domain;
+    Domain& domain;
     int max_time = 5000000;
-    int w = 1;
-    int k = 1;
+    double w = 1;
+    double k = 1;
     int lookahead;
     double C = 1.4; // exploration parameter C
     bool goal_found = false;
-    // shared_ptr<Node> root;
+    Node* root;
     string algorithm;
     string prune_type = "erase"; // default to removing deadends
+    string action;
+    unordered_set<Node*> openList;
 };

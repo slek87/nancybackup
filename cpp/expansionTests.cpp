@@ -12,7 +12,6 @@
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/PancakePuzzle.h"
-#include "sai/offlineastar.h"
 
 using namespace std;
 
@@ -110,8 +109,8 @@ int main(int argc, char** argv)
 		// astar.printPlan();
 
 		// astarRes = astar.search();
-		riskRes = risk.search();
 		fhatRes = fhat.search();
+		riskRes = risk.search();
 		// bfsRes = bfs.search();
 		lsslrtaRes = lsslrta.search();
 	}

@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
     string prune_type;
     if (argc > 3){
         prune_type = argv[3];
-        cout << prune_type << endl;
     }
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){

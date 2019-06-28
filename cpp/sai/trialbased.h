@@ -68,7 +68,7 @@ public:
         }
 
         State root_state = domain.getStartState();
-        root.reset(new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL));
+        root = make_shared<Node>(root_state, w * domain.heuristic(root_state), 1, false, nullptr);
         TT[root_state] = root;
     }
     
@@ -94,7 +94,6 @@ public:
             performTrial();
             ++t;
         }
-
         return res;
     }
 

@@ -235,23 +235,14 @@ public:
 		// cout << start->getState() << endl;
 		while (1)
 		{
-			// cout << *start << endl;
-			// int move = start->getState().getLabel();
-			// cout << move << endl;
-			//cout <<  std::setw(3) << move << " |" << start->getState() << " | G:"  <<  std::setw(3) << start->getGValue()  << " | H:"  <<  std::setw(3) << start->getHValue() << endl;
-			// cout << *start << endl;
-			//cout << move << endl;
+			// mark this node as the start of the current search (to prevent state pruning based on label)
+            start->markStart();
+
 			// Check if a goal has been reached
 			if (domain.isGoal(start->getState()))
 			{
 				// Calculate path cost and return solution
 				calculateCost(start, res);
-				/*
-				while(trace->getParent() != NULL){
-					path.push_back(trace->getState());
-					trace = trace->getParent();
-				}
-				*/
 	
 				return res;
 			}
@@ -278,75 +269,12 @@ public:
 
 			// Decision-making Phase
 			start = decisionAlgo->backup(open, tlas, start);
+
+			// Add this step to the path taken so far
+            res.path.push(start->getState().getLabel());
 		}
 		
 		return res;
-	}
-
-	ResultContainer lastIncrementalDecision()
-	{
-		domain.initialize(expansionPolicy, lookahead);
-
-		ResultContainer res;
-
-		// Get the start node
-		Node* start = new Node(0, domain.heuristic(domain.getStartState()), domain.distance(domain.getStartState()),
-			domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(),
-			domain.getStartState(), NULL, -1);
-
-		// Check if a goal has been reached
-		if (domain.isGoal(start->getState()))
-		{
-			// Calculate path cost and return solution
-			calculateCost(start, res);
-
-			return res;
-		}
-
-		restartLists(start);
-
-		// Exploration Phase
-		domain.updateEpsilons();
-		// First, generate the top-level actions
-		generateTopLevelActions(start, res);
-
-		// Expand some nodes until expnasion limit
-		expansionAlgo->expand(open, closed, tlas, duplicateDetection, res);
-
-		//  Learning Phase
-		learningAlgo->learn(open, closed);
-
-		// Decision-making Phase
-		start = decisionAlgo->backup(open, tlas, start);
-
-		// Empty OPEN and CLOSED
-		open.clear();
-
-		// delete all of the nodes from the last expansion phase
-		for (typename unordered_map<State, Node*, Hash>::iterator it = closed.begin(); it != closed.end(); it++)
-			if (it->second != start)
-				delete it->second;
-
-		closed.clear();
-
-		open.push(start);
-		closed[start->getState()] = start;
-
-		expansionAlgo->incrementLookahead();
-
-		// Solve the search optimally
-		expansionAlgo->expand(open, closed, tlas, duplicateDetection, res);
-
-		open.swapComparator(Node::compareNodesF);
-		start = open.top();
-
-		if (domain.isGoal(start->getState()))
-		{
-			// Calculate path cost and return solution
-			calculateCost(start, res);
-
-			return res;
-		}
 	}
 
 private:

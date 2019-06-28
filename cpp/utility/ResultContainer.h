@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-
+#include <queue>
 using namespace std;
 
 struct ResultContainer
@@ -9,7 +9,8 @@ struct ResultContainer
 	double solutionCost;
 	int nodesGenerated;
 	int nodesExpanded;
-
+	queue<int> path;
+	
 	ResultContainer()
 	{
 		solutionFound = false;
@@ -24,6 +25,7 @@ struct ResultContainer
 		solutionCost = res.solutionCost;
 		nodesGenerated = res.nodesGenerated;
 		nodesExpanded = res.nodesExpanded;
+		path = res.path;
 	}
 
 	ResultContainer& operator=(const ResultContainer& rhs)
@@ -36,6 +38,7 @@ struct ResultContainer
 			solutionCost = rhs.solutionCost;
 			nodesGenerated = rhs.nodesGenerated;
 			nodesExpanded = rhs.nodesExpanded;
+			path = rhs.path;
 			return *this;
 		}
 	}

@@ -6,6 +6,7 @@
 #include <vector>
 #include <iomanip>
 #include <algorithm>
+#include <bitset>
 #include <unordered_map>
 #include "../utility/SlidingWindow.h"
 
@@ -457,6 +458,29 @@ public:
 
 		return avg;
 	}
+
+	bool validatePath(queue<int> path)
+    {
+        std::vector<unsigned char> board = startOrdering;
+
+        std::vector<State> successors;
+
+        while (!path.empty())
+        {
+            char action = path.front();
+            int start = 0;
+			int end = path.front();
+			while(start < end){
+				std::swap(board[start++], board[end--]);
+			}
+            path.pop();
+
+        }
+
+        if (board == endOrdering)
+            return true;
+        return false;
+    }
 
     std::vector<unsigned char> startOrdering;
 	std::vector<unsigned char> endOrdering;
