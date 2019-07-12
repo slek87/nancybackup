@@ -8,17 +8,13 @@
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/PancakePuzzle.h"
+#include "domain/HeavyTilePuzzle.h"
 
 using namespace std;
 
-bool DEBUG = true;
-
-int main(int argc, char** argv)
-{
-	if ( argc < 3)
-	{
+int main(int argc, char** argv){
+	if ( argc < 3){
 		cout << "Wrong number of arguments: ./expansionTests.sh <Domain Type> <expansion limit> <optional: output file> < <domain file>" << endl;
-		cout << "Available domains are Pancake, PancakeDPS, TreeWorld and SlidingPuzzle" << endl;
 		exit(1);
 	}
 
@@ -27,72 +23,71 @@ int main(int argc, char** argv)
 
 	// Get the domain type
 	string domain = argv[1];
-	string lsslrta_backup = "minimin";
 
-	ResultContainer bfsRes;
-	ResultContainer astarRes;
-	ResultContainer fhatRes;
+	ResultContainer optimisticRes;
 	ResultContainer riskRes;
-	ResultContainer lsslrtaRes;
 
 	if (domain == "Pancake" || domain == "PancakeDPS" ){
 		// PancakePuzzle world = PancakePuzzle(16, 0, time(NULL));
 		PancakePuzzle world = PancakePuzzle(cin);
 		if (domain == "PancakeDPS"){
-		
 			world.setVariant(1);
 		}
 
+		// RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth);
+		// riskRes = risk.search();
 
-		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<PancakePuzzle> optimistic(world, "risk", "learn", "optimistic", lookaheadDepth);
+		// optimisticRes = optimistic.search();
 
-		riskRes = risk.search();
+		RealTimeSearch<PancakePuzzle> ie(world, "ie", "learn", "ie", lookaheadDepth);
+		optimisticRes = ie.search();
 
-
-
-	} else if (domain == "TreeWorld")
-	{
+	} else if (domain == "TreeWorld"){
 		// Make a tree world
 		TreeWorld world = TreeWorld(cin);
-
-		RealTimeSearch<TreeWorld> risk(world, "risk", "none", "k-best", lookaheadDepth, 1, "normal");
-
+		RealTimeSearch<TreeWorld> risk(world, "risk", "none", "k-best", lookaheadDepth);
 		riskRes = risk.search();
-	}
-	else if (domain == "SlidingPuzzle")
-	{
+
+		RealTimeSearch<TreeWorld> optimistic(world, "risk", "learn", "optimistic", lookaheadDepth);
+		optimisticRes = optimistic.search();
+
+	} else if (domain == "SlidingPuzzle") {
 		// Make a tile puzzle
 		SlidingTilePuzzle world = SlidingTilePuzzle(cin);
+		// RealTimeSearch<SlidingTilePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth);
+		// riskRes = risk.search();
 
-		RealTimeSearch<SlidingTilePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<SlidingTilePuzzle> optimistic(world, "risk", "learn", "optimistic", lookaheadDepth);
+		// optimisticRes = optimistic.search();
 
+		RealTimeSearch<SlidingTilePuzzle> ie(world, "ie", "learn", "ie", lookaheadDepth);
+		optimisticRes = ie.search();
+
+
+	} else if (domain == "HeavyTile") {
+
+		HeavyTilePuzzle world = HeavyTilePuzzle(cin);
+		RealTimeSearch<HeavyTilePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth);
 		riskRes = risk.search();
-	}
-	else
-	{
+
+		RealTimeSearch<HeavyTilePuzzle> optimistic(world, "risk", "learn", "optimistic", lookaheadDepth);
+		optimisticRes = optimistic.search();
+
+	} else {
 		cout << "Available domains are TreeWorld and SlidingPuzzle" << endl;
 		exit(1);
 	}
 
 	// string result = "{ \"BFS\": " + to_string(bfsRes.solutionCost) + 
-	string result = "{ \"A*\": " +	to_string(astarRes.solutionCost) + 
-		", \"F-Hat\": " + to_string(fhatRes.solutionCost) +
-		", \"Risk\": " + to_string(riskRes.solutionCost) + 
-		", \"LSS-LRTA*\": " + to_string(lsslrtaRes.solutionCost) +
-		//", \"Random\": " + to_string(randomCost) +
-		//", \"Random Sampling\": " + to_string(randomSamplingCost) +
-		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
+	string result = "{ \"Optimistic\": " +	to_string(optimisticRes.solutionCost) + 
+		", \"Risk\": " + to_string(riskRes.solutionCost) + " }";
 
-	if (argc < 4)
-	{
+	if (argc < 4)	{
 		cout << result << endl;
-	}
-	else
-	{
+	} else {
 		ofstream out(argv[3]);
-
 		out << result;
 		out.close();
 	}
-
 }

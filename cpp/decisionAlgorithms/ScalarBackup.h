@@ -39,6 +39,8 @@ private:
 			open.swapComparator(Node::compareNodesF);
 		else if (sortingFunction == "bellman")
 			open.swapComparator(Node::compareNodesFHat);
+		else if (sortingFunction == "ie")
+			open.swapComparator(Node::compareNodesFHat);
 	}
 
 protected:

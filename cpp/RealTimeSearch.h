@@ -8,6 +8,7 @@
 #include "utility/ResultContainer.h"
 #include "decisionAlgorithms/DecisionAlgorithm.h"
 #include "decisionAlgorithms/KBestBackup.h"
+#include "decisionAlgorithms/OptimisticBackup.h"
 #include "decisionAlgorithms/ScalarBackup.h"
 #include "expansionAlgorithms/ExpansionAlgorithm.h"
 #include "expansionAlgorithms/AStar.h"
@@ -130,6 +131,30 @@ public:
 			}
 			return n1->getHValue() < n2->getHValue();
 		}
+
+		static double getLowerConfidence(const Node* n)
+		{
+			double f = n->getFValue();
+			double mean =  n->getFHatValue();
+			if (f == mean){
+				return f;
+			}
+			double d = n->getDValue();
+			double error = n->getFHatValue() - n->getFValue();
+			double stdDev = error / 2.0;
+            double var = pow(stdDev, 2);
+			return max(f, mean - (1.96 * var));
+		}
+
+		static bool compareNodesL(const Node* n1, const Node* n2)
+		{ 
+			// Lower confidence interval
+			if (getLowerConfidence(n1) == getLowerConfidence(n2))
+			{
+				return n1->getGValue() > n2->getGValue();
+			}
+			return getLowerConfidence(n1) < getLowerConfidence(n2);
+		}
 	};
 
 	struct TopLevelAction
@@ -193,6 +218,10 @@ public:
 		{
 			expansionAlgo = new Risk<Domain, Node, TopLevelAction>(domain, lookahead, 1);
 		}
+		else if (expansionModule == "ie")
+		{
+			expansionAlgo = new  AStar<Domain, Node, TopLevelAction>(domain, lookahead, "l");
+		}
 
 		if (learningModule == "none")
 		{
@@ -214,6 +243,14 @@ public:
 		else if (decisionModule == "k-best")
 		{
 			decisionAlgo = new KBestBackup<Domain, Node, TopLevelAction>(domain, k, belief, lookahead);
+		}
+		else if (decisionModule == "optimistic")
+		{
+			decisionAlgo = new OptimisticBackup<Domain, Node, TopLevelAction>();
+		}
+		else if (decisionModule == "ie")
+		{
+			decisionAlgo = new ScalarBackup<Domain, Node, TopLevelAction>("ie");
 		}
 	}
 
@@ -276,6 +313,72 @@ public:
 		
 		return res;
 	}
+
+	// ResultContainer lastIncrementalDecision()
+	// {
+	// 	domain.initialize(expansionPolicy, lookahead);
+
+	// 	ResultContainer res;
+
+	// 	// Get the start node
+	// 	Node* start = new Node(0, domain.heuristic(domain.getStartState()), domain.distance(domain.getStartState()),
+	// 		domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(),
+	// 		domain.getStartState(), NULL, -1);
+
+	// 	// Check if a goal has been reached
+	// 	if (domain.isGoal(start->getState()))
+	// 	{
+	// 		// Calculate path cost and return solution
+	// 		calculateCost(start, res);
+
+	// 		return res;
+	// 	}
+
+	// 	restartLists(start);
+
+	// 	// Exploration Phase
+	// 	domain.updateEpsilons();
+	// 	// First, generate the top-level actions
+	// 	generateTopLevelActions(start, res);
+
+	// 	// Expand some nodes until expnasion limit
+	// 	expansionAlgo->expand(open, closed, tlas, duplicateDetection, res);
+
+	// 	//  Learning Phase
+	// 	learningAlgo->learn(open, closed);
+
+	// 	// Decision-making Phase
+	// 	start = decisionAlgo->backup(open, tlas, start);
+
+	// 	// Empty OPEN and CLOSED
+	// 	open.clear();
+
+	// 	// delete all of the nodes from the last expansion phase
+	// 	for (typename unordered_map<State, Node*, Hash>::iterator it = closed.begin(); it != closed.end(); it++)
+	// 		if (it->second != start)
+	// 			delete it->second;
+
+	// 	closed.clear();
+
+	// 	open.push(start);
+	// 	closed[start->getState()] = start;
+
+	// 	expansionAlgo->incrementLookahead();
+
+	// 	// Solve the search optimally
+	// 	expansionAlgo->expand(open, closed, tlas, duplicateDetection, res);
+
+	// 	open.swapComparator(Node::compareNodesF);
+	// 	start = open.top();
+
+	// 	if (domain.isGoal(start->getState()))
+	// 	{
+	// 		// Calculate path cost and return solution
+	// 		calculateCost(start, res);
+
+	// 		return res;
+	// 	}
+	// }
 
 private:
 	static bool duplicateDetection(Node* node, unordered_map<State, Node*, Hash>& closed, PriorityQueue<Node*>& open, 

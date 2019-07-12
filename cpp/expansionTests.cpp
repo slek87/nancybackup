@@ -47,10 +47,10 @@ int main(int argc, char** argv)
 			world.setVariant(1);
 		}
 
-		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
-		// RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<PancakePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth);
+		// RealTimeSearch<PancakePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth);
+		RealTimeSearch<PancakePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth);
+		RealTimeSearch<PancakePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth);
 		RealTimeSearch<PancakePuzzle> lsslrta(world, "a-star", "learn", lsslrta_backup, lookaheadDepth);
 		
 
@@ -75,10 +75,10 @@ int main(int argc, char** argv)
 		// Make a tree world
 		TreeWorld world = TreeWorld(cin);
 
-		// RealTimeSearch<TreeWorld> bfs(world, "bfs", "none", "k-best", lookaheadDepth, 1, "normal");
-		// RealTimeSearch<TreeWorld> astar(world, "a-star", "none", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<TreeWorld> fhat(world, "f-hat", "none", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<TreeWorld> risk(world, "risk", "none", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<TreeWorld> bfs(world, "bfs", "none", "k-best", lookaheadDepth);
+		// RealTimeSearch<TreeWorld> astar(world, "a-star", "none", "k-best", lookaheadDepth);
+		RealTimeSearch<TreeWorld> fhat(world, "f-hat", "none", "k-best", lookaheadDepth);
+		RealTimeSearch<TreeWorld> risk(world, "risk", "none", "k-best", lookaheadDepth);
 		RealTimeSearch<TreeWorld> lsslrta(world, "a-star", "none", lsslrta_backup, lookaheadDepth);
 
 		// bfsRes = bfs.search();
@@ -98,10 +98,10 @@ int main(int argc, char** argv)
 		// Make a tile puzzle
 		SlidingTilePuzzle world = SlidingTilePuzzle(cin);
 
-		// RealTimeSearch<SlidingTilePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth, 1, "normal");
-		// RealTimeSearch<SlidingTilePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<SlidingTilePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth, 1, "normal");
-		RealTimeSearch<SlidingTilePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth, 1, "normal");
+		// RealTimeSearch<SlidingTilePuzzle> bfs(world, "bfs", "learn", "k-best", lookaheadDepth);
+		// RealTimeSearch<SlidingTilePuzzle> astar(world, "a-star", "learn", "k-best", lookaheadDepth);
+		RealTimeSearch<SlidingTilePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth);
+		RealTimeSearch<SlidingTilePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth);
 		RealTimeSearch<SlidingTilePuzzle> lsslrta(world, "a-star", "learn", lsslrta_backup, lookaheadDepth);
 
 		// OfflineAStar<SlidingTilePuzzle> astar(world);
