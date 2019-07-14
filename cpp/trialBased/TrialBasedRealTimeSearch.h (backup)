@@ -10,6 +10,7 @@
 #include "../utility/ResultContainer.h"
 #include "../utility/DiscreteDistribution.h"
 
+
 using namespace std;
 
 template <class Domain>
@@ -29,14 +30,12 @@ public:
 		Node* parent;
         bool initialized;
         
-        // DiscreteDistribution distribution;
         double h;
         double d;
         double derr;
         double epsH;
         double epsD;
-        Node* bestKNode;
-
+        Node* bestKNode; // Points to the best sucessor in the open list
 
     public:
         Node(State state, double val, int visit, bool lock, Node* parent) : state(state), fval(val), visits(visit), lock(lock), parent(parent){
@@ -52,19 +51,30 @@ public:
         double getFHatValue() const { return g + getHHatValue(); }
         double getDHatValue() const { return (derr / (1.0 - epsD)); }
         double getHHatValue() const { return h + getDHatValue() * epsH; }
-
     };
 
     struct compare_g {
-        bool operator()(const Node* lhs, const Node* rhs){
-            // return lhs->g + lhs->h  > rhs->g + rhs->h;
-            return lhs->g > rhs->g;
+        bool operator()(const Node* n1, const Node* n2){
+            if (n1->g  == n2->g){
+                return rand() % 2;
+            }
+            return n1->g > n2->g;
+        }
+    };
+
+    struct compare_fhat {
+        bool operator()(const Node* n1, const Node* n2){
+			if (n1->getFHatValue() == n2->getFHatValue()){
+				return rand() % 2;
+			}
+			return n1->getFHatValue() > n2->getFHatValue();
         }
     };
 
     typedef priority_queue<Node*, vector<Node*>, compare_g> PQueue;
     
     THTS_RT(Domain& domain, string algorithm, int lookahead)  : domain(domain), algorithm(algorithm), lookahead(lookahead){
+        srand(1);
         // Default:
         // w = 1;
         // k = 1;
@@ -83,19 +93,22 @@ public:
             k = 0;
         }  else if (algorithm == "GUCTS-F"){
             action = "best-f";
+            algorithm = "GUCTS";
             k = 0;
         } else if (algorithm == "GUCTS-N"){
             // Greedy UCT expansion with Nancy backup and 
             action = "nancy";
+            algorithm = "GUCTS";
             k = 0;
-        } else {
+        } else if (algorithm == "GUCTS-B"){
+            // Greedy UCT expansion with Nancy backup and 
+            action = "bellman";
+            algorithm = "GUCTS";
+            k = 0;
+        }else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
-        }
-        // State root_state = domain.getStartState();
-        // cout << root_state << endl;  
-        // cout <<  to_string( w * domain.heuristic(root_state)) << endl;        
-
+        }  
     }
     
     // Info needed for Nancy Backup
@@ -117,25 +130,25 @@ public:
         return g;
     }
 
-
     ResultContainer getPlan(){
-        // cout << algorithm << endl;
         domain.initialize(algorithm, lookahead);
         ResultContainer res;
         State root_state = domain.getStartState();
         root = new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL);
-        if (action == "nancy"){
+        if (action == "nancy" || action == "bellman"){
             nacyNodeUpdate(root, 0, domain.distance(root_state), 
                             domain.distanceErr(root_state), domain.epsilonHGlobal(), domain.epsilonDGlobal());
             openList.insert(root);
         }
 
-        if (algorithm == "GUCTS-F" || algorithm == "GUCTS-N"){
+        if (algorithm == "GUCTS-F" || algorithm == "GUCTS-B" || algorithm == "GUCTS-N"){
             algorithm = "GUCTS";
         }
 
-        int t = 0;
-        while(t < max_time){     
+
+        while(true){     
+            cout << root->state << endl;
+
             if (domain.isGoal(root->state)){
                 res.solutionCost = root->g;
                 res.solutionFound = true;
@@ -148,7 +161,7 @@ public:
 
             // Expansion phase
 
-            if (action == "nancy"){
+            if (action == "nancy" || action == "bellman"){
                 domain.updateEpsilons();
             }
 
@@ -167,7 +180,6 @@ public:
             for (Node* child : root->successors){
                 minheap.push(root->g + domain.getEdgeCost(child->state) + domain.heuristic(child->state));
                 // minheap.push(root->fval);
-
             } 
             if (minheap.size() > 1){
                 minheap.pop();
@@ -181,7 +193,11 @@ public:
                 root = selectActionNancy(root);
                 openList.clear();
                 openList.insert(root);
-            } else {
+            } else if (action == "bellman"){
+                root = selectActionBellman(root);
+                openList.clear();
+                openList.insert(root);
+            }else {
                 root = selectAction(root);
             }
 
@@ -191,11 +207,7 @@ public:
             
             // Add this step to the path taken so far
             res.path.push(root->state.getLabel());
-            // cout << root->state << endl;
-		
-
-            ++t;
-
+	
             for (auto it : TT){
                 if (it.second != root){
                     delete(it.second);
@@ -205,8 +217,8 @@ public:
 
         delete(root);
 
-        if (t == max_time){
-            cout << "Time limit reached." << endl;
+        if (res.nodesGenerated > 10000000){
+            cout << "Node generation limit reached." << endl;
             res.solutionFound = false;
         }
 
@@ -265,7 +277,6 @@ public:
 
         res.nodesGenerated += children.size();
 
-
         State bestChild;
 		double bestF = numeric_limits<double>::infinity();
 
@@ -288,14 +299,13 @@ public:
                 childNode->g = n->g + domain.getEdgeCost(child);
                 
                 // Added for Nancy backup
-                if (action == "nancy"){
+                if (action == "nancy" || action == "bellman"){
                     nacyNodeUpdate(childNode, domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
                                     domain.epsilonHGlobal(), domain.epsilonDGlobal());
                     if (childNode->getFValue() < bestF){
                         bestF = childNode->getFValue();
                         bestChild = child;
                     }
-
                     openList.insert(childNode);
                 }
 
@@ -336,7 +346,7 @@ public:
             }
         }
         
-        if (action == "nancy"){
+        if (action == "nancy" || action == "bellman"){
             openList.erase(n);
 
             // Learn one-step error
@@ -371,16 +381,43 @@ public:
                 continue;
             }
             double child_value = child->fval + domain.getEdgeCost(child->state);
-            if (child_value < best_value){
-                best_value = child_value;
-                n = child;
+            if (child_value <= best_value){
+                if (child_value == best_value){
+                    if (rand() % 2){
+                        n = child;
+                    }
+                } else {
+                    best_value = child_value;
+                    n = child;
+                }
             }
         }
         return n;
     }
 
-    Node* selectActionNancy(Node* n){
+    Node* selectActionBellman(Node* n){
+        // If there's only one child   
+        if (n->successors.size() == 1){
+            n = *(n->successors.begin());
+            return n;
+        }
 
+        priority_queue <Node*, vector<Node*>, compare_fhat> pqueue;
+        for (Node* node : openList){
+            pqueue.push(node);
+        } 
+        
+        Node* best = pqueue.top();
+
+        while (best->parent != root){
+            best = best->parent;
+        }
+
+        n = best;
+        return n;
+    }   
+
+    Node* selectActionNancy(Node* n){
         // If there's only one child   
         if (n->successors.size() == 1){
             n = *(n->successors.begin());
@@ -392,7 +429,7 @@ public:
         }
 
         // Iterate through the open list and update bestKNode
-        // i.e. back up frontier's nodes f hat value
+        // i.e. back up frontier's nodes values to the TLA nodes
         for (Node* node : openList){
             Node* cur = node->parent;
             // Push kBest node up to TLA node
@@ -423,15 +460,15 @@ public:
         // At this point, all TLA nodes will have the k-best frontire node
         double best_value = numeric_limits<double>::infinity();
         for (Node* child : n->successors){
-            Node* best = child->bestKNode;
-            DiscreteDistribution d = DiscreteDistribution(100, best->getFValue(), best->getFHatValue(),
-						    best->getDValue(), best->getFHatValue() - best->getFValue());
+            DiscreteDistribution d = DiscreteDistribution(100, child->bestKNode->getFValue(), child->bestKNode->getFHatValue(),
+						    child->bestKNode->getDValue(), child->bestKNode->getFHatValue() - child->bestKNode->getFValue());
             double expectedMinimumPathCost = d.expectedCost();
             if (expectedMinimumPathCost < best_value){
                 best_value = expectedMinimumPathCost;
                 n = child;
             }
         }
+        n->bestKNode = NULL;
         return n;
     }
 
@@ -456,9 +493,15 @@ public:
                     continue;
                 }
                 double child_value = child->fval + k * domain.getEdgeCost(child->state);
-                if (child_value < best_value){
-                    best_value = child_value;
-                    n = child;
+                if (child_value <= best_value){
+                    if (child_value == best_value){
+                        if (rand() % 2){
+                            n = child;
+                        }
+                    } else {
+                        best_value = child_value;
+                        n = child;
+                    }
                 }
             }
         } else if (algorithm == "UCT" || algorithm == "GUCT" || algorithm == "UCTS" || algorithm == "GUCTS"){
@@ -510,12 +553,19 @@ public:
                 // cout << "  val: " << child_value << endl; 
                 // cout << child->state << endl;
 
-                if (child_value < best_value){
-                    best_value = child_value;
-                    n = child;
+                if (child_value <= best_value){
+                    if (child_value == best_value){
+                        if (rand() % 2){
+                            n = child;
+                        }
+                    } else {
+                        best_value = child_value;
+                        n = child;
+                    }
                 }
                 ++i;
             }
+            cout << best_value << endl;
         }
 
         return n;
@@ -585,7 +635,6 @@ public:
 
 protected:
     Domain& domain;
-    int max_time = 5000000;
     double w = 1;
     double k = 1;
     int lookahead;
@@ -596,4 +645,5 @@ protected:
     string prune_type = "erase"; // default to removing deadends
     string action;
     unordered_set<Node*> openList;
+    unordered_map<State, Node*, Hash> visits;
 };

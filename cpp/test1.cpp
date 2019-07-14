@@ -13,7 +13,7 @@
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/PancakePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
-#include "sai/trialbased_rt.h"
+#include "trialBased/TrialBasedRealTimeSearch.h"
 #include <chrono> 
 
 using namespace std;

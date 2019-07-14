@@ -135,6 +135,7 @@ public:
         ResultContainer res;
         State root_state = domain.getStartState();
         root = new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL);
+        
         if (action == "nancy" || action == "bellman"){
             nacyNodeUpdate(root, 0, domain.distance(root_state), 
                             domain.distanceErr(root_state), domain.epsilonHGlobal(), domain.epsilonDGlobal());
@@ -145,8 +146,8 @@ public:
             algorithm = "GUCTS";
         }
 
-        int t = 0;
-        while(t < max_time){     
+
+        while(true){     
             if (domain.isGoal(root->state)){
                 res.solutionCost = root->g;
                 res.solutionFound = true;
@@ -206,7 +207,6 @@ public:
             // Add this step to the path taken so far
             res.path.push(root->state.getLabel());
 	
-            ++t;
             for (auto it : TT){
                 if (it.second != root){
                     delete(it.second);
@@ -216,8 +216,8 @@ public:
 
         delete(root);
 
-        if (t == max_time){
-            cout << "Time limit reached." << endl;
+        if (res.nodesGenerated > 10000000){
+            cout << "Node generation limit reached." << endl;
             res.solutionFound = false;
         }
 
@@ -633,7 +633,6 @@ public:
 
 protected:
     Domain& domain;
-    int max_time = 5000000;
     double w = 1;
     double k = 1;
     int lookahead;
@@ -644,4 +643,5 @@ protected:
     string prune_type = "erase"; // default to removing deadends
     string action;
     unordered_set<Node*> openList;
+    unordered_map<State, Node*, Hash> visits;
 };

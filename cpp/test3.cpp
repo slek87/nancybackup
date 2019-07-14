@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "sai/trialbased_rt.h"
+#include "trialBased/TrialBasedRealTimeSearch.h"
 #include "domain/TreeWorld.h"
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/SimpleTilePuzzle.h"
