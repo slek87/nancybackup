@@ -143,6 +143,7 @@ public:
 			double error = n->getFHatValue() - n->getFValue();
 			double stdDev = error / 2.0;
             double var = pow(stdDev, 2);
+			// 1.96 is the Z value from the Z table to get the 2.5 confidence
 			return max(f, mean - (1.96 * var));
 		}
 
