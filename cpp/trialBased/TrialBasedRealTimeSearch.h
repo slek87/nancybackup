@@ -64,15 +64,6 @@ public:
         }
     };
 
-    struct compare_f {
-        bool operator()(const Node* n1, const Node* n2){
-			if (n1->getFValue() == n2->getFValue()){
-				return rand() % 2;
-			}
-			return n1->getFValue() > n2->getFValue();
-        }
-    };
-
     struct compare_fhat {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->getFHatValue() == n2->getFHatValue()){
@@ -140,8 +131,8 @@ public:
     
     // Extending what values the 
     void updateNode(Node* n, double h, double d, double derr, double epsH, double epsD){
-        n->h = h;
         n->d = d;
+        n->h = h;
         n->derr = derr;
         n->epsH = epsH;
         n->epsD = epsD;
@@ -195,21 +186,21 @@ public:
                 }
             }
             
-            if (learning == "dijkstra"){
-                dijkstra(TT);
-            } else {
-                rta();
-            }
-
             // Action selection phase
             if (decision == "best-f"){
-                root = selectActionOnBestF(root, TT);
+                root = selectActionOnBestF(root);
             } else if (decision == "nancy"){
                 root = selectActionNancy(root, TT);
             } else if (decision == "bellman"){
                 root = selectActionBellman(root, TT);
             } else {
                 root = selectAction(root);
+            }
+
+            if (learning == "dijkstra"){
+                dijkstra(TT);
+            } else {
+                rta();
             }
 
             resetNode(root);
@@ -240,7 +231,6 @@ public:
     void rta(){
         // RTA* style, update state to the second best heuristic + edgecost
         // Change current state h to the sencond best, RTA* style
-        // Does not work well with little lookahead
         priority_queue<double, vector<double>, greater<double>> minheap;
         for (Node* child : root->successors){
             minheap.push(root->g + domain.getEdgeCost(child->state) + domain.heuristic(child->state));
@@ -251,11 +241,12 @@ public:
         domain.updateHeuristic(root->state, minheap.top());
     }
 
+
     void dijkstra(unordered_map<State, Node*, Hash> TT){
         // Learning using reverse Dijkstra
-        // Start by initializing every state in closed to inf h
         priority_queue<Node*, vector<Node*>, compare_h> open;
         unordered_set<Node*> open_set;
+        // Start by initializing every state in closed to inf h
         for (auto it : TT){
             // Nodes that are initialized are equivalent to them being in the closed list
             if (it.second->initialized){
@@ -291,14 +282,20 @@ public:
 					    open.push(TT[s]);
                         open_set.insert(TT[s]);
                     } else {
-                        priority_queue<Node*, vector<Node*>, compare_h> opentmp;
+                        vector<Node*> tmp;
+                        // This is not the ideal way to update a node inside a pqueue
+                        // Doing this because we are using STD lib,
                         while(!open.empty()){
                             if (open.top() != TT[s]){
-                                opentmp.push(open.top());
+                                tmp.push_back(open.top());
                             }
                             open.pop();
                         }
-                        open = opentmp;
+                        // No push back node with updated heurisitic
+                        open.push(TT[s]);
+                        for (Node* n : tmp){
+                             open.push(n);
+                        }
                     }
                 }
             }
@@ -434,31 +431,45 @@ public:
         n->initialized = true;
     }
 
-    Node* selectActionOnBestF(Node* n, unordered_map<State, Node*, Hash>& TT){
+    Node* selectActionOnBestF(Node* n){
+        // Select based on the TLA fval (not to be confused with f)
         // If there's only one child   
         if (n->successors.size() == 1){
             n = *(n->successors.begin());
             return n;
         }
 
-        priority_queue<Node*, vector<Node*>, compare_f> open;
-        for (auto it : TT){
-            // Nodes that are initialized are equivalent to them being in the closed list
-            if (!it.second->initialized){
-                open.push(it.second);
+        // THTS-BFS
+        // return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
+        // i.e. return successor that is not locked with the lowest value
+        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
+        for (Node* child : n->successors){
+            if (prune_type == "lock" && child->lock){
+                continue;
             }
+            double child_value = child->fval + domain.getEdgeCost(child->state);
+            // if (child_value <= best_value){
+            //     if (child_value == best_value){
+            //         if (rand() % 2){
+            //             n = child;
+            //         }
+            //     } else {
+            //         best_value = child_value;
+            //         n = child;
+            //     }
+            // }
+            pqueue.push(make_pair(child_value, child));
         }
-        cout << "----------------------" << endl;
-        Node* best = open.top();
-            cout << best->state << endl;
-        while (best->parent != root){
-            best = best->parent;
-            cout << best->state << endl;
+
+        
+        vector<Node*> ties;
+        double best = pqueue.top().first;
+        while(!pqueue.empty() && pqueue.top().first == best){
+            ties.push_back(pqueue.top().second);
+            pqueue.pop();
         }
-        cout << "----------------------" << endl;
-        n = best;
-        cout << n->state << endl;
-        return n;
+
+        return ties[rand() % ties.size()];
     }
 
     Node* selectActionBellman(Node* n, unordered_map<State, Node*, Hash>& TT){
@@ -477,9 +488,11 @@ public:
         }
      
         Node* best = open.top();
+
         while (best->parent != root){
             best = best->parent;
         }
+
         n = best;
         return n;
     }   
@@ -555,30 +568,32 @@ public:
             return n;
         }
 
+        // Min queue to be used for tie breaking
+        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
         if (trial_expansion == "bfs"){
             // THTS-BFS
             // return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
             // i.e. return successor that is not locked with the lowest value
-            double best_value = numeric_limits<double>::infinity();
             for (Node* child : n->successors){
                 if (prune_type == "lock" && child->lock){
                     continue;
                 }
                 double child_value = child->fval + k * domain.getEdgeCost(child->state);
-                if (child_value <= best_value){
-                    if (child_value == best_value){
-                        if (rand() % 2){
-                            n = child;
-                        }
-                    } else {
-                        best_value = child_value;
-                        n = child;
-                    }
-                }
+
+                pqueue.push(make_pair(child_value, child));
+                // if (child_value <= best_value){
+                //     if (child_value == best_value){
+                //         if (rand() % 2){
+                //             n = child;
+                //         }
+                //     } else {
+                //         best_value = child_value;
+                //         n = child;
+                //     }
+                // }
             }
         } else if (trial_expansion == "uct"){
             // UTC
-            double best_value = numeric_limits<double>::infinity();
             double min = numeric_limits<double>::infinity();
             double max = 0;
             vector <double> children_fbar;
@@ -625,21 +640,29 @@ public:
                 // cout << "  val: " << child_value << endl; 
                 // cout << child->state << endl;
 
-                if (child_value <= best_value){
-                    if (child_value == best_value){
-                        if (rand() % 2){
-                            n = child;
-                        }
-                    } else {
-                        best_value = child_value;
-                        n = child;
-                    }
-                }
+                // if (child_value <= best_value){
+                //     if (child_value == best_value){
+                //         if (rand() % 2){
+                //             n = child;
+                //         }
+                //     } else {
+                //         best_value = child_value;
+                //         n = child;
+                //     }
+                // }
+                pqueue.push(make_pair(child_value, child));
                 ++i;
             }
         }
 
-        return n;
+        vector<Node*> ties;
+        double best = pqueue.top().first;
+        while(!pqueue.empty() && pqueue.top().first == best){
+            ties.push_back(pqueue.top().second);
+            pqueue.pop();
+        }
+
+        return ties[rand() % ties.size()];
     }
 
     void backUp(Node* n, unordered_map<State, Node*, Hash>& TT){
@@ -687,6 +710,24 @@ public:
             cout << "Invalid backup algorithm: " << trial_backup << endl;
             exit(1);
         }
+
+        // Update heuristic
+        // priority_queue<Node*, vector<Node*>, compare_h> pqueue;
+        // for (Node* child : n->successors){
+        //     pqueue.push(child);
+        // }
+        // Node* best_child = pqueue.top();
+        // if (domain.heuristic(n->state) > domain.getEdgeCost(best_child->state) + domain.heuristic(best_child->state)){
+        //     // Update the heuristic of this pedecessor
+        //     domain.updateHeuristic(n->state, domain.getEdgeCost(best_child->state) + domain.heuristic(best_child->state));
+        //     // Update the distance of this predecessor
+        //     domain.updateDistance(n->state, domain.distance(best_child->state) + 1);
+        //     // Update the distance for the heuristic error of this predecessor
+        //     domain.updateDistanceErr(n->state, domain.distanceErr(best_child->state));         
+        //     n->d = domain.distance(n->state);
+        //     n->derr = domain.distanceErr(n->state);
+        //     n->h = domain.heuristic(n->state);
+        // }
 
         n->visits = visits;
         n->lock = lock;

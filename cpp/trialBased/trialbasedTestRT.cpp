@@ -30,35 +30,35 @@ int main(int argc, char** argv) {
         if (domain == "PancakeDPS"){
 			world.setVariant(1);
 		}
-        THTS_RT <PancakePuzzle> thts(world, algorithm, lookahead, "rta");
+        THTS_RT <PancakePuzzle> thts(world, algorithm, lookahead, "dijkstra");
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
-        THTS_RT <TreeWorld> thts(world, algorithm, lookahead, "rta");
+        THTS_RT <TreeWorld> thts(world, algorithm, lookahead, "dijkstra");
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
     } else if (domain == "SlidingPuzzle"){
         SlidingTilePuzzle world = SlidingTilePuzzle(cin);
-        THTS_RT <SlidingTilePuzzle> thts(world, algorithm, lookahead, "rta");
+        THTS_RT <SlidingTilePuzzle> thts(world, algorithm, lookahead, "dijkstra");
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
     } else if (domain == "HeavyTile"){
         HeavyTilePuzzle world = HeavyTilePuzzle(cin);
-        THTS_RT <HeavyTilePuzzle> thts(world, algorithm, lookahead, "rta");
+        THTS_RT <HeavyTilePuzzle> thts(world, algorithm, lookahead, "dijkstra");
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
     } else if (domain == "InverseTile"){
         InverseTilePuzzle world = InverseTilePuzzle(cin);
-        THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, "rta");
+        THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, "dijkstra");
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
