@@ -8,7 +8,6 @@
 #include "utility/ResultContainer.h"
 #include "decisionAlgorithms/DecisionAlgorithm.h"
 #include "decisionAlgorithms/KBestBackup.h"
-#include "decisionAlgorithms/OptimisticBackup.h"
 #include "decisionAlgorithms/ScalarBackup.h"
 #include "expansionAlgorithms/ExpansionAlgorithm.h"
 #include "expansionAlgorithms/AStar.h"
@@ -147,7 +146,7 @@ public:
 			return max(f, mean - (1.96 * var));
 		}
 
-		static bool compareNodesL(const Node* n1, const Node* n2)
+		static bool compareNodesLC(const Node* n1, const Node* n2)
 		{ 
 			// Lower confidence interval
 			if (getLowerConfidence(n1) == getLowerConfidence(n2))
@@ -221,7 +220,7 @@ public:
 		}
 		else if (expansionModule == "ie")
 		{
-			expansionAlgo = new  AStar<Domain, Node, TopLevelAction>(domain, lookahead, "l");
+			expansionAlgo = new  AStar<Domain, Node, TopLevelAction>(domain, lookahead, "lowerconfidence");
 		}
 
 		if (learningModule == "none")
@@ -244,10 +243,6 @@ public:
 		else if (decisionModule == "k-best")
 		{
 			decisionAlgo = new KBestBackup<Domain, Node, TopLevelAction>(domain, k, belief, lookahead);
-		}
-		else if (decisionModule == "optimistic")
-		{
-			decisionAlgo = new OptimisticBackup<Domain, Node, TopLevelAction>();
 		}
 		else if (decisionModule == "ie")
 		{

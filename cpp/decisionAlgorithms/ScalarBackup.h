@@ -40,7 +40,7 @@ private:
 		else if (sortingFunction == "bellman")
 			open.swapComparator(Node::compareNodesFHat);
 		else if (sortingFunction == "ie")
-			open.swapComparator(Node::compareNodesFHat);
+			open.swapComparator(Node::compareNodesLC);
 	}
 
 protected:

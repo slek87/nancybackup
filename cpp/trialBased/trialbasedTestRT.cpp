@@ -15,17 +15,23 @@ using namespace std;
 
 
 int main(int argc, char** argv) {
+    if ( argc < 3){
+		cout << "Wrong number of arguments: [executable] [domain] [expansion limit] [trial algorithm] [decision algorithm] [optional: output file] < [domain file]" << endl;
+		exit(1);
+	}
+
     ResultContainer res;
     string domain = argv[1];
-    string algorithm = argv[2];
+    int lookahead = stoi(argv[2]);
+    string algorithm = argv[3];
     // string prune_type = argv[3];
     string prune_type = "erase";
     // int lookahead = stoi(argv[4]);
-    int lookahead = stoi(argv[3]);
-    string decision = "";
-    if (argc > 4) decision = argv[4];
+    string decision = argv[4];
 
-
+    if (decision == "-"){
+        decision = "";
+    }
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){
         ResultContainer result;
@@ -68,6 +74,20 @@ int main(int argc, char** argv) {
         res = thts.getPlan();
     }
 
-    cout << "{\"" + algorithm << "\":[" + to_string(res.solutionCost) + ", " + 
-    to_string(res.nodesGenerated)  + ", " + to_string(res.nodesExpanded) + "]}" << endl;
+    if (decision == "nancy"){
+        algorithm = algorithm + "-N";
+    } else if (decision == "fhat"){
+        algorithm = algorithm + "-FHAT";
+    } if (decision == "f"){
+        algorithm = algorithm + "-F";
+    }
+    string result = algorithm + "," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookahead);
+    
+    if (argc < 6) {
+		cout << result << endl;
+	} else {
+		ofstream out(argv[5]);
+		out << result;
+		out.close();
+	}
 }
