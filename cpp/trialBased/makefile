@@ -7,6 +7,9 @@ th: trialbasedTest.cpp TrialBased.h
 	
 thrt: trialbasedTestRT.cpp TrialBasedRealTimeSearch.h
 	$(CC) -g -O3 -std=c++11 trialbasedTestRT.cpp -o thrt
-	
+
+thrt-s: trialbasedTestRT.cpp TrialBasedRealTimeSearch.h
+	$(CC) -g -O3 -static -std=c++11 trialbasedTestRT.cpp -o thrt
+
 clean:
 	rm -f th thrt

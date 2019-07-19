@@ -151,14 +151,14 @@ public:
             trial_backup = "nancy";
         } else if (algorithm == "GUCTN"){
             trial_expansion = "uct";
-            trial_backup = "nancy";
+            trial_backup = "nancy-greedy";
             k = 0;
         } else if (algorithm == "UCTB"){
             trial_expansion = "uct";
             trial_backup = "bellman";
         }else if (algorithm == "GUCTB"){
             trial_expansion = "uct";
-            trial_backup = "bellman";
+            trial_backup = "bellman-greedy";
             k = 0; 
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
