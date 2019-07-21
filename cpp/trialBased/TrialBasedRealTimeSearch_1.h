@@ -743,5 +743,5 @@ protected:
     string trial_expansion;
     string trial_backup;
     string prune_type = "erase"; // default to removing deadends
-    bool record_plan = false;
+    bool record_plan = true;
 };

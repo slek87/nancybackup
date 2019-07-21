@@ -24,7 +24,6 @@ int main(int argc, char** argv) {
     }
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){
-        ResultContainer result;
         PancakePuzzle world = PancakePuzzle(cin);
         if (domain == "PancakeDPS"){
 			world.setVariant(1);
@@ -34,6 +33,10 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
+        if (!world.validatePath(res.path)){
+            cout << "invalid plan!" << endl;
+            exit(1);
+        } 
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
         THTS <TreeWorld> thts(world, algorithm);
@@ -41,6 +44,7 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
+        
     } else if (domain == "SlidingPuzzle"){
         SlidingTilePuzzle world = SlidingTilePuzzle(cin);
         THTS <SlidingTilePuzzle> thts(world, algorithm);
@@ -48,6 +52,10 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
+        if (!world.validatePath(res.path)){
+            cout << "invalid plan!" << endl;
+            exit(1);
+        } 
     } else if (domain == "HeavyTile"){
         HeavyTilePuzzle world = HeavyTilePuzzle(cin);
         THTS <HeavyTilePuzzle> thts(world, algorithm);
@@ -55,14 +63,11 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
-    } else if (domain == "InverseTile"){
-        InverseTilePuzzle world = InverseTilePuzzle(cin);
-        THTS <InverseTilePuzzle> thts(world, algorithm);
-        if (prune_type == "lock"){
-            thts.setPruning(prune_type);
-        }
-        res = thts.getPlan();
-    }
+        if (!world.validatePath(res.path)){
+            cout << "invalid plan!" << endl;
+            exit(1);
+        } 
+    } 
 
     cout << "{\"" + algorithm << "\":[" + to_string(res.solutionCost) + ", " + 
     to_string(res.nodesGenerated)  + ", " + to_string(res.nodesExpanded) + "]}" << endl;

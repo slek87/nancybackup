@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
+import os
 import sys
 import re
 import matplotlib.pyplot as plt
@@ -13,6 +14,8 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import random
 
 __author__ = 'Sai Lekyang'
+
+# simply put this file in the same directory and the result folder
 
 markerList=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<", "p", "h", "^", "D", "X", ">"]
 
@@ -32,9 +35,23 @@ data = sys.argv[1]
 outfileName = data.split('.')[0] + '.pdf'
 
 
-df = pd.read_csv(data, delimiter = ',')
+frames = []
+for folder in os.listdir('results'):
+    for file in os.listdir('results/' + str(folder)):
+        if '.csv' in str(file) and data in str(file):
+            df = pd.read_csv('results/' + str(folder) + '/' + str(file), delimiter = ',')
+            algo = df.iloc[0]['Algorithm']
+            df['Algorithm'] = str(folder)
+            frames.append(df)
 
-pointplot(df,outfileName,False, data.split('.')[0])
+result = pd.concat(frames)       
+# Filter out the following algorithms     
+result = result[result.Lookahead != 10]
+result = result[result.Lookahead != 30]
+
+# result = result[result.Algorithm != 'UCTS']
+# result = result[result.Algorithm != 'AS']
+pointplot(result,outfileName,False, data.split('.')[0])
 
 
 

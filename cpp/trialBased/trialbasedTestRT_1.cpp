@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "TrialBasedRealTimeSearch.h"
+#include "TrialBasedRealTimeSearch_1.h"
 #include "../domain/TreeWorld.h"
 #include "../domain/SlidingTilePuzzle.h"
 #include "../domain/SimpleTilePuzzle.h"
@@ -34,7 +34,6 @@ int main(int argc, char** argv) {
     }
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){
-        ResultContainer result;
         PancakePuzzle world = PancakePuzzle(cin);
         if (domain == "PancakeDPS"){
 			world.setVariant(1);
@@ -86,7 +85,7 @@ int main(int argc, char** argv) {
         algorithm = algorithm + "-F";
     }
     string result = algorithm + "," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookahead);
-    
+
     if (argc < 6) {
 		cout << result << endl;
 	} else {

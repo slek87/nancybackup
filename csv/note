@@ -1,2 +1,0 @@
-python combineCsvFiles.py PancakeDPS/10/ PancakeDPS10
-python plot.py PancakeDPS10.csv

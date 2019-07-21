@@ -426,19 +426,15 @@ public:
             int child_visits = child->visits;
 
             if (action){
-                if (actionVisits.find(n->state) == actionVisits.end()){
-                    actionVisits[n->state] = 1;
-                } 
                 self_visits = actionVisits[n->state];
                 if (actionVisits.find(child->state) == actionVisits.end()){
                     child_visits = 1;
                 } else {
                     child_visits = actionVisits[child->state];
                 }
-
             }
 
-            double csq = (C * sqrt(log(self_visits)/child_visits));
+            double csq = (C * sqrt(2.0 * log(self_visits)/child_visits));
 
             if (denom != 0){
                 fb = (children_fbar[i] - min)/denom;
