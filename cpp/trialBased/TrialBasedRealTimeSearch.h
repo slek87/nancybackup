@@ -37,7 +37,8 @@ public:
         double epsD;
 
     public:
-        Node(State state, double val, int visit, bool lock, Node* parent) : state(state), value(val), visits(visit), lock(lock), parent(parent){
+        Node(State state, double val, int visit, bool lock, Node* parent, double h, double d, double derr, double epsH, double epsD)
+                        : state(state), value(val), visits(visit), lock(lock), parent(parent), h(h), d(d), derr(derr), epsH(epsH), epsD(epsD){
             initialized = false;
             edgeCost = 0;
         }
@@ -108,21 +109,11 @@ public:
         }  
     }
     
-    // Extending what values the 
-    void updateNode(Node* n, double h, double d, double derr, double epsH, double epsD){
-        n->d = d;
-        n->h = h;
-        n->derr = derr;
-        n->epsH = epsH;
-        n->epsD = epsD;
-    }
-
     void resetNode(Node* n){
         root->parent = NULL;
         root->successors.clear();
         root->initialized = false;
     }
-
 
     ResultContainer getPlan(){
         ResultContainer res;
@@ -130,8 +121,7 @@ public:
         res.solutionCost = 0;
         domain.initialize(algorithm, lookahead);
 
-        root = new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL);
-        updateNode(root, domain.heuristic(root_state), domain.distance(root_state), 
+        root = new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL, domain.heuristic(root_state), domain.distance(root_state), 
                             domain.distanceErr(root_state), domain.epsilonHGlobal(), domain.epsilonDGlobal());
         actionVisits[root_state] = 1;
 
@@ -194,7 +184,7 @@ public:
         priority_queue<double, vector<double>, greater<double>> minheap;
         double g = n->getGValue();
         for (Node* child : n->successors){
-            minheap.push(g + domain.getEdgeCost(child->state) + domain.heuristic(child->state));
+            minheap.push(g + child->edgeCost + child->h);
         } 
         if (minheap.size() > 1){
             minheap.pop();
@@ -305,12 +295,14 @@ public:
 
 
                 // Don't lock the child if it's goal even when the paper says to. Otherwise, goal cannot be reached.
-                Node* childNode = new Node(child, w * domain.heuristic(child), 1, false, n); // n'
-                childNode->edgeCost = domain.getEdgeCost(child);
+                // n'
+                double value;
 
-                updateNode(childNode, domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
+                Node* childNode = new Node(child, w * domain.heuristic(child), 1, false, n,
+                                domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
                                 domain.epsilonHGlobal(), domain.epsilonDGlobal());
-
+                childNode->edgeCost = domain.getEdgeCost(child);  
+                
                 //TT[s'] <- n'
                 TT[child] = childNode;
                 // cout << child << endl;
