@@ -76,6 +76,15 @@ public:
         }
     };
 
+    struct minF {
+        bool operator()(const Node* n1, const Node* n2){
+			if (n1->getFValue() == n2->getFValue()){
+                return rand() % 2;
+			}
+			return n1->h > n2->h;
+        }
+    };
+
     // In the paper, they use max pqueue on g, which make sense if g is uniform.
     typedef priority_queue<Node*, vector<Node*>, maxG> PQueue; // Max queue
     
@@ -121,10 +130,31 @@ public:
             trial_backup = "bfs";
             backup_type = "hnancy";
             k = 0;
+        } else if (algorithm == "UCTIE"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+            backup_type = "ie";
+        } else if (algorithm == "GUCTIE"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+            backup_type = "ie";
+            k = 0;
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
         }  
+    }
+
+    double getLowerConfidence(Node* n)    {
+        double mean =  n->getHHatValue();
+        if (n->h == mean){
+            return n->h;
+        }
+        double error = mean - n->h;
+        double stdDev = error / 2.0;
+        double var = pow(stdDev, 2);
+        // 1.96 is the Z value from the Z table to get the 2.5 confidence
+        return max(n->h, mean - (1.96 * var));
     }
     
     void resetNode(Node* n){
@@ -329,6 +359,8 @@ public:
                     childNode->value =
                     DiscreteDistribution(100, childNode->h, childNode->getHHatValue(),
 						childNode->d, childNode->getHHatValue() - childNode->h).expectedCost();
+                } else if (backup_type == "ie"){
+                    childNode->value = getLowerConfidence(n);
                 }
 
                 //TT[s'] <- n'
@@ -376,20 +408,6 @@ public:
             double epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) - n->h;
             domain.pushEpsilonHGlobal(epsH);
             domain.pushEpsilonDGlobal(epsD);
-        }
-
-        if (active_learning && n->successors.size() == 0){
-            best_f = numeric_limits<double>::infinity();
-            for (State child : children){
-                double f = domain.getEdgeCost(child) + domain.heuristic(child);
-                if (f < best_f){
-                    best_f = f;
-                }
-            }
-            domain.updateHeuristic(n->state, best_f);
-            domain.updateDistance(n->state, domain.distance(n->state) + 1);
-            // Update the distance for the heuristic error of this predecessor
-            domain.updateDistanceErr(n->state, domain.distanceErr(n->state));
         }
 
         n->initialized = true;
@@ -521,15 +539,59 @@ public:
             return n;
         }
         // Min queue to be used for tie breaking
-
-        if (trial_expansion == "bfs"){
-            return selectBFS(n);
-        } else if (trial_expansion == "uct"){
-            return selectActionUCT(n);
+        if (decision == "nancy"){
+            priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
+            for (auto it : TT){
+                // Nodes that are initialized are equivalent to them being in the closed list
+                if (!it.second->initialized){
+                    DiscreteDistribution d = DiscreteDistribution(100, it.second->getFValue(), it.second->getFHatValue(),
+						    it.second->d, it.second->getFHatValue() - it.second->getFValue());
+                    open.push(make_pair(d.expectedCost(), it.second));
+                }
+            }
+            Node* cur = open.top().second;
+            while(cur->parent != root){
+                cur = cur->parent;
+            }
+            return cur;
+        } else if (decision == "minimin") {
+            priority_queue<Node*, vector<Node*>, minF> open;
+            for (auto it : TT){
+                // Nodes that are initialized are equivalent to them being in the closed list
+                if (!it.second->initialized){
+                    open.push(it.second);
+                }
+            }
+            Node* cur = open.top();
+            while(cur->parent != root){
+                cur = cur->parent;
+            }
+            return cur;
+        } else if (decision == "ie") {
+            priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
+            for (auto it : TT){
+                // Nodes that are initialized are equivalent to them being in the closed list
+                if (!it.second->initialized){
+                      open.push(make_pair(getLowerConfidence(it.second), it.second));
+                }
+            }
+            Node* cur = open.top().second;
+            while(cur->parent != root){
+                cur = cur->parent;
+            }
+            return cur;
         } else {
-            cout << "Invalid decision algorithm: " << decision << endl;
-            exit(1);
-        }  
+            if (trial_expansion == "bfs"){
+                return selectBFS(n);
+            } else if (trial_expansion == "uct"){
+                return selectActionUCT(n);
+            } else {
+                cout << "Invalid decision algorithm: " << decision << endl;
+                exit(1);
+            }  
+        }
+
+
     }
     
     Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TT){
@@ -595,11 +657,6 @@ public:
                 lock = lock && child->lock;
             }
             n->value = value/visits;
-
-            // cout << "  new value: " << n->value << endl;
-        } else if (trial_backup == "fhat"){
-
-
         } else {
             cout << "Invalid backup algorithm: " << trial_backup << endl;
             exit(1);
@@ -637,8 +694,6 @@ protected:
     int trial_limit = 10000000;
     double C = 1.414; // exploration parameter C
     bool goal_found = false;
-    bool active_learning = false;
-    bool remove_deadend = true;
     Node* root;
     string decision;
     string algorithm;

@@ -138,8 +138,7 @@ public:
 			if (f == mean){
 				return f;
 			}
-			double d = n->getDValue();
-			double error = n->getFHatValue() - n->getFValue();
+			double error = mean - f;
 			double stdDev = error / 2.0;
             double var = pow(stdDev, 2);
 			// 1.96 is the Z value from the Z table to get the 2.5 confidence
