@@ -58,7 +58,7 @@ public:
         double getHHatValue() const { return h + getDHatValue() * epsH; }
     };
 
-    struct max_g {
+    struct maxG {
         bool operator()(const Node* n1, const Node* n2){
             if (n1->getGValue()  == n2->getGValue()){
                 return rand() % 2;
@@ -67,7 +67,7 @@ public:
         }
     };
 
-    struct min_h {
+    struct minH {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->h == n2->h){
                 n1->getGValue() < n2->getGValue();
@@ -77,7 +77,7 @@ public:
     };
 
     // In the paper, they use max pqueue on g, which make sense if g is uniform.
-    typedef priority_queue<Node*, vector<Node*>, max_g> PQueue; // Max queue
+    typedef priority_queue<Node*, vector<Node*>, maxG> PQueue; // Max queue
     
     THTS_RT(Domain& domain, string algorithm, int lookahead, string decision = "") 
                     : domain(domain), algorithm(algorithm), lookahead(lookahead), decision(decision){
@@ -102,6 +102,24 @@ public:
         } else if (algorithm == "GUCTS"){
             trial_expansion = "uct";
             trial_backup = "bfs";
+            k = 0;
+        } else if (algorithm == "UCTH"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+            backup_type = "hhat";
+        } else if (algorithm == "GUCTH"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+            backup_type = "hhat";
+            k = 0;
+        } else if (algorithm == "UCTN"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+            backup_type = "hnancy";
+        } else if (algorithm == "GUCTN"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+            backup_type = "hnancy";
             k = 0;
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
@@ -190,11 +208,16 @@ public:
             minheap.pop();
         }
         domain.updateHeuristic(n->state, minheap.top());
+
+        // TODO
+        // domain.updateDistance(s, domain.distance(cur->state) + 1);
+        // Update the distance for the heuristic error of this predecessor
+        // domain.updateDistanceErr(s, domain.distanceErr(cur->state));
     }
 
     void dijkstra(unordered_map<State, Node*, Hash> TT){
         // Learning using reverse Dijkstra
-        priority_queue<Node*, vector<Node*>, min_h> open;
+        priority_queue<Node*, vector<Node*>, minH> open;
         // vector<Node*>open;
 
         // unordered_set<Node*> open_set;
@@ -231,7 +254,6 @@ public:
         }
     }
    
-
     void performTrial(unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
         PQueue backUpQueue;
         Node* n = root;
@@ -280,7 +302,7 @@ public:
         res.nodesGenerated += children.size();
 
         State bestChild;
-		double bestF = numeric_limits<double>::infinity();
+		double best_f = numeric_limits<double>::infinity();
 
         for (State child : children){
             // child = s'
@@ -296,13 +318,19 @@ public:
 
                 // Don't lock the child if it's goal even when the paper says to. Otherwise, goal cannot be reached.
                 // n'
-                double value;
-
                 Node* childNode = new Node(child, w * domain.heuristic(child), 1, false, n,
                                 domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
                                 domain.epsilonHGlobal(), domain.epsilonDGlobal());
                 childNode->edgeCost = domain.getEdgeCost(child);  
                 
+                if (backup_type == "hhat"){
+                    childNode->value = childNode->getHHatValue();
+                } else if (backup_type == "hnancy"){
+                    childNode->value =
+                    DiscreteDistribution(100, childNode->h, childNode->getHHatValue(),
+						childNode->d, childNode->getHHatValue() - childNode->h).expectedCost();
+                }
+
                 //TT[s'] <- n'
                 TT[child] = childNode;
                 // cout << child << endl;
@@ -333,20 +361,35 @@ public:
                 }
             }
 
+
             if (!TT[child]->initialized){
-                if (TT[child]->getFValue() < bestF){
-                    bestF = TT[child]->getFValue();
+                if (TT[child]->getFValue() < best_f){
+                    best_f = TT[child]->getFValue();
                     bestChild = child;
                 }
             }
         }
         
          // Learn one-step error
-        if (bestF != numeric_limits<double>::infinity()){
+        if (best_f != numeric_limits<double>::infinity()){
             double epsD = (1 + domain.distance(bestChild)) - n->d;
             double epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) - n->h;
             domain.pushEpsilonHGlobal(epsH);
             domain.pushEpsilonDGlobal(epsD);
+        }
+
+        if (active_learning && n->successors.size() == 0){
+            best_f = numeric_limits<double>::infinity();
+            for (State child : children){
+                double f = domain.getEdgeCost(child) + domain.heuristic(child);
+                if (f < best_f){
+                    best_f = f;
+                }
+            }
+            domain.updateHeuristic(n->state, best_f);
+            domain.updateDistance(n->state, domain.distance(n->state) + 1);
+            // Update the distance for the heuristic error of this predecessor
+            domain.updateDistanceErr(n->state, domain.distanceErr(n->state));
         }
 
         n->initialized = true;
@@ -529,6 +572,8 @@ public:
 
         if (trial_backup == "bfs" ){
             // THTS-BFS
+            // Backing up the best h value if k = 0
+            // Backing up the best f value if k = 1
             double best_value = numeric_limits<double>::infinity();
             for (Node* child : n->successors){
                 // f(n) <- min (n' in N(n)) { f(n') + k * c(n, n') }
@@ -541,6 +586,8 @@ public:
             }
             n->value = best_value;
         } else if (trial_backup == "uct"){
+            // Backing up the best estimated h value if k = 0
+            // Backing up the best estimated f value if k = 1
             double value = 0;
             for (Node* child : n->successors){
                 value += child->visits * (child->value + k * child->edgeCost);
@@ -550,6 +597,9 @@ public:
             n->value = value/visits;
 
             // cout << "  new value: " << n->value << endl;
+        } else if (trial_backup == "fhat"){
+
+
         } else {
             cout << "Invalid backup algorithm: " << trial_backup << endl;
             exit(1);
@@ -587,11 +637,14 @@ protected:
     int trial_limit = 10000000;
     double C = 1.414; // exploration parameter C
     bool goal_found = false;
+    bool active_learning = false;
+    bool remove_deadend = true;
     Node* root;
     string decision;
     string algorithm;
     string trial_expansion;
     string trial_backup;
+    string backup_type;
     string prune_type = "erase"; // default to removing deadends
     unordered_map<State, int, Hash> actionVisits;
     bool record_plan = true;
