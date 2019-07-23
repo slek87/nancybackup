@@ -112,23 +112,14 @@ public:
             trial_expansion = "uct";
             trial_backup = "bfs";
             k = 0;
-        } else if (algorithm == "UCTH"){
-            trial_expansion = "uct";
-            trial_backup = "bfs";
-            backup_type = "hhat";
-        } else if (algorithm == "GUCTH"){
-            trial_expansion = "uct";
-            trial_backup = "bfs";
-            backup_type = "hhat";
-            k = 0;
         } else if (algorithm == "UCTN"){
             trial_expansion = "uct";
             trial_backup = "bfs";
-            backup_type = "hnancy";
+            backup_type = "nancy";
         } else if (algorithm == "GUCTN"){
             trial_expansion = "uct";
             trial_backup = "bfs";
-            backup_type = "hnancy";
+            backup_type = "nancy";
             k = 0;
         } else if (algorithm == "UCTIE"){
             trial_expansion = "uct";
@@ -182,6 +173,8 @@ public:
             int exp = res.nodesExpanded;
             unordered_map<State, Node*, Hash> TT;
             TT[root->state] = root;
+
+            // Update epsilons
             domain.updateEpsilons();
 
             // Expansion phase
@@ -353,9 +346,7 @@ public:
                                 domain.epsilonHGlobal(), domain.epsilonDGlobal());
                 childNode->edgeCost = domain.getEdgeCost(child);  
                 
-                if (backup_type == "hhat"){
-                    childNode->value = childNode->getHHatValue();
-                } else if (backup_type == "hnancy"){
+                if (backup_type == "nancy"){
                     childNode->value =
                     DiscreteDistribution(100, childNode->h, childNode->getHHatValue(),
 						childNode->d, childNode->getHHatValue() - childNode->h).expectedCost();
