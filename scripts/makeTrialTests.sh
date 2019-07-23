@@ -4,6 +4,7 @@ if (($# == 1))
 then
     arg=$1
     if [ "$arg" = "static" ] 
+    then
         g++ -std=c++11 -static ../cpp/trialBased/trialbasedTestRT.cpp -o ../../build_release/trialBasedTest
         chmod a+x ../../build_release/trialBasedTest
     else
