@@ -39,7 +39,7 @@ do
     if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ]
     then
         dimensions=4
-        mkdir -p ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}
+        mkdir -p ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}
         instance=$firstInstance
         while ((instance < lastInstance))
         do
@@ -50,15 +50,15 @@ do
                 wait
                 numProcs=0
             fi		  
-            if [ -f ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv ]
+            if [ -f ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv ]
             then 
                 let instance++
             else
                 if (( instance + 1 == lastInstance ))
                 then
-                    timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
+                    timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 else
-                    timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file} &
+                    timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file} &
                 fi
                 let instance++
                 let numProcs++
@@ -66,7 +66,7 @@ do
         done
     elif [ "$domainType" = "TreeWorld" ]
     then
-        mkdir -p ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}
+        mkdir -p ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/LA${lookahead}
         instance=$firstInstance
         while ((instance < lastInstance))
         do
@@ -77,15 +77,15 @@ do
             wait
             numProcs=0
         fi		  
-        if [ -f ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv ]
+        if [ -f ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv ]
         then 
             let instance++
         else
             if (( instance + 1 == lastInstance ))
             then
-                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
+                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
             else
-                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file} &
+                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file} &
             fi
             let instance++
             let numProcs++
@@ -99,7 +99,7 @@ do
         exit 1
         fi
         dimensions=$7
-        mkdir -p ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}
+        mkdir -p ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}/LA${lookahead}
         instance=$firstInstance
         while ((instance < lastInstance))
         do
@@ -109,16 +109,16 @@ do
             wait
             numProcs=0
         fi		  
-        if [ -f ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv ]
+        if [ -f ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv ]
         then 
             let instance++
         else
         echo "${instance}-${dimensions}"
         if (( instance + 1 == lastInstance ))
             then
-                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
+                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
             else
-                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file} &
+                timeout 150 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm} ${decisionAlgorithm}  ../../results/${trialAlgorithm}${decisionAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file} &
             fi
 
             let instance++
