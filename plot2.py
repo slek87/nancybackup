@@ -31,17 +31,17 @@ def pointplot(df, n, j, title):
     plt.cla()
     return
 
-data = sys.argv[1]
-outfileName = data.split('.')[0] + '.pdf'
+domain = sys.argv[1]
+outfileName = domain.split('.')[0] + '.pdf'
 
 
 frames = []
-for folder in os.listdir('results'):
-    for file in os.listdir('results/' + str(folder)):
-        if '.csv' in str(file) and data in str(file):
-            df = pd.read_csv('results/' + str(folder) + '/' + str(file), delimiter = ',')
-            algo = df.iloc[0]['Algorithm']
-            df['Algorithm'] = str(folder)
+for algorithm in os.listdir('results'):
+    for dom in os.listdir('results/' + str(algorithm)):
+        if '.csv' in str(dom) and domain in str(dom):
+            df = pd.read_csv('results/' + str(algorithm) + '/' + str(algo), delimiter = ',')
+            # algostr = df.iloc[0]['Algorithm']
+            df['Algorithm'] = str(algorithm)
             frames.append(df)
 
 result = pd.concat(frames)       
@@ -51,7 +51,7 @@ result = result[result.Lookahead != 30]
 
 # result = result[result.Algorithm != 'UCTS']
 # result = result[result.Algorithm != 'AS']
-pointplot(result,outfileName,False, data.split('.')[0])
+pointplot(result,outfileName,False, domain.split('.')[0])
 
 
 
