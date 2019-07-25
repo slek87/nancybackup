@@ -48,13 +48,13 @@ maxInstances=$((maxInstances+3))
 for algo in "${algoArr[@]}"
 do
     echo "./trialTests2.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} "
-    ./trialTests2.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} 
+    ./trialTests2.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} 10
 done
 
 for algo in "${algoArr[@]}"
 do
     echo "./trialTests2.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} "
-    ./trialTests2.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} 
+    ./trialTests2.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} 10
 done
 
 
@@ -70,6 +70,6 @@ maxInstances=$((maxInstances+3))
 
 for algo in "${algoArr[@]}"
 do
-    echo "./trialTests2.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} "
+    echo "./trialTests2.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} "
     ./trialTests2.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} 
 done
