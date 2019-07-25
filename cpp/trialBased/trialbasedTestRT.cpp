@@ -93,10 +93,10 @@ int main(int argc, char** argv) {
 
     string result = algorithm + "," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookahead);
     
-    if (argc < 6) {
+    if (argc < 5) {
 		cout << result << endl;
 	} else {
-		ofstream out(argv[5]);
+		ofstream out(argv[4]);
 		out << result;
 		out.close();
 	}
