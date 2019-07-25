@@ -28,11 +28,11 @@ do
     echo "./trialTests2.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} "
     ./trialTests2.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} 
 done
-# for algo in "${algoArr[@]}"
-# do
-#     echo "./trialTests2.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
-#     ./trialTests2.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
-# done
+for algo in "${algoArr[@]}"
+do
+    echo "./trialTests2.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
+    ./trialTests2.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
+done
 
 
 
