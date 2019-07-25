@@ -81,7 +81,7 @@ public:
 			if (n1->getFValue() == n2->getFValue()){
                 return rand() % 2;
 			}
-			return n1->h > n2->h;
+			return n1->getFValue() > n2->getFValue();
         }
     };
 
@@ -98,42 +98,46 @@ public:
             trial_expansion = "bfs";
             trial_backup = "bfs";
             w = 5; 
-        } else if (algorithm == "UCT"){
+        } else if (algorithm == "WASnancy"){
+            trial_expansion = "bfs";
+            trial_backup = "bfs";
+            backup_type = "nancy";
+            w = 5; 
+        } else if (algorithm == "WASie"){
+            trial_expansion = "bfs";
+            trial_backup = "bfs";
+            backup_type = "ie";
+            w = 5; 
+        } else if (algorithm == "UCT" || algorithm == "GUCT"){
             trial_expansion = "uct";
             trial_backup = "uct";
-        } else if (algorithm == "GUCT"){
+        } else if (algorithm == "UCTS" || algorithm == "GUCTS"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+        } else if (algorithm == "UCTnancy" || algorithm == "GUCTnancy"){
             trial_expansion = "uct";
             trial_backup = "uct";
-            k = 0;
-        } else if (algorithm == "UCTS"){
-            trial_expansion = "uct";
-            trial_backup = "bfs";
-        } else if (algorithm == "GUCTS"){
-            trial_expansion = "uct";
-            trial_backup = "bfs";
-            k = 0;
-        } else if (algorithm == "UCTN"){
+            backup_type = "nancy";
+        } else if (algorithm == "UCTSnancy" || algorithm == "GUCTSnancy"){
             trial_expansion = "uct";
             trial_backup = "bfs";
             backup_type = "nancy";
-        } else if (algorithm == "GUCTN"){
+        } else if (algorithm == "UCTie" || algorithm == "GUCTie"){
             trial_expansion = "uct";
-            trial_backup = "bfs";
-            backup_type = "nancy";
-            k = 0;
-        } else if (algorithm == "UCTIE"){
+            trial_backup = "uct";
+            backup_type = "ie";
+        } else if (algorithm == "UCTSie" || algorithm == "GUCTSie"){
             trial_expansion = "uct";
             trial_backup = "bfs";
             backup_type = "ie";
-        } else if (algorithm == "GUCTIE"){
-            trial_expansion = "uct";
-            trial_backup = "bfs";
-            backup_type = "ie";
-            k = 0;
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
         }  
+
+        if (algorithm[0] == 'G'){
+            k = 0;
+        }
     }
 
     double getLowerConfidence(Node* n)    {
@@ -160,8 +164,17 @@ public:
         res.solutionCost = 0;
         domain.initialize(algorithm, lookahead);
 
-        root = new Node(root_state, w * domain.heuristic(root_state), 1, false, NULL, domain.heuristic(root_state), domain.distance(root_state), 
+        root = new Node(root_state, 0, 1, false, NULL, domain.heuristic(root_state), domain.distance(root_state), 
                             domain.distanceErr(root_state), domain.epsilonHGlobal(), domain.epsilonDGlobal());
+        if (backup_type == "nancy"){
+            root->value =
+            DiscreteDistribution(100, root->h, root->getHHatValue(),
+                root->d, root->getHHatValue() - root->h).expectedCost();
+        } else if (backup_type == "ie"){
+            root->value = getLowerConfidence(root);
+        } else {
+            root->value = domain.heuristic(root_state);
+        }
         actionVisits[root_state] = 1;
 
         while(true){
@@ -238,6 +251,7 @@ public:
         // domain.updateDistanceErr(s, domain.distanceErr(cur->state));
     }
 
+    /*
     void dijkstra(unordered_map<State, Node*, Hash> TT){
         // Learning using reverse Dijkstra
         priority_queue<Node*, vector<Node*>, minH> open;
@@ -276,6 +290,7 @@ public:
             }
         }
     }
+    */
    
     void performTrial(unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
         PQueue backUpQueue;
@@ -341,7 +356,7 @@ public:
 
                 // Don't lock the child if it's goal even when the paper says to. Otherwise, goal cannot be reached.
                 // n'
-                Node* childNode = new Node(child, w * domain.heuristic(child), 1, false, n,
+                Node* childNode = new Node(child, 0, 1, false, n,
                                 domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
                                 domain.epsilonHGlobal(), domain.epsilonDGlobal());
                 childNode->edgeCost = domain.getEdgeCost(child);  
@@ -351,8 +366,12 @@ public:
                     DiscreteDistribution(100, childNode->h, childNode->getHHatValue(),
 						childNode->d, childNode->getHHatValue() - childNode->h).expectedCost();
                 } else if (backup_type == "ie"){
-                    childNode->value = getLowerConfidence(n);
+                    childNode->value = getLowerConfidence(childNode);
+                } else {
+                    childNode->value = domain.heuristic(child);
                 }
+
+                childNode->value  *= w;
 
                 //TT[s'] <- n'
                 TT[child] = childNode;
@@ -531,46 +550,46 @@ public:
         }
         // Min queue to be used for tie breaking
         if (decision == "nancy"){
-            priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
-            for (auto it : TT){
-                // Nodes that are initialized are equivalent to them being in the closed list
-                if (!it.second->initialized){
-                    DiscreteDistribution d = DiscreteDistribution(100, it.second->getFValue(), it.second->getFHatValue(),
-						    it.second->d, it.second->getFHatValue() - it.second->getFValue());
-                    open.push(make_pair(d.expectedCost(), it.second));
-                }
-            }
-            Node* cur = open.top().second;
-            while(cur->parent != root){
-                cur = cur->parent;
-            }
-            return cur;
+            // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
+            // for (auto it : TT){
+            //     // Nodes that are initialized are equivalent to them being in the closed list
+            //     if (!it.second->initialized){
+            //         DiscreteDistribution d = DiscreteDistribution(100, it.second->getFValue(), it.second->getFHatValue(),
+			// 			    it.second->d, it.second->getFHatValue() - it.second->getFValue());
+            //         open.push(make_pair(d.expectedCost(), it.second));
+            //     }
+            // }
+            // Node* cur = open.top().second;
+            // while(cur->parent != root){
+            //     cur = cur->parent;
+            // }
+            // return cur;
         } else if (decision == "minimin") {
-            priority_queue<Node*, vector<Node*>, minF> open;
-            for (auto it : TT){
-                // Nodes that are initialized are equivalent to them being in the closed list
-                if (!it.second->initialized){
-                    open.push(it.second);
-                }
-            }
-            Node* cur = open.top();
-            while(cur->parent != root){
-                cur = cur->parent;
-            }
-            return cur;
+            // priority_queue<Node*, vector<Node*>, minF> open;
+            // for (auto it : TT){
+            //     // Nodes that are initialized are equivalent to them being in the closed list
+            //     if (!it.second->initialized){
+            //         open.push(it.second);
+            //     }
+            // }
+            // Node* cur = open.top();
+            // while(cur->parent != root){
+            //     cur = cur->parent;
+            // }
+            // return cur;
         } else if (decision == "ie") {
-            priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
-            for (auto it : TT){
-                // Nodes that are initialized are equivalent to them being in the closed list
-                if (!it.second->initialized){
-                      open.push(make_pair(getLowerConfidence(it.second), it.second));
-                }
-            }
-            Node* cur = open.top().second;
-            while(cur->parent != root){
-                cur = cur->parent;
-            }
-            return cur;
+            // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
+            // for (auto it : TT){
+            //     // Nodes that are initialized are equivalent to them being in the closed list
+            //     if (!it.second->initialized){
+            //           open.push(make_pair(getLowerConfidence(it.second), it.second));
+            //     }
+            // }
+            // Node* cur = open.top().second;
+            // while(cur->parent != root){
+            //     cur = cur->parent;
+            // }
+            // return cur;
         } else {
             if (trial_expansion == "bfs"){
                 return selectBFS(n);
@@ -582,7 +601,7 @@ public:
             }  
         }
 
-
+        return NULL;
     }
     
     Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TT){
@@ -693,5 +712,5 @@ protected:
     string backup_type;
     string prune_type = "erase"; // default to removing deadends
     unordered_map<State, int, Hash> actionVisits;
-    bool record_plan = true;
+    bool record_plan = false;
 };

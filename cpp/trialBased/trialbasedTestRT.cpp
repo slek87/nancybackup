@@ -26,12 +26,12 @@ int main(int argc, char** argv) {
     string algorithm = argv[3];
     // string prune_type = argv[3];
     string prune_type = "erase";
-    // int lookahead = stoi(argv[4]);
-    string decision = argv[4];
-
-    if (decision == "-"){
-        decision = "";
-    }
+    // string decision = argv[4];
+    // if (decision == "-"){
+    //     decision = "";
+    // }
+    string decision = "-";
+    bool check = false;
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){
         ResultContainer result;
@@ -44,8 +44,10 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
-        if (!world.validatePath(res.path)) exit(1);
-        
+        if (!world.validatePath(res.path) && check) {
+            cout << "INVALID PATH!" << endl;
+            exit(1);
+        }
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
         THTS_RT <TreeWorld> thts(world, algorithm, lookahead, decision);
@@ -60,7 +62,10 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
-        if (!world.validatePath(res.path)) exit(1);
+        if (!world.validatePath(res.path) && check) {
+            cout << "INVALID PATH!" << endl;
+            exit(1);
+        }
 
     } else if (domain == "HeavyTile"){
         HeavyTilePuzzle world = HeavyTilePuzzle(cin);
@@ -69,6 +74,10 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
+        if (!world.validatePath(res.path) && check) {
+            cout << "INVALID PATH!" << endl;            
+            exit(1);
+        }
     } else if (domain == "InverseTile"){
         InverseTilePuzzle world = InverseTilePuzzle(cin);
         THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, decision);
@@ -76,15 +85,12 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
+        if (!world.validatePath(res.path) && check) {
+            cout << "INVALID PATH!" << endl;            
+            exit(1);
+        }
     }
 
-    if (decision == "nancy"){
-        algorithm = algorithm + "-N";
-    } else if (decision == "fhat"){
-        algorithm = algorithm + "-FHAT";
-    } if (decision == "f"){
-        algorithm = algorithm + "-F";
-    }
     string result = algorithm + "," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookahead);
     
     if (argc < 6) {

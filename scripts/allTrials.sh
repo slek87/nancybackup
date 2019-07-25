@@ -11,8 +11,9 @@ slidingPuzzleFiles=100
 treeWorldFiles=1000
 pancakeFiles=200
 # dec="-"
-algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTN" "GUCTN" "UCTIE" "GUCTIE")
-decArr=("-" "minimin" "nancy")
+# algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTN" "GUCTN" "UCTIE" "GUCTIE")
+algoArr=("GUCTS")
+decArr=("minimin" "nancy" "ie")
 
 testSize=slidingPuzzleFiles
 firstInstance=1
@@ -33,73 +34,58 @@ do
     done
 done
 
-
-maxInstances=$((testSize / availableMachines ))
-if ((machineNumber > 1))
-then
-    firstInstance=$((maxInstances * (machineNumber - 1)))
-fi
-maxInstances=$((maxInstances+3))
-
-for dec in "${decArr[@]}"
-do
-    for algo in "${algoArr[@]}"
-    do
-        echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} ${dec}"
-        ./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} ${dec}
-    done
-done
+# for dec in "${decArr[@]}"
+# do
+#     for algo in "${algoArr[@]}"
+#     do
+#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} ${dec}"
+#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} ${dec}
+#     done
+# done
 
 
 
-testSize=pancakeFiles
-maxInstances=$((testSize / availableMachines ))
-if ((machineNumber > 1))
-then
-    firstInstance=$((maxInstances * (machineNumber - 1)))
-fi
-maxInstances=$((maxInstances+3))
+# testSize=pancakeFiles
+# maxInstances=$((testSize / availableMachines ))
+# if ((machineNumber > 1))
+# then
+#     firstInstance=$((maxInstances * (machineNumber - 1)))
+# fi
+# maxInstances=$((maxInstances+3))
 
-for dec in "${decArr[@]}"
-do
-    for algo in "${algoArr[@]}"
-    do
-        echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} ${dec}"
-        ./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} ${dec}
-    done
-done
+# for dec in "${decArr[@]}"
+# do
+#     for algo in "${algoArr[@]}"
+#     do
+#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} ${dec}"
+#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} ${dec}
+#     done
+# done
 
-maxInstances=$((testSize / availableMachines ))
-if ((machineNumber > 1))
-then
-    firstInstance=$((maxInstances * (machineNumber - 1)))
-fi
-maxInstances=$((maxInstances+3))
-
-for dec in "${decArr[@]}"
-do
-    for algo in "${algoArr[@]}"
-    do
-        echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}"
-        ./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}
-    done
-done
+# for dec in "${decArr[@]}"
+# do
+#     for algo in "${algoArr[@]}"
+#     do
+#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}"
+#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}
+#     done
+# done
 
 
 
-testSize=treeWorldFiles
-maxInstances=$((testSize / availableMachines ))
-if ((machineNumber > 1))
-then
-    firstInstance=$((maxInstances * (machineNumber - 1)))
-fi
-maxInstances=$((maxInstances+3))
+# testSize=treeWorldFiles
+# maxInstances=$((testSize / availableMachines ))
+# if ((machineNumber > 1))
+# then
+#     firstInstance=$((maxInstances * (machineNumber - 1)))
+# fi
+# maxInstances=$((maxInstances+3))
 
-for dec in "${decArr[@]}"
-do
-    for algo in "${algoArr[@]}"
-    do
-        echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}"
-        ./trialTests.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} ${dec}
-    done
-done
+# for dec in "${decArr[@]}"
+# do
+#     for algo in "${algoArr[@]}"
+#     do
+#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}"
+#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} ${dec}
+#     done
+# done

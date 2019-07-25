@@ -31,23 +31,28 @@ def pointplot(df, n, j, title):
     plt.cla()
     return
 
+
 domain = sys.argv[1]
 outfileName = domain.split('.')[0] + '.pdf'
-
+directory = sys.argv[2]
 
 frames = []
-for algorithm in os.listdir('results'):
-    for dom in os.listdir('results/' + str(algorithm)):
-        if '.csv' in str(dom) and domain in str(dom):
-            df = pd.read_csv('results/' + str(algorithm) + '/' + str(algo), delimiter = ',')
+for algorithm in os.listdir(directory):
+    for dom in os.listdir(directory + '/' + str(algorithm)):
+        if '.csv' in str(dom) and dom.split('.')[0] == domain:
+            print(directory + '/' + str(algorithm) + '/' + str(dom))
+            df = pd.read_csv(directory + '/' + str(algorithm) + '/' + str(dom), delimiter = ',')
             # algostr = df.iloc[0]['Algorithm']
             df['Algorithm'] = str(algorithm)
             frames.append(df)
 
-result = pd.concat(frames)       
+result = pd.concat(frames)      
 # Filter out the following algorithms     
-result = result[result.Lookahead != 10]
-result = result[result.Lookahead != 30]
+# result = result[result.Lookahead != 10]
+# result = result[result.Lookahead != 30]
+# result = result[result.Lookahead != 100]
+# result = result[result.Lookahead != 300]
+# result = result[result.Lookahead != 1000]
 
 # result = result[result.Algorithm != 'UCTS']
 # result = result[result.Algorithm != 'AS']
