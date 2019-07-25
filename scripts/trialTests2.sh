@@ -97,7 +97,7 @@ do
         echo "./executable [starting instance #] [# of instances to test] [# of processes] [Domain Type] [Pancake Size]"
         exit 1
         fi
-        dimensions=$7
+        dimensions=$6
         mkdir -p ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}
         instance=$firstInstance
         while ((instance < lastInstance))
