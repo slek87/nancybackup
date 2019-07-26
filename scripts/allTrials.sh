@@ -9,83 +9,61 @@ availableMachines=$1
 machineNumber=$2
 slidingPuzzleFiles=100
 treeWorldFiles=1000
-pancakeFiles=200
-# dec="-"
-# algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTN" "GUCTN" "UCTIE" "GUCTIE")
-algoArr=("GUCTS")
-decArr=("minimin" "nancy" "ie")
+pancakeFiles=100
+firstInstance=0
+algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie")
 
 testSize=slidingPuzzleFiles
-firstInstance=1
-
-maxInstances=$((testSize / availableMachines ))
-if ((machineNumber > 1))
-then
-    firstInstance=$((maxInstances * (machineNumber - 1)))
-fi
-maxInstances=$((maxInstances+3))
-
-for dec in "${decArr[@]}"
+firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
+maxInstances=$((1 + testSize / availableMachines ))
+for algo in "${algoArr[@]}"
 do
-    for algo in "${algoArr[@]}"
-    do
-        echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} ${dec}"
-        ./trialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} ${dec}
-    done
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} "
+    ./trialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} 
 done
 
-# for dec in "${decArr[@]}"
-# do
-#     for algo in "${algoArr[@]}"
-#     do
-#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} ${dec}"
-#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} ${dec}
-#     done
-# done
+for algo in "${algoArr[@]}"
+do
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
+    ./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
+done
 
 
 
-# testSize=pancakeFiles
-# maxInstances=$((testSize / availableMachines ))
-# if ((machineNumber > 1))
-# then
-#     firstInstance=$((maxInstances * (machineNumber - 1)))
-# fi
-# maxInstances=$((maxInstances+3))
+testSize=pancakeFiles
+firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
+maxInstances=$((1 + testSize / availableMachines ))
+for algo in "${algoArr[@]}"
+do
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} "
+    ./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} 10
+done
 
-# for dec in "${decArr[@]}"
-# do
-#     for algo in "${algoArr[@]}"
-#     do
-#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} ${dec}"
-#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} ${dec}
-#     done
-# done
-
-# for dec in "${decArr[@]}"
-# do
-#     for algo in "${algoArr[@]}"
-#     do
-#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}"
-#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}
-#     done
-# done
+for algo in "${algoArr[@]}"
+do
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} "
+    ./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} 10
+done
 
 
 
-# testSize=treeWorldFiles
-# maxInstances=$((testSize / availableMachines ))
-# if ((machineNumber > 1))
-# then
-#     firstInstance=$((maxInstances * (machineNumber - 1)))
-# fi
-# maxInstances=$((maxInstances+3))
+testSize=treeWorldFiles
+firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
+maxInstances=$((1 + testSize / availableMachines ))
+for algo in "${algoArr[@]}"
+do
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} "
+    ./trialTests.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} 
+done
 
-# for dec in "${decArr[@]}"
-# do
-#     for algo in "${algoArr[@]}"
-#     do
-#         echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} ${dec}"
-#         ./trialTests.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} ${dec}
-#     done
-# done
+
+
+testSize=slidingPuzzleFiles
+firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
+maxInstances=$((1 + testSize / availableMachines ))
+for algo in "${algoArr[@]}"
+do
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} "
+    ./trialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} 
+done
+
