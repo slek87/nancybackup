@@ -39,7 +39,9 @@ do
     if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ]
     then
         if [ "$domainType" = "InverseTile" ]
+        then
             if (( lookahead == 1000 ))
+            then
                 exit 0
             fi
         fi
