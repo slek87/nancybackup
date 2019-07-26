@@ -48,9 +48,9 @@ for algorithm in os.listdir(directory):
 
 result = pd.concat(frames)      
 # Filter out the following algorithms     
-# result = result[result.Lookahead != 10]
-# result = result[result.Lookahead != 30]
-# result = result[result.Lookahead != 100]
+result = result[result.Lookahead != 10]
+result = result[result.Lookahead != 30]
+result = result[result.Lookahead != 100]
 # result = result[result.Lookahead != 300]
 # result = result[result.Lookahead != 1000]
 

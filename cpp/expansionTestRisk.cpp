@@ -9,6 +9,7 @@
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/PancakePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
+#include "domain/InverseTilePuzzle.h"
 
 using namespace std;
 
@@ -51,6 +52,12 @@ int main(int argc, char** argv){
 		res = risk.search();
 		if (!world.validatePath(res.path)) exit(1);
 
+	} else if (domain == "InverseTile") {
+		InverseTilePuzzle world = InverseTilePuzzle(cin);
+		RealTimeSearch<InverseTilePuzzle> risk(world, "risk", "learn", "k-best", lookaheadDepth);
+		res = risk.search();
+		if (!world.validatePath(res.path)) exit(1);
+		
 	} else {
 		cout << "Available domains are TreeWorld and SlidingPuzzle" << endl;
 		exit(1);

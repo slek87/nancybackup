@@ -42,6 +42,9 @@ for algo in os.listdir(base):
             if 'Heavy' in str(domain) or 'Sliding' in str(domain):
                 for lookahead in os.listdir( loc + '/' + str(domain) + '/4x4/'):
                     aggregateCvs(loc + '/' + str(domain) + '/4x4/' + lookahead)
+            elif 'Pancake' in str(domain):
+                for lookahead in os.listdir( loc + '/' + str(domain) + '/10/'):
+                    aggregateCvs(loc + '/' + str(domain) + '/10/' + lookahead)
             else:
                 for lookahead in os.listdir( loc + '/' + str(domain)):
                     aggregateCvs(loc + '/' + str(domain) + '/' + lookahead)

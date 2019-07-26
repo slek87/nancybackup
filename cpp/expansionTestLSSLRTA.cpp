@@ -8,6 +8,8 @@
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/PancakePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
+#include "domain/InverseTilePuzzle.h"
+
 
 using namespace std;
 
@@ -47,6 +49,12 @@ int main(int argc, char** argv){
 	} else if (domain == "HeavyTile") {
 		HeavyTilePuzzle world = HeavyTilePuzzle(cin);
 		RealTimeSearch<HeavyTilePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
+		res = lsslrta.search();
+		if (!world.validatePath(res.path)) exit(1);
+
+	} else if (domain == "InverseTile") {
+		InverseTilePuzzle world = InverseTilePuzzle(cin);
+		RealTimeSearch<InverseTilePuzzle> lsslrta(world, "a-star", "learn", "minimin", lookaheadDepth);
 		res = lsslrta.search();
 		if (!world.validatePath(res.path)) exit(1);
 
