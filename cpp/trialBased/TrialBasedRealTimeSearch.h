@@ -223,10 +223,10 @@ public:
 
         delete(root);
 
-        if (res.nodesGenerated > trial_limit){
-            cout << "Node generation limit reached." << endl;
-            res.solutionFound = false;
-        }
+        // if (res.nodesGenerated > trial_limit){
+        //     cout << "Node generation limit reached." << endl;
+        //     res.solutionFound = false;
+        // }
 
         return res;
     }
@@ -701,7 +701,7 @@ protected:
     double w = 1;
     double k = 1;
     int lookahead;
-    int trial_limit = 10000000;
+    // int trial_limit = 10000000;
     double C = 1.414; // exploration parameter C
     bool goal_found = false;
     Node* root;

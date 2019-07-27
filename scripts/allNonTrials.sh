@@ -9,7 +9,7 @@ availableMachines=$1
 machineNumber=$2
 slidingPuzzleFiles=100
 treeWorldFiles=1000
-pancakeFiles=200
+pancakeFiles=100
 firstInstance=0
 algoArr=("FHAT RISK IE LSSLRTA")
 
