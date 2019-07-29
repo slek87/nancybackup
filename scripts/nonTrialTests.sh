@@ -63,9 +63,9 @@ do
             else
                 if (( instance + 1 == lastInstance ))
                 then
-                    timeout 600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
+                    timeout 300 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 else
-                    timeout 600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file} &
+                    timeout 300 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file} &
                 fi
                 let instance++
                 let numProcs++
@@ -90,9 +90,9 @@ do
         else
             if (( instance + 1 == lastInstance ))
             then
-                timeout 600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
+                timeout 300 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
             else
-                timeout 600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file} &
+                timeout 300 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file} &
             fi
             let instance++
             let numProcs++
@@ -123,9 +123,9 @@ do
         echo "${instance}-${dimensions}"
         if (( instance + 1 == lastInstance ))
             then
-                timeout 600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
+                timeout 300 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
             else
-                timeout 600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file} &
+                timeout 300 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file} &
             fi
 
             let instance++
