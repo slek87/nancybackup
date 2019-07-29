@@ -19,11 +19,15 @@ def clearLine():
     lines.append('Algorithm,World,SolCost,NodeGen,NodeExp,Lookahead,FileID\n')
 
 def aggregateCvs(directory):
+    print('Aggregating... ' + directory)
+    i = 0
     for file in os.listdir(directory):
+        i += 1
         with open(directory +'/' + file) as f:
             for line in f:
                 line = line.rstrip('\n')
                 lines.append(line + ',' + file + '\n')
+    print('Aggregated ' + str(i) + ' lines')
 
 for algo in os.listdir(base):
     loc = base + algo 
@@ -39,7 +43,7 @@ for algo in os.listdir(base):
         print('\tloc' + loc + '/' + domain)
 
         for subfolder in os.listdir( loc + '/' + str(domain)):
-            if 'Heavy' in str(domain) or 'Sliding' in str(domain):
+            if 'Tile' in str(domain) or 'Sliding' in str(domain):
                 for lookahead in os.listdir( loc + '/' + str(domain) + '/4x4/'):
                     aggregateCvs(loc + '/' + str(domain) + '/4x4/' + lookahead)
             elif 'Pancake' in str(domain):
@@ -51,6 +55,7 @@ for algo in os.listdir(base):
 
         filename = loc + '/' + domain + '.csv' 
         out = open(filename, 'w')
+        print('Print to ' + filename)
         for l in lines:
             out.write(l)
         out.close()

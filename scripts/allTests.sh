@@ -61,14 +61,14 @@ done
 
 
 
-testSize=slidingPuzzleFiles
-firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
-maxInstances=$((1 + testSize / availableMachines ))
-for algo in "${algoArr[@]}"
-do
-    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} "
-    ./trialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} 
-done
+# testSize=slidingPuzzleFiles
+# firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
+# maxInstances=$((1 + testSize / availableMachines ))
+# for algo in "${algoArr[@]}"
+# do
+#     echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} "
+#     ./trialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} 
+# done
 
 
 
@@ -134,10 +134,10 @@ done
 
 
 
-firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
-maxInstances=$((1 + testSize / availableMachines ))
-for algo in "${algoArr[@]}"
-do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} "
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} 
-done
+# firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
+# maxInstances=$((1 + testSize / availableMachines ))
+# for algo in "${algoArr[@]}"
+# do
+#     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} "
+#     ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} 
+# done
