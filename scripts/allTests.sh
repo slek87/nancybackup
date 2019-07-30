@@ -21,14 +21,14 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./trialTests.sh ${firstInstance} ${maxInstances } 2 SlidingPuzzle ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 SlidingPuzzle ${algo} 
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 2 SlidingPuzzle ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 SlidingPuzzle ${algo} 
 done
 
 for algo in "${algoArr[@]}"
 do
-    echo "./trialTests.sh ${firstInstance} ${maxInstances } 2 HeavyTile ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 HeavyTile ${algo} 
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 2 HeavyTile ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 HeavyTile ${algo} 
 done
 
 
@@ -38,14 +38,14 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./trialTests.sh ${firstInstance} ${maxInstances } 2 Pancake ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 Pancake ${algo} 10
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 2 Pancake ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 Pancake ${algo} 10
 done
 
 for algo in "${algoArr[@]}"
 do
-    echo "./trialTests.sh ${firstInstance} ${maxInstances } 2 PancakeDPS ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 PancakeDPS ${algo} 10
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 2 PancakeDPS ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 PancakeDPS ${algo} 10
 done
 
 
@@ -55,8 +55,8 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./trialTests.sh ${firstInstance} ${maxInstances } 2 TreeWorld ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 TreeWorld ${algo} 
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 2 TreeWorld ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 TreeWorld ${algo} 
 done
 
 
@@ -66,8 +66,8 @@ done
 # maxInstances=$((1 + testSize / availableMachines ))
 # for algo in "${algoArr[@]}"
 # do
-#     echo "./trialTests.sh ${firstInstance} ${maxInstances } 2 InverseTile ${algo} "
-#     #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 InverseTile ${algo} 
+#     echo "./trialTests.sh ${firstInstance} ${maxInstances} 2 InverseTile ${algo} "
+#     ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 InverseTile ${algo} 
 # done
 
 
@@ -82,14 +82,14 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 SlidingPuzzle ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 SlidingPuzzle ${algo} 
+    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 SlidingPuzzle ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 SlidingPuzzle ${algo} 
 done
 
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 HeavyTile ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 HeavyTile ${algo} 
+    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 HeavyTile ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 HeavyTile ${algo} 
 done
 
 
@@ -100,14 +100,14 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 Pancake ${algo} 10"
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 Pancake ${algo} 10
+    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 Pancake ${algo} 10"
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 Pancake ${algo} 10
 done
 
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 PancakeDPS ${algo} 10"
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 PancakeDPS ${algo} 10
+    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 PancakeDPS ${algo} 10"
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 PancakeDPS ${algo} 10
 done
 
 
@@ -118,8 +118,8 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 PancakeDPS ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 TreeWorld ${algo} 
+    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 PancakeDPS ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 TreeWorld ${algo} 
 done
 
 
@@ -128,8 +128,8 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 SlidingPuzzle ${algo} "
-    #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 SlidingPuzzle ${algo} 
+    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 SlidingPuzzle ${algo} "
+    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 SlidingPuzzle ${algo} 
 done
 
 
@@ -138,6 +138,6 @@ done
 # maxInstances=$((1 + testSize / availableMachines ))
 # for algo in "${algoArr[@]}"
 # do
-#     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 InverseTile ${algo} "
-#     #./nonTrialTests.sh ${firstInstance} ${maxInstances } 2 InverseTile ${algo} 
+#     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 InverseTile ${algo} "
+#     ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 InverseTile ${algo} 
 # done
