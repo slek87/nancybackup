@@ -19,13 +19,13 @@ maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} "
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} 
+    #./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} 
 done
 
 for algo in "${algoArr[@]}"
 do
     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
+    #./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
 done
 
 
@@ -37,13 +37,13 @@ maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} 10"
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} 10
+    #./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 Pancake ${algo} 10
 done
 
 for algo in "${algoArr[@]}"
 do
     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} 10"
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} 10
+    #./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} 10
 done
 
 
@@ -55,7 +55,7 @@ maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 PancakeDPS ${algo} "
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} 
+    #./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 TreeWorld ${algo} 
 done
 
 
@@ -65,7 +65,7 @@ maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} "
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} 
+    #./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} 
 done
 
 
@@ -75,5 +75,5 @@ maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
     echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} "
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} 
+    #./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 InverseTile ${algo} 
 done
