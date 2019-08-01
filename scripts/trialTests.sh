@@ -25,7 +25,7 @@ maxProcs=$3
 # The domain to run on
 domainType=$4
 # lookahead=$5
-lookaheadArr=(10 30 100 300 1000)
+lookaheadArr=(10 30 100 3600 1000)
 
 trialAlgorithm=$5
 
@@ -63,9 +63,9 @@ do
             else
                 if (( instance + 1 == lastInstance ))
                 then
-                    timeout 300 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
+                    timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 else
-                    timeout 300 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file} &
+                    timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file} &
                 fi
                 let instance++
                 let numProcs++
@@ -90,9 +90,9 @@ do
         else
             if (( instance + 1 == lastInstance ))
             then
-                timeout 300 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
+                timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
             else
-                timeout 300 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file} &
+                timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file} &
             fi
             let instance++
             let numProcs++
@@ -123,9 +123,9 @@ do
         echo "${instance}-${dimensions}"
         if (( instance + 1 == lastInstance ))
             then
-                timeout 300 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
+                timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
             else
-                timeout 300 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file} &
+                timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${trialAlgorithm}   ../../results/${trialAlgorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file} &
             fi
 
             let instance++
