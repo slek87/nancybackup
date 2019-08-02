@@ -20,16 +20,7 @@ __author__ = 'Sai Lekyang'
 markerList=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<", "p", "h", "^", "D", "X", ">"]
 algosArr = ['UCT','UCTie','UCTnancy','UCTS','UCTSie','UCTSnancy','GUCT','GUCTie','GUCTnancy','GUCTS','GUCTSie','GUCTSnancy','RISK','FHAT','LSSLRTA','IE', 'WAS', 'WASie', 'WASnancy']
 
-def fixTitle(t):
-    if t == 'HeavyTile':
-        return 'Heavy Sliding Puzzle'
-    if t == 'SlidingPuzzle':
-        return 'Sliding Puzzle'
-    if t == 'TreeWorld':
-        return 'Random Binary Tree'
-    if t == 'InverseTile':
-        return 'Inverse Sliding Puzzle'
-    return t
+
 
 def fixName(a):
     if 'UCT' in a or 'WA' in a:
@@ -49,8 +40,7 @@ def fixName(a):
     return a
 def pointplot(df, n, j, title):
     sns.set(rc={'figure.figsize': (12, 8), 'font.size': 14, 'text.color': 'black'})
-    ax = sns.pointplot(x='Lookahead', y='SolCost', data=df, hue = 'Algorithm', dodge=0.3, join=j, markers=markerList, errwidth=3, ci=95)
-    ax.legend(loc='upper right')
+    sns.pointplot(x='Lookahead', y='SolCost', data=df, hue = 'Algorithm', dodge=0.3, join=j, markers=markerList, errwidth=3, ci=95)
     plt.title(title, fontsize=18)
     plt.ylabel('Solution Cost', color='black', fontsize=14)
     plt.xlabel('Node Expansion Limit', color='black', fontsize=14)
@@ -68,21 +58,7 @@ def violinplot(df, n, j, title):
     # plt.setp(ax.collections, zorder=100, label="")
     # ax.legend_.remove()
 
-    ax = sns.violinplot(x='Lookahead', y='SolCost', data=df, hue = 'Algorithm')    
-    ax.legend(loc='upper right')
-    plt.title(title, fontsize=18)
-    plt.ylabel('Solution Cost', color='black', fontsize=14)
-    plt.xlabel('Node Expansion Limit', color='black', fontsize=14)
-    plt.savefig(n, bbox_inches="tight", pad_inches=0)
-    plt.close()
-    plt.clf()
-    plt.cla()
-    return
-
-def boxplot(df, n, j, title):
-    sns.set(rc={'figure.figsize': (12, 8), 'font.size': 14, 'text.color': 'black'})
-    ax = sns.boxplot(x='Lookahead', y='SolCost', data=df, hue = 'Algorithm')    
-    ax.legend(loc='upper right')
+    sns.violinplot(x='Lookahead', y='SolCost', data=df, hue = 'Algorithm')    
     plt.title(title, fontsize=18)
     plt.ylabel('Solution Cost', color='black', fontsize=14)
     plt.xlabel('Node Expansion Limit', color='black', fontsize=14)
@@ -93,7 +69,7 @@ def boxplot(df, n, j, title):
     return
 
 domain = sys.argv[1]
-outfileName = domain + '.pdf'
+outfileName = domain.split('.')[0] + '.pdf'
 directory = sys.argv[2]
 
 uct = algosArr[0:6]
@@ -103,8 +79,8 @@ was = algosArr[16:]
 
 
 # PARAMS
-printRange = was
-algoType = 'WAS_'
+printRange = uct
+algoType = 'UCT_'
 domFilter = ''
 
 frames = []
@@ -135,11 +111,9 @@ result = pd.concat(frames)
 # result = result[result.Lookahead != 300]
 # result = result[result.Lookahead != 1000]
 
-title = fixTitle(domain)
 
-pointplot(result, algoType + outfileName,False, title)
-violinplot(result,algoType + 'Violin' + outfileName,False, title)
-boxplot(result,algoType + 'Box' + outfileName,False, title)
+pointplot(result, algoType + outfileName,False, domain.split('.')[0])
+violinplot(result,algoType + 'Violin' + outfileName,False, domain.split('.')[0])
 
 
 

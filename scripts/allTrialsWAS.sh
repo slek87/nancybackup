@@ -22,11 +22,11 @@ do
     ./trialTests.sh ${firstInstance} ${maxInstances} 1 SlidingPuzzle ${algo} 
 done
 
-# for algo in "${algoArr[@]}"
-# do
-#     echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
-#     ./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
-# done
+for algo in "${algoArr[@]}"
+do
+    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
+    ./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
+done
 
 testSize=treeWorldFiles
 firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
