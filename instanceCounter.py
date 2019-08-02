@@ -14,10 +14,18 @@ import os
 base = sys.argv[1]
 
 def aggregateCvs(directory):
+    alert = False
     i = 0
     for file in os.listdir(directory):
         i += 1
-    print('\t' + directory + ' ' + str(i) + ' lines')
+
+    if 'Tree' in directory and i != 1000:
+        alert = True
+    elif 'Tree' not in directory and i != 100:
+        alert = True
+
+    if alert:
+        print('\t    ' + directory.split('/')[-1] + ' ' + str(i) + ' inst')
 
 for algo in os.listdir(base):
     loc = base + algo 

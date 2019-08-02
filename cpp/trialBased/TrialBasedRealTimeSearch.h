@@ -319,7 +319,7 @@ public:
         while (!backUpQueue.empty()){
             n = backUpQueue.top(); // m <-backUpQueue.pop()
             backUpQueue.pop();
-            backUp(n, TT);
+            backup(n, TT);
 
             if (n != root){
                 backUpQueue.push(n->parent);
@@ -623,7 +623,7 @@ public:
 
     }
 
-    void backUp(Node* n, unordered_map<State, Node*, Hash>& TT){
+    void backup(Node* n, unordered_map<State, Node*, Hash>& TT){
         // cout << "Back up:\n" << n->state << endl;
 
         if (n->successors.size() == 0){
