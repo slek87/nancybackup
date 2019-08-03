@@ -25,7 +25,7 @@ maxProcs=$3
 # The domain to run on
 domainType=$4
 # lookahead=$5
-lookaheadArr=(30 100 300)
+lookaheadArr=(30 100)
 
 trialAlgorithm=$5
 
