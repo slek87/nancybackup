@@ -23,8 +23,8 @@ maxInstances=$((1 + testSize / availableMachines ))
 
 for algo in "${algoArr[@]}"
 do
-    echo "./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
-    ./trialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
+    echo "./trialTestsC.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
+    ./trialTestsC.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
 done
 
 
@@ -37,7 +37,7 @@ maxInstances=$((1 + testSize / availableMachines ))
 
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
-    ./nonTrialTests.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
+    echo "./trialTestsC.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} "
+    ./trialTestsC.sh ${firstInstance} ${maxInstances} 1 HeavyTile ${algo} 
 done
 
