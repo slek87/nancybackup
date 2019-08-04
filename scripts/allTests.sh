@@ -118,12 +118,12 @@ firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
 do
-    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 PancakeDPS ${algo} "
+    echo "./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 TreeWorld ${algo} "
     ./nonTrialTests.sh ${firstInstance} ${maxInstances} 2 TreeWorld ${algo} 
 done
 
 
-
+testSize=slidingPuzzleFiles
 firstInstance=$(( (machineNumber - 1) * testSize / availableMachines + 1 ))
 maxInstances=$((1 + testSize / availableMachines ))
 for algo in "${algoArr[@]}"
