@@ -16,16 +16,32 @@ base = sys.argv[1]
 def aggregateCvs(directory):
     alert = False
     i = 0
+    found = []
+    missing = []
     for file in os.listdir(directory):
+        inst_arr = (str(file)).split('-')
+        if inst_arr[0] == 'b2d100':
+            inst_num = (inst_arr[1].split('.'))[0]
+            found.append(int(inst_num))
+        else:
+            inst_num = inst_arr[0]
+            found.append(int(inst_num))
+
         i += 1
 
     if 'Tree' in directory and i != 1000:
+        missing = [i for i in range(1, 1001)]
         alert = True
     elif 'Tree' not in directory and i != 100:
+        missing = [i for i in range(1, 101)]
         alert = True
 
     if alert:
-        print('\t    ' + directory.split('/')[-1] + ' ' + str(i) + ' inst')
+        print('\t    ' + directory.split('/')[-1] + ' ' + str(i) + '/' + str(len(missing)))
+        for f in found:
+            missing.remove(f)
+        print('\t    Missing: ' + str(missing))
+        
 
 for algo in os.listdir(base):
     loc = base + algo 
