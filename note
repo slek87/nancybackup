@@ -5,3 +5,7 @@ cssh ai1.cs.unh.edu ai2.cs.unh.edu ai3.cs.unh.edu ai4.cs.unh.edu ai5.cs.unh.edu 
 cssh chestnut.cs.unh.edu quartz.cs.unh.edu tupelo.cs.unh.edu ash.cs.unh.edu galena.cs.unh.edu poplar.cs.unh.edu
 
 cssh ais1.cs.unh.edu ais2.cs.unh.edu ais3.cs.unh.edu
+
+cssh -p 31415 corona.cs.unh.edu corona.cs.unh.edu corona.cs.unh.edu corona.cs.unh.edu
+aerials
+cssh -p 31415 aerials.cs.unh.edu aerials.cs.unh.edu aerials.cs.unh.edu aerials.cs.unh.edu
