@@ -58,9 +58,9 @@ do
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
-                    timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
+                    timeout 5400 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 else
-                    timeout 3600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
+                    timeout 5400 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 fi
                 rm ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}
                 let instance++
@@ -82,9 +82,9 @@ do
                 echo "A" > ../../results/${algorithm}/${domainType}/LA${lookahead}/{instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
-                    timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
+                    timeout 5400 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
                 else
-                    timeout 3600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
+                    timeout 5400 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
                 fi
                 rm ../../results/${algorithm}/${domainType}/LA${lookahead}/{instance}
                 let instance++
@@ -112,9 +112,9 @@ do
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
-                    timeout 3600 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
+                    timeout 5400 ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
                 else
-                    timeout 3600 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
+                    timeout 5400 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
                 fi
                 rm ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}
                 let instance++
