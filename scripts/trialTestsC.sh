@@ -46,7 +46,7 @@ do
         dimensions=4
         mkdir -p ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}
         instance=$firstInstance
-        while ((instance < lastInstance))
+        while ((instance <= lastInstance))
         do
             echo "${instance}-${dimensions}x${dimensions}"
             file="../../worlds/slidingTile/${instance}-${dimensions}x${dimensions}.st"
@@ -70,7 +70,7 @@ do
     then
         mkdir -p ../../results/${algorithm}/${domainType}/LA${lookahead}
         instance=$firstInstance
-        while ((instance < lastInstance))
+        while ((instance <= lastInstance))
         do
             echo "b2d100-${instance}"
             file="../../worlds/treeWorld/b2d100-${instance}.tw"
@@ -100,7 +100,7 @@ do
             dimensions=$6
             mkdir -p ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}
             instance=$firstInstance
-        while ((instance < lastInstance))
+        while ((instance <= lastInstance))
         do
             echo "${instance}-${dimensions}"
             file="../../worlds/pancake/${dimensions}/${instance}-${dimensions}.pan"
