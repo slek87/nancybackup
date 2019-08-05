@@ -12,13 +12,20 @@ import os
 
 # outfileName = outfileName + '.csv'
 base = sys.argv[1]
+totalMissing = 0
+algoMissing = 0
 
 def aggregateCvs(directory):
+    global algoMissing
+
     alert = False
     i = 0
     found = []
     missing = []
     for file in os.listdir(directory):
+        if 'csv' not in file:
+            continue
+
         inst_arr = (str(file)).split('-')
         if inst_arr[0] == 'b2d100':
             inst_num = (inst_arr[1].split('.'))[0]
@@ -40,10 +47,13 @@ def aggregateCvs(directory):
         print('\t    ' + directory.split('/')[-1] + ' ' + str(i) + '/' + str(len(missing)))
         for f in found:
             missing.remove(f)
-        print('\t    Missing: ' + str(missing))
+        print('\t        Missing: ' + str(missing))
+        algoMissing = algoMissing + len(missing)
         
 
 for algo in os.listdir(base):
+    algoMissing = 0
+
     loc = base + algo 
     print(algo)
     for domain in os.listdir(loc):
@@ -63,5 +73,8 @@ for algo in os.listdir(base):
             else:
                 # for lookahead in os.listdir( loc + '/' + str(domain) ):
                 aggregateCvs(loc + '/' + str(domain) + '/' + subfolder)
+    print ('\t--Total:' + str(algoMissing))
+    totalMissing = totalMissing + algoMissing
 
 
+print ('Total:' + str(totalMissing))
