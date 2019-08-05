@@ -44,10 +44,24 @@ def aggregateCvs(directory):
         alert = True
 
     if alert:
-        print('\t    ' + directory.split('/')[-1] + ' ' + str(i) + '/' + str(len(missing)))
+        print(' ' + str(directory.split('/')[3]))
+        print('   ' + directory.split('/')[-1] + ' ' + str(i) + '/' + str(len(missing)))
         for f in found:
             missing.remove(f)
-        print('\t        Missing: ' + str(missing))
+        compress = ''
+        for num, inst in enumerate(missing):
+            if num == len(missing) - 1:
+                compress = compress + str(inst)
+            elif num == 0:
+                compress = str(inst) + ' '
+            elif inst - 1 == missing[num - 1] and inst + 1 == missing[num + 1]:
+                compress = compress.strip()
+                compress = compress + '-'
+            else:
+                compress = compress + str(inst) + ' '
+    
+
+        print('    M: ' + compress)
         algoMissing = algoMissing + len(missing)
         
 
@@ -60,7 +74,6 @@ for algo in os.listdir(base):
         if '.' in str(domain):
             continue
 
-        print('\t' + domain)
 
         for subfolder in os.listdir( loc + '/' + str(domain)):
 
@@ -73,8 +86,9 @@ for algo in os.listdir(base):
             else:
                 # for lookahead in os.listdir( loc + '/' + str(domain) ):
                 aggregateCvs(loc + '/' + str(domain) + '/' + subfolder)
-    print ('\t--Total:' + str(algoMissing))
+
+    print ('  -TOTAL: ' + str(algoMissing) + '\n')
     totalMissing = totalMissing + algoMissing
 
 
-print ('Total:' + str(totalMissing))
+print ('ALL TOTAL: ' + str(totalMissing) + '\n')

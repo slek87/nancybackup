@@ -103,8 +103,8 @@ was = algosArr[16:]
 
 
 # PARAMS
-printRange = was
-algoType = 'WAS_'
+printRange = guct
+algoType = 'GUCT_'
 domFilter = ''
 
 frames = []

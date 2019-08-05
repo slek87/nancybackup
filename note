@@ -2,7 +2,10 @@ python plot.py PancakeDPS10
 
 cssh ai1.cs.unh.edu ai2.cs.unh.edu ai3.cs.unh.edu ai4.cs.unh.edu ai5.cs.unh.edu ai6.cs.unh.edu ai7.cs.unh.edu ai8.cs    .unh.edu ai9.cs.unh.edu ai10.cs.unh.edu ai11.cs.unh.edu ai12.cs.unh.edu ai13.cs.unh.edu ai14.cs.unh.edu ai15.cs.unh.edu -p 22
 
-cssh chestnut.cs.unh.edu quartz.cs.unh.edu tupelo.cs.unh.edu ash.cs.unh.edu galena.cs.unh.edu poplar.cs.unh.edu
+cssh chestnut.cs.unh.edu quartz.cs.unh.edu quartz.cs.unh.edu tupelo.cs.unh.edu tupelo.cs.unh.edu ash.cs.unh.edu galena.cs.unh.edu poplar.cs.unh.edu poplar.cs.unh.edu cherry.cs.unh.edu
+
+
+
 
 cssh ais1.cs.unh.edu ais2.cs.unh.edu ais3.cs.unh.edu
 

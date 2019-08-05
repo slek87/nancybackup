@@ -1,6 +1,6 @@
 CC=g++ 
 
-all: th thrt thrtdhe
+all: th thrt thrtl
 
 th: trialbasedTest.cpp TrialBased.h
 	$(CC) -g -O3 -std=c++11 trialbasedTest.cpp -o th
@@ -11,8 +11,8 @@ thrt: trialbasedTestRT.cpp TrialBasedRealTimeSearch.h
 thrts: trialbasedTestRT.cpp TrialBasedRealTimeSearch.h
 	$(CC) -g -O3 -static -std=c++11 trialbasedTestRT.cpp -o thrt
 
-thrtdhe: trialbasedTestRTDHE.cpp TrialBasedRealTimeSearchDHE.h
-	$(CC) -g -O3 -std=c++11 trialbasedTestRTDHE.cpp -o thrtdhe
+thrtl: trialbasedTestRTL.cpp TrialBasedRealTimeSearchL.h
+	$(CC) -g -O3 -std=c++11 trialbasedTestRTL.cpp -o thrtl
 
 clean:
-	rm -f th thrt thrtdhe
+	rm -f th thrt thrtl
