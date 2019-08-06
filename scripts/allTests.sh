@@ -62,13 +62,10 @@ then
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} "
-        ./nonexpansionTest${reverse}.sh 1 100 1 InverseTile ${algo} 
+        ./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} 
         wait
     done
-fi
-
-
-if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] 
+elif [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] 
 then
     for algo in "${algoArr[@]}"
     do
@@ -76,7 +73,8 @@ then
         ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} 10
         wait
     done
-elif [ "$domainType" = "TreeWorld" ] then
+elif [ "$domainType" = "TreeWorld" ] 
+then
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} "

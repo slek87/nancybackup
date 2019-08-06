@@ -30,7 +30,6 @@ lookaheadArr=(10 30 100 300 1000)
 algorithm=$5
 
 numProcs=0
-
 for lookahead in "${lookaheadArr[@]}"
 do
     echo "Domain:${domainType} Lookahead:${lookahead} Algorithm:${algorithm}"
@@ -45,16 +44,16 @@ do
         fi
         dimensions=4
         mkdir -p ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}
-        instance=$lastInstance
+        instance=1
         while ((instance < lastInstance))
         do
-            echo "${instance}-${dimensions}x${dimensions}"
             file="../../worlds/slidingTile/${instance}-${dimensions}x${dimensions}.st"
   
             if [ -f ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv ] || [ -f ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance} ]
             then 
                 let instance++
             else
+                echo "${instance}-${dimensions}x${dimensions}"
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
@@ -70,16 +69,16 @@ do
     elif [ "$domainType" = "TreeWorld" ]
     then
         mkdir -p ../../results/${algorithm}/${domainType}/LA${lookahead}
-        instance=$lastInstance
+        instance=1
         while ((instance < lastInstance))
         do
-            echo "b2d100-${instance}"
             file="../../worlds/treeWorld/b2d100-${instance}.tw"
         
             if [ -f ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv ] || [ -f ../../results/${algorithm}/${domainType}/LA${lookahead}/{instance} ]
             then 
                 let instance++
             else
+                echo "b2d100-${instance}"
                 echo "A" > ../../results/${algorithm}/${domainType}/LA${lookahead}/{instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
@@ -101,16 +100,16 @@ do
         fi
             dimensions=$6
             mkdir -p ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}
-            instance=$lastInstance
+            instance=1
         while ((instance < lastInstance))
         do
-            echo "${instance}-${dimensions}"
             file="../../worlds/pancake/${dimensions}/${instance}-${dimensions}.pan"
         
             if [ -f ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv ] || [ -f ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance} ]
             then 
                 let instance++
             else
+                echo "${instance}-${dimensions}"
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then

@@ -17,7 +17,7 @@ firstInstance=$1
 
 # The maximum number of instances to test on
 maxInstances=$2
-lastInstance=$(( $firstInstance + $maxInstances ))
+lastInstance=$(( $firstInstance + $maxInstances - 1))
 
 # Max number of background processes to start, should probably not be more than the number of cores on the machine
 maxProcs=$3
@@ -48,13 +48,13 @@ do
         instance=$lastInstance
         while ((instance > 0))
         do
-            echo "${instance}-${dimensions}x${dimensions}"
             file="../../worlds/slidingTile/${instance}-${dimensions}x${dimensions}.st"
   
             if [ -f ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv ] || [ -f ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance} ]
             then 
                 let instance--
             else
+                echo "${instance}-${dimensions}x${dimensions}"
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
@@ -73,13 +73,13 @@ do
         instance=$lastInstance
         while ((instance > 0))
         do
-            echo "b2d100-${instance}"
             file="../../worlds/treeWorld/b2d100-${instance}.tw"
         
             if [ -f ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv ] || [ -f ../../results/${algorithm}/${domainType}/LA${lookahead}/{instance} ]
             then 
                 let instance--
             else
+                echo "b2d100-${instance}"
                 echo "A" > ../../results/${algorithm}/${domainType}/LA${lookahead}/{instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
@@ -104,13 +104,13 @@ do
             instance=$lastInstance
         while ((instance > 0))
         do
-            echo "${instance}-${dimensions}"
             file="../../worlds/pancake/${dimensions}/${instance}-${dimensions}.pan"
         
             if [ -f ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv ] || [ -f ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance} ]
             then 
                 let instance--
             else
+                echo "${instance}-${dimensions}"
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
