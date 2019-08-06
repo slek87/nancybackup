@@ -95,17 +95,12 @@ def boxplot(df, n, j, title):
 domain = sys.argv[1]
 outfileName = domain + '.pdf'
 directory = sys.argv[2]
+desiredAlgo = sys.argv[3]
 
-uct = algosArr[0:6]
-guct = algosArr[6:12]
-nontrial = algosArr[12:16]
-was = algosArr[16:]
 
-t = ['UCT','UCTie','UCTnancy','UCTS','UCTSie','UCTSnancy','GUCT','GUCTie','GUCTnancy','GUCTS','GUCTSie','GUCTSnancy']
-ii = 11
 # PARAMS
-printRange = [t[ii], t[ii] + '2']
-algoType = str(t[ii]) + '_'
+printRange = [desiredAlgo, desiredAlgo + '2']
+algoType = desiredAlgo + '_'
 domFilter = ''
 
 frames = []

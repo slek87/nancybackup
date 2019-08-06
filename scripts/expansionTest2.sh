@@ -80,14 +80,14 @@ do
             then 
                 let instance--
             else
-                echo "A" > ../../results/${algorithm}2/${domainType}/LA${lookahead}/{instance}
+                echo "A" > ../../results/${algorithm}2/${domainType}/LA${lookahead}/${instance}
                 if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
                     timeout 270 ../../build_release/trialBasedTest2 ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}2/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
                 else
                     timeout 270 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}2/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
                 fi
-                rm ../../results/${algorithm}2/${domainType}/LA${lookahead}/{instance}
+                rm ../../results/${algorithm}2/${domainType}/LA${lookahead}/${instance}
                 let instance--
             fi
         done

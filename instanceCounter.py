@@ -15,8 +15,10 @@ base = sys.argv[1]
 totalMissing = 0
 algoMissing = 0
 
+first = True
+
 def aggregateCvs(directory):
-    global algoMissing
+    global algoMissing, first
 
     alert = False
     i = 0
@@ -44,7 +46,9 @@ def aggregateCvs(directory):
         alert = True
 
     if alert:
-        print(' ' + str(directory.split('/')[3]))
+        if first:
+            print(' ' + str(directory.split('/')[3]))
+            first = False
         print('   ' + directory.split('/')[-1] + ' ' + str(i) + '/' + str(len(missing)))
         for f in found:
             missing.remove(f)
@@ -71,6 +75,7 @@ for algo in os.listdir(base):
     loc = base + algo 
     print(algo)
     for domain in os.listdir(loc):
+        first = True
         if '.' in str(domain):
             continue
 
@@ -87,7 +92,8 @@ for algo in os.listdir(base):
                 # for lookahead in os.listdir( loc + '/' + str(domain) ):
                 aggregateCvs(loc + '/' + str(domain) + '/' + subfolder)
 
-    print ('  -TOTAL: ' + str(algoMissing) + '\n')
+    if (algoMissing > 0):
+        print ('  -TOTAL: ' + str(algoMissing) + '\n')
     totalMissing = totalMissing + algoMissing
 
 

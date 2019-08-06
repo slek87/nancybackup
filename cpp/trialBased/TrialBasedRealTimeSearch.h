@@ -29,7 +29,6 @@ public:
         bool initialized;
         double edgeCost;
         
-        // Extended values beyond the paper
         double h;
         double d;
         double derr;
@@ -200,7 +199,9 @@ public:
             }
             
             // Learning phase
-            // dijkstra(TT);
+            if (learn){
+                learning(TT);
+            }
 
             // Action selection phase
             root = selectOneStepAction(root, TT);
@@ -244,53 +245,35 @@ public:
             minheap.pop();
         }
         domain.updateHeuristic(n->state, minheap.top());
-
-        // TODO
-        // domain.updateDistance(s, domain.distance(cur->state) + 1);
-        // Update the distance for the heuristic error of this predecessor
-        // domain.updateDistanceErr(s, domain.distanceErr(cur->state));
     }
 
-    /*
-    void dijkstra(unordered_map<State, Node*, Hash> TT){
-        // Learning using reverse Dijkstra
+    void learning(unordered_map<State, Node*, Hash> TT){
+        // Learning using reverse Dijkstra inspired
         priority_queue<Node*, vector<Node*>, minH> open;
-        // vector<Node*>open;
 
-        // unordered_set<Node*> open_set;
-        // Start by initializing every state in closed to inf h
         for (auto it : TT){
             // Nodes that are initialized are equivalent to them being in the closed list
             if (it.second->initialized){
-                // domain.updateHeuristic(it.first, numeric_limits<double>::infinity());
             } else {
-                // open.push_back(it.second);
                 open.push(it.second);
-                // open_set.insert(it.second);
             }
         }
 
         while(!open.empty()){
             Node* cur = open.top();
             open.pop();
-            if (cur->parent){
+
+            while (cur->parent){
                 State s = cur->parent->state;
-                if (domain.heuristic(s) > domain.getEdgeCost(cur->state) + domain.heuristic(cur->state)){
-                    // Update the heuristic of this pedecessor
-                    domain.updateHeuristic(s, domain.getEdgeCost(cur->state) + domain.heuristic(cur->state));
-                    // Update the distance of this predecessor
+                if (domain.heuristic(s) > cur->edgeCost + domain.heuristic(cur->state)){
+                    domain.updateHeuristic(s, cur->edgeCost + domain.heuristic(cur->state));
                     domain.updateDistance(s, domain.distance(cur->state) + 1);
-                    // Update the distance for the heuristic error of this predecessor
                     domain.updateDistanceErr(s, domain.distanceErr(cur->state));
-                    cur->parent->d = domain.distance(s);
-                    cur->parent->derr = domain.distanceErr(s);
-                    cur->parent->h = domain.heuristic(s);
-                    open.push(cur->parent);
                 }
+                cur = cur->parent;
             }
         }
     }
-    */
    
     void performTrial(unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
         PQueue backUpQueue;
@@ -331,17 +314,13 @@ public:
     }
 
     void initalizeNode(Node* n, PQueue& backUpQueue, unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
-        // cout << "Initalize:\n" << n->state << "\n" << endl;
         res.nodesExpanded++;
-
         vector <State> children = domain.successors(n->state);
-        // For each action... In this case for each children
-
         res.nodesGenerated += children.size();
-
         State bestChild;
 		double best_f = numeric_limits<double>::infinity();
 
+        // For each action... In this case for each children
         for (State child : children){
             // child = s'
             auto it = TT.find(child);
@@ -385,24 +364,15 @@ public:
                 if (n->getGValue() + domain.getEdgeCost(child) < TT[child]->getGValue()) {
                     Node* s = (TT[child]);
 
-                    // cout << " Better path:" << endl;
-                    // cout << child << endl;
-                    // cout << " Old parent:" << endl;
-                    // cout << s->parent->state << endl;
-
                     backUpQueue.push(s->parent);
                     // N(par(TT[s'])) <- N(par(TT[s'])) \ {n'}
                     s->parent->successors.erase(s);
                     s->parent = n;
-                    s->state = child; // update label
+                    s->state = child; // Update label
                     s->edgeCost = domain.getEdgeCost(child);
                     n->successors.insert(s);
-
-                    // cout << " New parent:" << endl;
-                    // cout << n->state << endl;
                 }
             }
-
 
             if (!TT[child]->initialized){
                 if (TT[child]->getFValue() < best_f){
@@ -508,17 +478,6 @@ public:
             }
 
             child_value = fb - csq;
-
-            // cout << "  value: " << child->value;
-            // cout << "  max:" << max;
-            // cout << "  min:" << min;
-            // cout << "  n:" << children_fbar[i] - min;
-            // cout << "  d:" << denom;
-            // cout << "  fb: " << fb;
-            // cout << "  csq: " << csq;
-            // cout << "  val: " << child_value << endl; 
-            // cout << child->state << endl;
-
             pqueue.push(make_pair(child_value, child));
             ++i;
         }
@@ -548,58 +507,15 @@ public:
             n = *(n->successors.begin());
             return n;
         }
-        // Min queue to be used for tie breaking
-        if (decision == "nancy"){
-            // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
-            // for (auto it : TT){
-            //     // Nodes that are initialized are equivalent to them being in the closed list
-            //     if (!it.second->initialized){
-            //         DiscreteDistribution d = DiscreteDistribution(100, it.second->getFValue(), it.second->getFHatValue(),
-			// 			    it.second->d, it.second->getFHatValue() - it.second->getFValue());
-            //         open.push(make_pair(d.expectedCost(), it.second));
-            //     }
-            // }
-            // Node* cur = open.top().second;
-            // while(cur->parent != root){
-            //     cur = cur->parent;
-            // }
-            // return cur;
-        } else if (decision == "minimin") {
-            // priority_queue<Node*, vector<Node*>, minF> open;
-            // for (auto it : TT){
-            //     // Nodes that are initialized are equivalent to them being in the closed list
-            //     if (!it.second->initialized){
-            //         open.push(it.second);
-            //     }
-            // }
-            // Node* cur = open.top();
-            // while(cur->parent != root){
-            //     cur = cur->parent;
-            // }
-            // return cur;
-        } else if (decision == "ie") {
-            // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > open; 
-            // for (auto it : TT){
-            //     // Nodes that are initialized are equivalent to them being in the closed list
-            //     if (!it.second->initialized){
-            //           open.push(make_pair(getLowerConfidence(it.second), it.second));
-            //     }
-            // }
-            // Node* cur = open.top().second;
-            // while(cur->parent != root){
-            //     cur = cur->parent;
-            // }
-            // return cur;
+   
+        if (trial_expansion == "bfs"){
+            return selectBFS(n);
+        } else if (trial_expansion == "uct"){
+            return selectActionUCT(n);
         } else {
-            if (trial_expansion == "bfs"){
-                return selectBFS(n);
-            } else if (trial_expansion == "uct"){
-                return selectActionUCT(n);
-            } else {
-                cout << "Invalid decision algorithm: " << decision << endl;
-                exit(1);
-            }  
-        }
+            cout << "Invalid decision algorithm: " << decision << endl;
+            exit(1);
+        }  
 
         return NULL;
     }
@@ -629,9 +545,6 @@ public:
         if (n->successors.size() == 0){
             if (prune_type == "erase"){
                 n->parent->successors.erase(n);
-                // cout << "  Deadend!" << endl;
-                // cout << "  Parent's succ size: " << n->parent->successors.size() << endl;
-                // cout << n->parent->state << endl;
                 TT.erase(n->state);
             } else if (prune_type == "lock"){
                 n->lock = true;
@@ -696,6 +609,10 @@ public:
         record_plan = b;
     }
 
+    void setLearning(bool b){
+        learn = b;
+    }
+
 protected:
     Domain& domain;
     double w = 1;
@@ -705,6 +622,7 @@ protected:
     double C = 1.414; // exploration parameter C
     bool goal_found = false;
     Node* root;
+    bool learn = false;
     string decision;
     string algorithm;
     string trial_expansion;
