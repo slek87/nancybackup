@@ -22,7 +22,8 @@ done
 
 
 
-if [ "$domainType" = "All" ] then
+if [ "$domainType" = "All" ] 
+then
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 SlidingPuzzle ${algo} "
@@ -67,7 +68,8 @@ if [ "$domainType" = "All" ] then
 fi
 
 
-if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] then
+if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] 
+then
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 1000 1 ${domainType} ${algo} "
