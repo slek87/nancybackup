@@ -62,6 +62,7 @@ do
                 else
                     timeout 5400 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 fi
+                wait
                 rm ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}
                 let instance--
             fi
@@ -86,6 +87,7 @@ do
                 else
                     timeout 5400 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
                 fi
+                wait
                 rm ../../results/${algorithm}/${domainType}/LA${lookahead}/{instance}
                 let instance--
             fi
@@ -116,6 +118,7 @@ do
                 else
                     timeout 5400 ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
                 fi
+                wait
                 rm ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}
                 let instance--
             fi
