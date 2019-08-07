@@ -27,7 +27,7 @@ public:
 		while (goalPrime->getParent() != start)
 			goalPrime = goalPrime->getParent();
 
-		// goalPrime->markStart();
+		goalPrime->markStart();
 
 		return goalPrime;
 	}
@@ -39,8 +39,6 @@ private:
 			open.swapComparator(Node::compareNodesF);
 		else if (sortingFunction == "bellman")
 			open.swapComparator(Node::compareNodesFHat);
-		else if (sortingFunction == "ie")
-			open.swapComparator(Node::compareNodesLC);
 	}
 
 protected:

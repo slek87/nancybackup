@@ -105,10 +105,8 @@ private:
 	{
 		if (sortingFunction == "f")
 			open.swapComparator(Node::compareNodesF);
-		if (sortingFunction == "fhat")
+		else if (sortingFunction == "fhat")
 			open.swapComparator(Node::compareNodesFHat);
-		else if (sortingFunction == "lowerconfidence")
-			open.swapComparator(Node::compareNodesLC);
 	}
 
 protected:
