@@ -75,7 +75,7 @@ do
                 then
                     echo "Time limit(${timelimit} ms) reached: ${instance}"
                     let notSolved++
-                if
+                fi
 
                 rm ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}.tmp
                 let instance++
@@ -107,7 +107,7 @@ do
                 then
                     echo "Time limit(${timelimit} ms)  reached: ${instance}"
                     let notSolved++
-                if
+                fi
 
                 rm ../../results/${algorithm}/${domainType}/LA${lookahead}/${instance}.tmp
                 let instance++
@@ -145,7 +145,7 @@ do
                 then
                     echo "Time limit(${timelimit} ms)  reached: ${instance}"
                     let notSolved++
-                if
+                fi
 
                 rm ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}.tmp
                 let instance++
