@@ -85,6 +85,15 @@ public:
         }
     };
 
+    struct minValue {
+        bool operator()(const Node* n1, const Node* n2){
+			if (n1->value == n2->value){
+                return rand() % 2;
+			}
+			return n1->value > n2->value;
+        }
+    };
+
     // In the paper, they use max pqueue on g, which make sense if g is uniform.
     typedef priority_queue<Node*, vector<Node*>, maxG> PQueue; // Max queue
     
@@ -590,16 +599,31 @@ public:
             return n;
         }
    
-        if (trial_expansion == "bfs"){
-            return selectBFS(n);
-        } else if (trial_expansion == "uct"){
-            return selectActionUCT(n);
-        } else {
-            cout << "Invalid decision algorithm: " << decision << endl;
-            exit(1);
-        }  
+        // if (trial_expansion == "bfs"){
+        //     return selectBFS(n);
+        // } else if (trial_expansion == "uct"){
+        //     return selectActionUCT(n);
+        // } else {
+        //     cout << "Invalid decision algorithm: " << decision << endl;
+        //     exit(1);
+        // }  
 
-        return NULL;
+        // return NULL;
+        priority_queue<Node*, vector<Node*>, minValue> open;
+
+        for (auto it : TREE){
+            // Nodes that are initialized are equivalent to them being in the closed list
+            if (it.second->initialized){
+            } else {
+                open.push(it.second);
+            }
+        } 
+
+        Node* r = open.top();
+        while(r->parent != root){
+            r = r->parent;
+        }
+        return r;
     }
     
     Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TREE){

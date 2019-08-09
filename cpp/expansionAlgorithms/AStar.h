@@ -107,13 +107,10 @@ private:
 			open.swapComparator(Node::compareNodesF);
 		else if (sortingFunction == "fhat")
 			open.swapComparator(Node::compareNodesFHat);
-<<<<<<< HEAD
 		else if (sortingFunction == "lowerconfidence")
 			open.swapComparator(Node::compareNodesLC);
 		else if (sortingFunction == "upperconfidence")
 			open.swapComparator(Node::compareNodesUC);
-=======
->>>>>>> cpu
 	}
 
 protected:
