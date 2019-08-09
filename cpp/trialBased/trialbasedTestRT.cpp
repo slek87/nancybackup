@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
-        if (!world.validatePath(res.path) && check) {
+        if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;
             exit(1);
         }
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
-        if (!world.validatePath(res.path) && check) {
+        if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;
             exit(1);
         }
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
-        if (!world.validatePath(res.path) && check) {
+        if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;            
             exit(1);
         }
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
             thts.setPruning(prune_type);
         }
         res = thts.getPlan();
-        if (!world.validatePath(res.path) && check) {
+        if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;            
             exit(1);
         }

@@ -109,6 +109,8 @@ private:
 			open.swapComparator(Node::compareNodesFHat);
 		else if (sortingFunction == "lowerconfidence")
 			open.swapComparator(Node::compareNodesLC);
+		else if (sortingFunction == "upperconfidence")
+			open.swapComparator(Node::compareNodesUC);
 	}
 
 protected:

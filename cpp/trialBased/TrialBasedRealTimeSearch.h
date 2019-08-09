@@ -45,8 +45,9 @@ public:
         double getGValue() const { 
             const Node *cur = this;
             double gCost = 0;
-            while(cur->parent){
-                gCost += edgeCost;
+
+            while(cur){
+                gCost += cur->edgeCost;
                 cur = cur->parent;
             }
             return gCost; 
@@ -107,6 +108,11 @@ public:
             trial_backup = "bfs";
             backup_type = "ie";
             w = 5; 
+        } else if (algorithm == "WASiep"){
+            trial_expansion = "bfs";
+            trial_backup = "bfs";
+            backup_type = "iep";
+            w = 5; 
         } else if (algorithm == "UCT" || algorithm == "GUCT"){
             trial_expansion = "uct";
             trial_backup = "uct";
@@ -129,6 +135,14 @@ public:
             trial_expansion = "uct";
             trial_backup = "bfs";
             backup_type = "ie";
+        } else if (algorithm == "UCTiep" || algorithm == "GUCTiep"){
+            trial_expansion = "uct";
+            trial_backup = "uct";
+            backup_type = "iep";
+        } else if (algorithm == "UCTSiep" || algorithm == "GUCTSiep"){
+            trial_expansion = "uct";
+            trial_backup = "bfs";
+            backup_type = "iep";
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
@@ -149,6 +163,18 @@ public:
         double var = pow(stdDev, 2);
         // 1.96 is the Z value from the Z table to get the 2.5 confidence
         return max(n->h, mean - (1.96 * var));
+    }
+
+    double getUpperConfidence(Node* n)    {
+        double mean =  n->getHHatValue();
+        if (n->h == mean){
+            return n->h;
+        }
+        double error = mean - n->h;
+        double stdDev = error / 2.0;
+        double var = pow(stdDev, 2);
+        // 1.96 is the Z value from the Z table to get the 2.5 confidence
+        return max(n->h, mean + (1.96 * var));
     }
     
     void resetNode(Node* n){
@@ -171,6 +197,8 @@ public:
                 root->d, root->getHHatValue() - root->h).expectedCost();
         } else if (backup_type == "ie"){
             root->value = getLowerConfidence(root);
+         } else if (backup_type == "iep"){
+            root->value = getUpperConfidence(root);
         } else {
             root->value = domain.heuristic(root_state);
         }
@@ -183,29 +211,30 @@ public:
             }
 
             int exp = res.nodesExpanded;
-            unordered_map<State, Node*, Hash> TT;
-            TT[root->state] = root;
+            unordered_map<State, Node*, Hash> TREE;
+            TREE[root->state] = root;
 
             // Update epsilons
             domain.updateEpsilons();
 
             // Expansion phase
             while (res.nodesExpanded - exp < lookahead){
-                performTrial(TT, res);
+                performTrial(TREE, res);
                 if (goal_found){
                     goal_found = false;
                     break;
                 }
             }
-            
+
             // Learning phase
             if (learn){
-                learning(TT);
+                learning(TREE);
             }
 
             // Action selection phase
-            root = selectOneStepAction(root, TT);
+            root = selectOneStepAction(root, TREE);
             res.solutionCost += root->edgeCost;
+            root->edgeCost = res.solutionCost;
             updateParent(root->parent);
             resetNode(root);
                        
@@ -214,12 +243,14 @@ public:
                 res.path.push(root->state.getLabel());
             }
 
+
             // Clean up tree
-            for (auto it : TT){
+            for (auto it : TREE){
                 if (it.second != root){
                     delete(it.second);
                 }
             }
+
         }
 
         delete(root);
@@ -247,11 +278,11 @@ public:
         domain.updateHeuristic(n->state, minheap.top());
     }
 
-    void learning(unordered_map<State, Node*, Hash> TT){
+    void learning(unordered_map<State, Node*, Hash> TREE){
         // Learning using reverse Dijkstra inspired
         priority_queue<Node*, vector<Node*>, minH> open;
 
-        for (auto it : TT){
+        for (auto it : TREE){
             // Nodes that are initialized are equivalent to them being in the closed list
             if (it.second->initialized){
             } else {
@@ -262,30 +293,32 @@ public:
         while(!open.empty()){
             Node* cur = open.top();
             open.pop();
-
             while (cur->parent){
                 State s = cur->parent->state;
                 if (domain.heuristic(s) > cur->edgeCost + domain.heuristic(cur->state)){
                     domain.updateHeuristic(s, cur->edgeCost + domain.heuristic(cur->state));
                     domain.updateDistance(s, domain.distance(cur->state) + 1);
                     domain.updateDistanceErr(s, domain.distanceErr(cur->state));
+                    cur->parent->d = (domain.distance(s));
+					cur->parent->derr = (domain.distanceErr(s));
+					cur->parent->h = (domain.heuristic(s));
                 }
                 cur = cur->parent;
             }
         }
     }
    
-    void performTrial(unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
+    void performTrial(unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
         PQueue backUpQueue;
         Node* n = root;
+
         while (n->initialized){           
             State old = n->state;
-            n = selectTrialAction(n, TT);
+            n = selectTrialAction(n, TREE);
             if (old == n->state){
                 cout << "Deadend..." << endl;
                 exit(1);
             }
-            // cout << "At:\n" << n->state << "\n" << endl;
         }
 
         // If n is goal
@@ -295,25 +328,25 @@ public:
             return; // Extract plan and return
         }
 
-        initalizeNode(n, backUpQueue, TT, res);
+        expandNode(n, backUpQueue, TREE, res);
         backUpQueue.push(n);
 
         // while backUpQueue is not empty do
         while (!backUpQueue.empty()){
             n = backUpQueue.top(); // m <-backUpQueue.pop()
             backUpQueue.pop();
-            backup(n, TT);
+            backup(n, TREE);
 
             if (n != root){
                 backUpQueue.push(n->parent);
-                if(TT.find(n->state) == TT.end()){
+                if(TREE.find(n->state) == TREE.end()){
                     delete(n);
                 }
             }
         }
     }
 
-    void initalizeNode(Node* n, PQueue& backUpQueue, unordered_map<State, Node*, Hash>& TT, ResultContainer& res){
+    void expandNode(Node* n, PQueue& backUpQueue, unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
         res.nodesExpanded++;
         vector <State> children = domain.successors(n->state);
         res.nodesGenerated += children.size();
@@ -323,11 +356,11 @@ public:
         // For each action... In this case for each children
         for (State child : children){
             // child = s'
-            auto it = TT.find(child);
+            auto it = TREE.find(child);
 
-            // If s' not in TT and not is not deadend then
+            // If s' not in TREE and not is not deadend then
             // TODO check deadend
-            if (it == TT.end()){
+            if (it == TREE.end()){
                 // Node(State state, int N, Cost f, int v, Node* parent)
                 // n' <- <s', 0, w*h(s'), l, isGoal(s')>
                 // Node* childNode(new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n)); // n'
@@ -346,14 +379,16 @@ public:
 						childNode->d, childNode->getHHatValue() - childNode->h).expectedCost();
                 } else if (backup_type == "ie"){
                     childNode->value = getLowerConfidence(childNode);
+                } else if (backup_type == "iep"){
+                    childNode->value = getUpperConfidence(childNode);
                 } else {
                     childNode->value = domain.heuristic(child);
                 }
 
                 childNode->value  *= w;
 
-                //TT[s'] <- n'
-                TT[child] = childNode;
+                //TREE[s'] <- n'
+                TREE[child] = childNode;
                 // cout << child << endl;
 
                 //N(n) <- N(n) union {n'} N = succesor nodes
@@ -361,22 +396,69 @@ public:
 
             } else {
                 // State already in the tree, check to see if it's a better path
-                if (n->getGValue() + domain.getEdgeCost(child) < TT[child]->getGValue()) {
-                    Node* s = (TT[child]);
+                if (n->getGValue() + domain.getEdgeCost(child) < TREE[child]->getGValue()) {
+
+                    Node* s = (TREE[child]);
+
+                    double child_OldG = s->getGValue();
+                    double child_oldEdge = s->edgeCost;
+                    double n_oldG = n->getGValue();
+                    Node* child_Oldpar = s->parent;
+                    double oldPar_cost = child_Oldpar->getGValue();
 
                     backUpQueue.push(s->parent);
-                    // N(par(TT[s'])) <- N(par(TT[s'])) \ {n'}
+                    // N(par(TREE[s'])) <- N(par(TREE[s'])) \ {n'}
                     s->parent->successors.erase(s);
                     s->parent = n;
                     s->state = child; // Update label
                     s->edgeCost = domain.getEdgeCost(child);
                     n->successors.insert(s);
+
+                    // Duplicate node detection and debug printing
+                    unordered_set<State, Hash> dup;
+                    Node* cur = s;
+                    while(cur->parent){
+                        if(dup.find(cur->state) == dup.end()){
+                            dup.insert(cur->state);
+                        } else {
+                            cout << "root" << endl;
+                            cout << root->state << endl;
+                            cout << "Duplication detected" << endl;
+                            cout << s->state << endl;
+                            cout << "old edge cost " << child_oldEdge << endl;
+                            cout << "old cost to child" << child_OldG << endl;
+                            cout << "new edge cost " << s->edgeCost << endl;
+                            cout << "new cost to child" << n_oldG +  s->edgeCost << endl;
+
+                            State ss = cur->state;
+                            cur = cur->parent;
+                            while (cur->state != ss){
+                                cout << cur->state << endl;
+                                cur = cur->parent;
+                            }
+                            cout << cur->state << endl;
+
+                            cout << "Old parent" << endl;
+                            cout << child_Oldpar->state << endl;
+                            cout << "cost to parent " << oldPar_cost << endl;
+
+                            cout << endl;
+                            while (child_Oldpar){
+                                cout << child_Oldpar->state << endl;                            
+                                cout << "edge " << child_Oldpar->edgeCost << endl;
+                                cout << "g " << child_Oldpar->getGValue() << endl;
+                                child_Oldpar = child_Oldpar->parent;
+                            }
+                            exit(1);
+                        }
+                        cur = cur->parent;
+                    }
                 }
             }
 
-            if (!TT[child]->initialized){
-                if (TT[child]->getFValue() < best_f){
-                    best_f = TT[child]->getFValue();
+            if (!TREE[child]->initialized){
+                if (TREE[child]->getFValue() < best_f){
+                    best_f = TREE[child]->getFValue();
                     bestChild = child;
                 }
             }
@@ -502,7 +584,7 @@ public:
         return ties[r];
     }
 
-    Node* selectOneStepAction(Node* n, unordered_map<State, Node*, Hash>& TT){
+    Node* selectOneStepAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
         if (n->successors.size() == 1){
             n = *(n->successors.begin());
             return n;
@@ -520,7 +602,7 @@ public:
         return NULL;
     }
     
-    Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TT){
+    Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
         // cout << "Select action:" << endl;
         // If there's only one child   
         if (n->successors.size() == 1){
@@ -539,13 +621,13 @@ public:
 
     }
 
-    void backup(Node* n, unordered_map<State, Node*, Hash>& TT){
+    void backup(Node* n, unordered_map<State, Node*, Hash>& TREE){
         // cout << "Back up:\n" << n->state << endl;
 
         if (n->successors.size() == 0){
             if (prune_type == "erase"){
                 n->parent->successors.erase(n);
-                TT.erase(n->state);
+                TREE.erase(n->state);
             } else if (prune_type == "lock"){
                 n->lock = true;
             }

@@ -41,6 +41,8 @@ private:
 			open.swapComparator(Node::compareNodesFHat);
 		else if (sortingFunction == "ie")
 			open.swapComparator(Node::compareNodesLC);
+		else if (sortingFunction == "iep")
+			open.swapComparator(Node::compareNodesUC);
 	}
 
 protected:

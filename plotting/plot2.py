@@ -103,8 +103,8 @@ was = algosArr[16:]
 
 
 # PARAMS
-printRange = guct
-algoType = 'GUCT_'
+printRange = ['IE', 'IEP', 'RISK']
+algoType = '_'
 domFilter = ''
 
 frames = []

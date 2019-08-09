@@ -145,6 +145,20 @@ public:
 			return max(f, mean - (1.96 * var));
 		}
 
+		static double getUpperConfidence(const Node* n)
+		{
+			double f = n->getFValue();
+			double mean =  n->getFHatValue();
+			if (f == mean){
+				return f;
+			}
+			double error = mean - f;
+			double stdDev = error / 2.0;
+            double var = pow(stdDev, 2);
+			// 1.96 is the Z value from the Z table to get the 2.5 confidence
+			return max(f, mean + (1.96 * var));
+		}
+
 		static bool compareNodesLC(const Node* n1, const Node* n2)
 		{ 
 			// Lower confidence interval
@@ -153,6 +167,16 @@ public:
 				return n1->getGValue() > n2->getGValue();
 			}
 			return getLowerConfidence(n1) < getLowerConfidence(n2);
+		}
+
+		static bool compareNodesUC(const Node* n1, const Node* n2)
+		{ 
+			// Lower confidence interval
+			if (getLowerConfidence(n1) == getLowerConfidence(n2))
+			{
+				return n1->getGValue() > n2->getGValue();
+			}
+			return getUpperConfidence(n1) < getUpperConfidence(n2);
 		}
 	};
 
@@ -221,6 +245,11 @@ public:
 		{
 			expansionAlgo = new  AStar<Domain, Node, TopLevelAction>(domain, lookahead, "lowerconfidence");
 		}
+		else if (expansionModule == "iep")
+		{
+			expansionAlgo = new  AStar<Domain, Node, TopLevelAction>(domain, lookahead, "upperconfidence");
+		}
+
 
 		if (learningModule == "none")
 		{
@@ -246,6 +275,10 @@ public:
 		else if (decisionModule == "ie")
 		{
 			decisionAlgo = new ScalarBackup<Domain, Node, TopLevelAction>("ie");
+		}
+		else if (decisionModule == "iep")
+		{
+			decisionAlgo = new ScalarBackup<Domain, Node, TopLevelAction>("iep");
 		}
 	}
 

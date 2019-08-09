@@ -31,30 +31,30 @@ int main(int argc, char** argv){
 		if (domain == "PancakeDPS"){
 			world.setVariant(1);
 		}
-		RealTimeSearch<PancakePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
+		RealTimeSearch<PancakePuzzle> ie(world, "iep", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
 		if (!world.validatePath(res.path)) exit(1);
 
 	} else if (domain == "TreeWorld"){
 		TreeWorld world = TreeWorld(cin);
-		RealTimeSearch<TreeWorld> ie(world, "ie", "none", "minimin", lookaheadDepth);
+		RealTimeSearch<TreeWorld> ie(world, "iep", "none", "minimin", lookaheadDepth);
 		res = ie.search();
 
 	} else if (domain == "SlidingPuzzle") {
 		SlidingTilePuzzle world = SlidingTilePuzzle(cin);
-		RealTimeSearch<SlidingTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
+		RealTimeSearch<SlidingTilePuzzle> ie(world, "iep", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
 		if (!world.validatePath(res.path)) exit(1);
 
 	} else if (domain == "HeavyTile") {
 		HeavyTilePuzzle world = HeavyTilePuzzle(cin);
-		RealTimeSearch<HeavyTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
+		RealTimeSearch<HeavyTilePuzzle> ie(world, "iep", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
 		if (!world.validatePath(res.path)) exit(1);
 
 	} else if (domain == "InverseTile") {
 		InverseTilePuzzle world = InverseTilePuzzle(cin);
-		RealTimeSearch<InverseTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
+		RealTimeSearch<InverseTilePuzzle> ie(world, "iep", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
 		if (!world.validatePath(res.path)) exit(1);
 		
@@ -63,7 +63,7 @@ int main(int argc, char** argv){
 		exit(1);
 	}
 
-	string result = "IE," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookaheadDepth);
+	string result = "IEP," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookaheadDepth);
 
 	if (argc < 4)	{
 		cout << result << endl;

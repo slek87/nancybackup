@@ -1,6 +1,8 @@
 #!/bin/bash
 
-algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "WAS" "WASie" "WASnancy" "FHAT" "RISK" "IE" "LSSLRTA")
+# algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "WAS" "WASie" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
+algoArr=("IEP")
+
 
 default=true
 
@@ -48,7 +50,7 @@ then
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo} "
-        ./expansionTest${reverse}.sh 1 100 1 TreeWorld ${algo}
+        ./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo}
         wait
     done
 
