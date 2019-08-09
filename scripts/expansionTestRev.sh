@@ -31,8 +31,15 @@ algorithm=$5
 timelimit=$6
 
 numProcs=0
+notSolved=0
 for lookahead in "${lookaheadArr[@]}"
 do
+    if (( notSolved > 4 ))
+    then
+         echo "Few instances cannot be solved within the time limit(${timelimit} ms) , perhaps try try larger timeout?"
+         exit 1
+    fi
+
     echo "Domain:${domainType} Lookahead:${lookahead} Algorithm:${algorithm}"
     if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ]
     then
@@ -63,6 +70,13 @@ do
                     timeout ${timelimit} ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 fi
                 wait
+
+                if [ ! -f ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv ]
+                then
+                    echo "Time limit(${timelimit} ms)  reached: ${instance}"
+                    let notSolved++
+                if
+
                 rm ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}.tmp
                 let instance--
             fi
@@ -88,6 +102,13 @@ do
                     timeout ${timelimit} ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
                 fi
                 wait
+
+                if [ ! -f ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv ]
+                then
+                    echo "Time limit(${timelimit} ms)  reached: ${instance}"
+                    let notSolved++
+                if
+
                 rm ../../results/${algorithm}/${domainType}/LA${lookahead}/${instance}.tmp
                 let instance--
             fi
@@ -119,6 +140,13 @@ do
                     timeout ${timelimit} ../../build_release/${algorithm}expansionTest ${domainType} ${lookahead}  ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
                 fi
                 wait
+
+                if [ ! -f ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv ]
+                then
+                    echo "Time limit(${timelimit} ms)  reached: ${instance}"
+                    let notSolved++
+                if
+
                 rm ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}.tmp
                 let instance--
             fi
