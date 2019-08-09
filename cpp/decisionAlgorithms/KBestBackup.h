@@ -31,7 +31,7 @@ public:
 
 		Node* goalPrime = lowestExpectedPathTLA.topLevelNode;
 
-		// goalPrime->markStart();
+		goalPrime->markStart();
 
 		return goalPrime;
 	}
