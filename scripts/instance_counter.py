@@ -47,7 +47,8 @@ def aggregateCvs(directory):
 
     if alert:
         if first:
-            print(' ' + str(directory.split('/')[3]))
+            print(' ' + str(directory.split('/')[-3]) + ' ' + str(directory.split('/')[-2]))
+
             first = False
         print('   ' + directory.split('/')[-1] + ' ' + str(i) + '/' + str(len(missing)))
         for f in found:

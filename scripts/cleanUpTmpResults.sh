@@ -4,15 +4,42 @@ FILES=${dir}/*
 lookahead=("LA10" "LA30" "LA100" "LA300" "LA1000")
 for f in $FILES
 do
-    
+    echo ${f}
     for l in "${lookahead[@]}"
     do
-        rm ${f}/Pancake/10/${l}/{1..100}.tmp
-        rm ${f}/PancakeDPS/10/${l}/{1..100}.tmp
-        rm ${f}/SlidingPuzzle/4x4/${l}/{1..100}.tmp
-        rm ${f}/HeavyTile/4x4/${l}/{1..100}.tmp
-        rm ${f}/TreeWorld/${l}/{1..1000}.tmp
+        for (( i=1; i <= 100; i++ )); do
+            if [ -f ${f}/Pancake/10/${l}/${i}.tmp ] 
+            then 
+                rm ${f}/Pancake/10/${l}/${i}.tmp
+            fi
 
+            if [ -f ${f}/PancakeDPS/10/${l}/${i}.tmp ] 
+            then 
+                rm ${f}/PancakeDPS/10/${l}/${i}.tmp
+            fi
+
+            if [ -f ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp ] 
+            then 
+                rm ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp
+            fi
+
+            if [ -f ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp ] 
+            then 
+                rm ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp
+            fi
+
+            if [ -f ${f}/HeavyTile/4x4/${l}/${i}.tmp ] 
+            then 
+                rm ${f}/HeavyTile/4x4/${l}/${i}.tmp
+            fi
+        done
+
+        for (( i=1; i <= 1000; i++ )); do
+            if [ -f ${f}/TreeWorld/${l}/${i}.tmp ] 
+            then 
+                rm ${f}/TreeWorld/${l}/${i}.tmp
+            fi
+        done
     done
 
 done

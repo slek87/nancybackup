@@ -78,7 +78,7 @@ then
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} "
-        # ./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} 
+        ./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} 
         wait
     done
 elif [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] 

@@ -70,7 +70,7 @@ public:
     struct minH {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->h == n2->h){
-                n1->getGValue() < n2->getGValue();
+                return rand() % 2;
 			}
 			return n1->h > n2->h;
         }
@@ -243,7 +243,6 @@ public:
             // Action selection phase
             root = selectOneStepAction(root, TREE);
             res.solutionCost += root->edgeCost;
-            root->edgeCost = res.solutionCost;
             updateParent(root->parent);
             resetNode(root);
                        
@@ -294,7 +293,6 @@ public:
         for (auto it : TREE){
             // Nodes that are initialized are equivalent to them being in the closed list
             if (it.second->initialized){
-            } else {
                 open.push(it.second);
             }
         }
@@ -598,28 +596,27 @@ public:
             n = *(n->successors.begin());
             return n;
         }
-   
-        // if (trial_expansion == "bfs"){
-        //     return selectBFS(n);
-        // } else if (trial_expansion == "uct"){
-        //     return selectActionUCT(n);
-        // } else {
-        //     cout << "Invalid decision algorithm: " << decision << endl;
-        //     exit(1);
-        // }  
+        Node* r;
+        if (backup_type == "nancy"){
+            priority_queue<Node*, vector<Node*>, minValue> pqueue;
+            for (auto it : TREE){
+                // Nodes that are initialized are equivalent to them being in the closed list
+                if (!it.second->initialized){
+                    pqueue.push(it.second);
+                }
+            } 
+            r = pqueue.top();
+        } else {
+            priority_queue<Node*, vector<Node*>, minH> pqueue;
+            for (auto it : TREE){
+                // Nodes that are initialized are equivalent to them being in the closed list
+                if (!it.second->initialized){
+                    pqueue.push(it.second);
+                }
+            } 
+            r = pqueue.top();
+        }
 
-        // return NULL;
-        priority_queue<Node*, vector<Node*>, minValue> open;
-
-        for (auto it : TREE){
-            // Nodes that are initialized are equivalent to them being in the closed list
-            if (it.second->initialized){
-            } else {
-                open.push(it.second);
-            }
-        } 
-
-        Node* r = open.top();
         while(r->parent != root){
             r = r->parent;
         }

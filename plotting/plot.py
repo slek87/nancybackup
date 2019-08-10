@@ -18,7 +18,6 @@ __author__ = 'Sai Lekyang'
 # simply put this file in the same directory and the result folder
 
 markerList=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<", "p", "h", "^", "D", "X", ">"]
-algosArr = ['UCT','UCTie','UCTnancy','UCTS','UCTSie','UCTSnancy','GUCT','GUCTie','GUCTnancy','GUCTS','GUCTSie','GUCTSnancy','RISK','FHAT','LSSLRTA','IE', 'WAS', 'WASie', 'WASnancy']
 
 def fixTitle(t):
     if t == 'HeavyTile':
@@ -34,6 +33,7 @@ def fixTitle(t):
 def fixName(a):
     if 'UCT' in a or 'WA' in a:
         a = a.replace('S', '*')
+        a = a.replace('iep', '-IEP')
         a = a.replace('ie', '-IE')
         a = a.replace('nancy', '-Nancy')
     else:
@@ -96,16 +96,16 @@ domain = sys.argv[1]
 outfileName = domain + '.pdf'
 directory = sys.argv[2]
 
-uct = algosArr[0:6]
-guct = algosArr[6:12]
-nontrial = algosArr[12:16]
-was = algosArr[16:]
+
+uctArr = ['UCT','UCTie', 'UCTiep','UCTnancy','UCTS','UCTSie', 'UCTSiep', 'UCTSnancy']
+guctArr = ['GUCT','GUCTie', 'GUCTiep','GUCTnancy','GUCTS','GUCTSie', 'GUCTSiep', 'GUCTSnancy']
+wasArr = ['WAS', 'WASie', 'WASiep','WASnancy']
+otherArr = ['RISK','FHAT','LSSLRTA','IE', 'IEP']
 
 
 # PARAMS
-printRange = ['IE', 'IEP', 'RISK']
-algoType = '_'
-domFilter = ''
+printRange = otherArr
+frontTextAppend = '_O' # Goes in front of the name of the pdf file being output
 
 frames = []
 for a in printRange:
@@ -114,8 +114,6 @@ for a in printRange:
             continue
         for dom in os.listdir(directory + '/' + str(algorithm)):
             if '.csv' in str(dom) and dom.split('.')[0] == domain:
-                if domFilter != '' and dom.split('.')[0] != domFilter:
-                    continue
                 print(directory + '/' + str(algorithm) + '/' + str(dom))
                 df = pd.read_csv(directory + '/' + str(algorithm) + '/' + str(dom), delimiter = ',')
                 # algostr = df.iloc[0]['Algorithm']
@@ -137,9 +135,9 @@ result = pd.concat(frames)
 
 title = fixTitle(domain)
 
-pointplot(result, algoType + outfileName,False, title)
-violinplot(result,algoType + 'Violin' + outfileName,False, title)
-boxplot(result,algoType + 'Box' + outfileName,False, title)
+pointplot(result, frontTextAppend + outfileName,False, title)
+# violinplot(result,frontTextAppend + 'Violin' + outfileName,False, title)
+# boxplot(result,frontTextAppend + 'Box' + outfileName,False, title)
 
 
 

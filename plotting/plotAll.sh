@@ -1,5 +1,5 @@
-./plot2.py Pancake ../../results
-./plot2.py PancakeDPS ../../results
-./plot2.py SlidingPuzzle ../../results
-./plot2.py HeavyTile ../../results
-./plot2.py TreeWorld ../../results
+./plot.py Pancake ../../results
+./plot.py PancakeDPS ../../results
+./plot.py SlidingPuzzle ../../results
+./plot.py HeavyTile ../../results
+./plot.py TreeWorld ../../results
