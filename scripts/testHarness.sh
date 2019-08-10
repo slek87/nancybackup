@@ -44,42 +44,60 @@ then
     do
         echo "./expansionTest${reverse}.sh 1 100 1 SlidingPuzzle ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 100 1 SlidingPuzzle ${algo} ${tout} 
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 Pancake ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 100 1 Pancake ${algo} ${tout} 10
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 PancakeDPS ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 100 1 PancakeDPS ${algo} ${tout}
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo} ${tout}
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 HeavyTile ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 100 1 HeavyTile ${algo} ${tout} 
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} 
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 elif [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] 
 then
@@ -87,7 +105,10 @@ then
     do
         echo "./expansionTest${reverse}.sh 1 1000 1 ${domainType} ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout}
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 elif [ "$domainType" = "TreeWorld" ] 
 then
@@ -95,7 +116,10 @@ then
     do
         echo "./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} "
         ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} 
-        wait
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
     done
 else
     echo "Invalid domain!"
