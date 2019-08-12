@@ -213,6 +213,10 @@ public:
         }
         actionVisits[root_state] = 1;
 
+        if (!greedyOneStep){
+            learn = true;
+        }
+
         while(true){
             if (domain.isGoal(root->state)){
                 res.solutionFound = true;
