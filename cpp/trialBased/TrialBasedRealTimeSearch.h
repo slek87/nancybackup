@@ -70,7 +70,7 @@ public:
     struct minH {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->h == n2->h){
-                return rand() % 2;
+                return n1->getGValue() > n2->getGValue();
 			}
 			return n1->h > n2->h;
         }
@@ -79,7 +79,7 @@ public:
     struct minF {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->getFValue() == n2->getFValue()){
-                return rand() % 2;
+                return n1->h > n2->h;
 			}
 			return n1->getFValue() > n2->getFValue();
         }
@@ -88,7 +88,7 @@ public:
     struct minValue {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->value == n2->value){
-                return rand() % 2;
+                return n1->getGValue() > n2->getGValue();
 			}
 			return n1->value > n2->value;
         }
@@ -97,8 +97,8 @@ public:
     // In the paper, they use max pqueue on g, which make sense if g is uniform.
     typedef priority_queue<Node*, vector<Node*>, maxG> PQueue; // Max queue
     
-    THTS_RT(Domain& domain, string algorithm, int lookahead, string decision = "") 
-                    : domain(domain), algorithm(algorithm), lookahead(lookahead), decision(decision){
+    THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = true) 
+                    : domain(domain), algorithm(algorithm), lookahead(lookahead), greedyOneStep(greedyOneStep){
         srand(1);
         if (algorithm == "AS"){
             trial_expansion = "bfs";
@@ -106,7 +106,7 @@ public:
         } else if (algorithm == "WAS"){
             trial_expansion = "bfs";
             trial_backup = "bfs";
-            w = 5; 
+            w = 5;
         } else if (algorithm == "WASnancy"){
             trial_expansion = "bfs";
             trial_backup = "bfs";
@@ -242,8 +242,13 @@ public:
 
             // Action selection phase
             root = selectOneStepAction(root, TREE);
-            res.solutionCost += root->edgeCost;
-            updateParent(root->parent);
+            root->edgeCost += root->parent->edgeCost;
+
+
+            if (!learn){
+                updateParent(root->parent);
+            }
+
             resetNode(root);
                        
             // Add this step to the path taken so far
@@ -261,6 +266,7 @@ public:
 
         }
 
+        res.solutionCost = root->edgeCost;
         delete(root);
 
         // if (res.nodesGenerated > trial_limit){
@@ -596,26 +602,53 @@ public:
             n = *(n->successors.begin());
             return n;
         }
-        Node* r;
-        if (backup_type == "nancy"){
-            priority_queue<Node*, vector<Node*>, minValue> pqueue;
-            for (auto it : TREE){
-                // Nodes that are initialized are equivalent to them being in the closed list
-                if (!it.second->initialized){
-                    pqueue.push(it.second);
-                }
-            } 
-            r = pqueue.top();
-        } else {
-            priority_queue<Node*, vector<Node*>, minH> pqueue;
-            for (auto it : TREE){
-                // Nodes that are initialized are equivalent to them being in the closed list
-                if (!it.second->initialized){
-                    pqueue.push(it.second);
-                }
-            } 
-            r = pqueue.top();
+        
+        Node* r; 
+
+
+        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
+
+        int c = 1;
+        if (greedyOneStep){
+            c = 0;
         }
+        for (auto it : TREE){
+            // Nodes that are initialized are equivalent to them being in the closed list
+            if (!it.second->initialized){
+                pqueue.push(make_pair(it.second->value + c * it.second->getGValue(), it.second));
+            }
+        } 
+        
+        r = pqueue.top().second;
+
+        // if (backup_type == "nancy"){
+        //     priority_queue<Node*, vector<Node*>, minValue> pqueue;
+        //     for (auto it : TREE){
+        //         // Nodes that are initialized are equivalent to them being in the closed list
+        //         if (!it.second->initialized){
+        //             pqueue.push(it.second);
+        //         }
+        //     } 
+        //     r = pqueue.top();
+        // } else if(greedyOneStep) {
+        //     priority_queue<Node*, vector<Node*>, minH> pqueue;
+        //     for (auto it : TREE){
+        //         // Nodes that are initialized are equivalent to them being in the closed list
+        //         if (!it.second->initialized){
+        //             pqueue.push(it.second);
+        //         }
+        //     } 
+        //     r = pqueue.top();
+        // } else {
+        //     priority_queue<Node*, vector<Node*>, minF> pqueue;
+        //     for (auto it : TREE){
+        //         // Nodes that are initialized are equivalent to them being in the closed list
+        //         if (!it.second->initialized){
+        //             pqueue.push(it.second);
+        //         }
+        //     } 
+        //     r = pqueue.top();
+        // }
 
         while(r->parent != root){
             r = r->parent;
@@ -726,7 +759,7 @@ protected:
     bool goal_found = false;
     Node* root;
     bool learn = false;
-    string decision;
+    bool greedyOneStep;
     string algorithm;
     string trial_expansion;
     string trial_backup;

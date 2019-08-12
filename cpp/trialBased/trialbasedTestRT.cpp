@@ -16,21 +16,39 @@ using namespace std;
 
 int main(int argc, char** argv) {
     if ( argc < 3){
-		cout << "Wrong number of arguments: [executable] [domain] [expansion limit] [trial algorithm] [decision algorithm] [optional: output file] < [domain file]" << endl;
+		cout << "Wrong number of arguments: [executable] [domain] [expansion limit] [trial algorithm] [optional: output file] < [domain file]" << endl;
 		exit(1);
 	}
 
     ResultContainer res;
     string domain = argv[1];
     int lookahead = stoi(argv[2]);
-    string algorithm = argv[3];
-    // string prune_type = argv[3];
+    string algorithmInput = argv[3];
     string prune_type = "erase";
-    // string decision = argv[4];
-    // if (decision == "-"){
-    //     decision = "";
-    // }
-    string decision = "-";
+    bool greedyOneStep = true;
+
+    string algorithm = "";
+    bool front = true;
+    for(int i = 0; i < algorithmInput.length(); ++i){
+        if (algorithmInput[i] == '-'){
+            front = !front;
+        } else {
+            if (front){
+                algorithm += algorithmInput[i];
+            } else {
+                if (algorithmInput[i] == 'F'){
+                    greedyOneStep = false;
+                } else if (algorithmInput[i] == 'H'){
+                    greedyOneStep = true;
+                } else {
+                    cout << "Invalid algorithm!" << endl;
+                    exit(1);
+                }
+            }
+        }
+    }
+
+
     bool check = false;
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){
@@ -39,10 +57,13 @@ int main(int argc, char** argv) {
         if (domain == "PancakeDPS"){
 			world.setVariant(1);
 		}
-        THTS_RT <PancakePuzzle> thts(world, algorithm, lookahead, decision);
+        THTS_RT <PancakePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
+
+        thts.setRecordPlan(check);
+
         res = thts.getPlan();
         if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;
@@ -50,17 +71,24 @@ int main(int argc, char** argv) {
         }
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
-        THTS_RT <TreeWorld> thts(world, algorithm, lookahead, decision);
+        THTS_RT <TreeWorld> thts(world, algorithm, lookahead, greedyOneStep);
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
+
+        thts.setRecordPlan(check);
+
         res = thts.getPlan();
     } else if (domain == "SlidingPuzzle"){
         SlidingTilePuzzle world = SlidingTilePuzzle(cin);
-        THTS_RT <SlidingTilePuzzle> thts(world, algorithm, lookahead, decision);
+        THTS_RT <SlidingTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
+
+        thts.setRecordPlan(check);
+
+
         res = thts.getPlan();
         if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;
@@ -69,10 +97,13 @@ int main(int argc, char** argv) {
 
     } else if (domain == "HeavyTile"){
         HeavyTilePuzzle world = HeavyTilePuzzle(cin);
-        THTS_RT <HeavyTilePuzzle> thts(world, algorithm, lookahead, decision);
+        THTS_RT <HeavyTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
+
+        thts.setRecordPlan(check);
+
         res = thts.getPlan();
         if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;            
@@ -80,10 +111,13 @@ int main(int argc, char** argv) {
         }
     } else if (domain == "InverseTile"){
         InverseTilePuzzle world = InverseTilePuzzle(cin);
-        THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, decision);
+        THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
         if (prune_type == "lock"){
             thts.setPruning(prune_type);
         }
+
+        thts.setRecordPlan(check);
+
         res = thts.getPlan();
         if (check && !world.validatePath(res.path)) {
             cout << "INVALID PATH!" << endl;            
@@ -91,7 +125,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    string result = algorithm + "," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookahead);
+    string result = algorithmInput + "," + domain + "," + to_string(res.solutionCost) + "," + to_string(res.nodesGenerated) + "," + to_string(res.nodesExpanded) + "," + to_string(lookahead);
     
     if (argc < 5) {
 		cout << result << endl;
