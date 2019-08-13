@@ -10,26 +10,31 @@ do
         for (( i=1; i <= 100; i++ )); do
             if [ -f ${f}/Pancake/10/${l}/${i}.tmp ] 
             then 
+                echo "rm ${f}/Pancake/10/${l}/${i}.tmp"
                 rm ${f}/Pancake/10/${l}/${i}.tmp
             fi
 
             if [ -f ${f}/PancakeDPS/10/${l}/${i}.tmp ] 
             then 
+                echo "rm ${f}/PancakeDPS/10/${l}/${i}.tmp"
                 rm ${f}/PancakeDPS/10/${l}/${i}.tmp
             fi
 
             if [ -f ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp ] 
             then 
+                echo "rm ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp"
                 rm ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp
             fi
 
             if [ -f ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp ] 
             then 
+                echo "rm ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp"
                 rm ${f}/SlidingPuzzle/4x4/${l}/${i}.tmp
             fi
 
             if [ -f ${f}/HeavyTile/4x4/${l}/${i}.tmp ] 
             then 
+                echo "rm ${f}/HeavyTile/4x4/${l}/${i}.tmp"
                 rm ${f}/HeavyTile/4x4/${l}/${i}.tmp
             fi
         done
@@ -37,6 +42,7 @@ do
         for (( i=1; i <= 1000; i++ )); do
             if [ -f ${f}/TreeWorld/${l}/${i}.tmp ] 
             then 
+                echo "rm ${f}/TreeWorld/${l}/${i}.tmp"
                 rm ${f}/TreeWorld/${l}/${i}.tmp
             fi
         done

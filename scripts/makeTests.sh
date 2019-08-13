@@ -14,11 +14,11 @@ then
     fi
 else
     g++ -std=c++11 -O3  ../cpp/trialBased/trialbasedTestRT.cpp -o ../../build_release/trialBasedTest
-    # g++ -std=c++11 -O3  ../cpp/expansionTestFHat.cpp -o ../../build_release/FHATexpansionTest
-    # g++ -std=c++11 -O3  ../cpp/expansionTestIE.cpp -o ../../build_release/IEexpansionTest
-    # g++ -std=c++11 -O3  ../cpp/expansionTestIEP.cpp -o ../../build_release/IEPexpansionTest
-    # g++ -std=c++11 -O3  ../cpp/expansionTestLSSLRTA.cpp -o ../../build_release/LSSLRTAexpansionTest
-    # g++ -std=c++11 -O3  ../cpp/expansionTestRisk.cpp -o ../../build_release/RISKexpansionTest
+    g++ -std=c++11 -O3  ../cpp/expansionTestFHat.cpp -o ../../build_release/FHATexpansionTest
+    g++ -std=c++11 -O3  ../cpp/expansionTestIE.cpp -o ../../build_release/IEexpansionTest
+    g++ -std=c++11 -O3  ../cpp/expansionTestIEP.cpp -o ../../build_release/IEPexpansionTest
+    g++ -std=c++11 -O3  ../cpp/expansionTestLSSLRTA.cpp -o ../../build_release/LSSLRTAexpansionTest
+    g++ -std=c++11 -O3  ../cpp/expansionTestRisk.cpp -o ../../build_release/RISKexpansionTest
 
 fi
 
