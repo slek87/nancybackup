@@ -1,7 +1,7 @@
 #!/bin/bash
 
-algoArr=("UCT-H" "GUCT-H" "UCTS-H" "GUCTS-H" "UCTnancy-H" "GUCTnancy-H" "UCTSnancy-H" "GUCTSnancy-H" "UCTie-H" "GUCTie-H" "UCTSie-H" "GUCTSie-H" "UCTiep-H" "GUCTiep-H" "UCTSiep-H" "GUCTSiep-H" "WAS-H" "WASie-H" "WASiep-H" "WASnancy-H" "UCT-F" "GUCT-F" "UCTS-F" "GUCTS-F" "UCTnancy-F" "GUCTnancy-F" "UCTSnancy-F" "GUCTSnancy-F" "UCTie-F" "GUCTie-F" "UCTSie-F" "GUCTSie-F" "UCTiep-F" "GUCTiep-F" "UCTSiep-F" "GUCTSiep-F" "WAS-F" "WASie-F" "WASiep-F" "WASnancy-F" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
-
+# algoArr=("UCT-H" "GUCT-H" "UCTS-H" "GUCTS-H" "UCTnancy-H" "GUCTnancy-H" "UCTSnancy-H" "GUCTSnancy-H" "UCTie-H" "GUCTie-H" "UCTSie-H" "GUCTSie-H" "UCTiep-H" "GUCTiep-H" "UCTSiep-H" "GUCTSiep-H" "WAS-H" "WASie-H" "WASiep-H" "WASnancy-H" "UCT-F" "GUCT-F" "UCTS-F" "GUCTS-F" "UCTnancy-F" "GUCTnancy-F" "UCTSnancy-F" "GUCTSnancy-F" "UCTie-F" "GUCTie-F" "UCTSie-F" "GUCTSie-F" "UCTiep-F" "GUCTiep-F" "UCTSiep-F" "GUCTSiep-F" "WAS-F" "WASie-F" "WASiep-F" "WASnancy-F" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
+algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "UCTiep" "GUCTiep" "UCTSiep" "GUCTSiep" "WAS" "WASie" "WASiep" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
 default=true
 
 domainType="All"

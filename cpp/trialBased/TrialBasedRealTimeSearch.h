@@ -213,10 +213,6 @@ public:
         }
         actionVisits[root_state] = 1;
 
-        if (!greedyOneStep){
-            learn = true;
-        }
-
         while(true){
             if (domain.isGoal(root->state)){
                 res.solutionFound = true;
@@ -240,18 +236,14 @@ public:
             }
 
             // Learning phase
-            if (learn){
-                learning(TREE);
-            }
+            // if (learn){
+            //     learning(TREE);
+            // }
 
             // Action selection phase
             root = selectOneStepAction(root, TREE);
             root->edgeCost += root->parent->edgeCost;
-
-
-            if (!learn){
-                updateParent(root->parent);
-            }
+            updateParent(root->parent);
 
             resetNode(root);
                        
@@ -297,12 +289,11 @@ public:
     }
 
     void learning(unordered_map<State, Node*, Hash> TREE){
-        // Learning using reverse Dijkstra inspired
+
         priority_queue<Node*, vector<Node*>, minH> open;
 
         for (auto it : TREE){
-            // Nodes that are initialized are equivalent to them being in the closed list
-            if (it.second->initialized){
+            if (!it.second->initialized){
                 open.push(it.second);
             }
         }
@@ -606,6 +597,16 @@ public:
             n = *(n->successors.begin());
             return n;
         }
+
+
+        if (trial_expansion == "bfs"){
+            return selectBFS(n);
+        } else if (trial_expansion == "uct"){
+            return selectActionUCT(n);
+        } else {
+            cout << "Invalid algorithm: " << algorithm << endl;
+            exit(1);
+        }  
         
         Node* r; 
 
@@ -622,37 +623,17 @@ public:
                 pqueue.push(make_pair(it.second->value + c * it.second->getGValue(), it.second));
             }
         } 
-        
-        r = pqueue.top().second;
+       
+        vector<Node*> ties;
+        double best = pqueue.top().first;
+        while(!pqueue.empty() && pqueue.top().first == best){
+            ties.push_back(pqueue.top().second);
+            pqueue.pop();
+        }
 
-        // if (backup_type == "nancy"){
-        //     priority_queue<Node*, vector<Node*>, minValue> pqueue;
-        //     for (auto it : TREE){
-        //         // Nodes that are initialized are equivalent to them being in the closed list
-        //         if (!it.second->initialized){
-        //             pqueue.push(it.second);
-        //         }
-        //     } 
-        //     r = pqueue.top();
-        // } else if(greedyOneStep) {
-        //     priority_queue<Node*, vector<Node*>, minH> pqueue;
-        //     for (auto it : TREE){
-        //         // Nodes that are initialized are equivalent to them being in the closed list
-        //         if (!it.second->initialized){
-        //             pqueue.push(it.second);
-        //         }
-        //     } 
-        //     r = pqueue.top();
-        // } else {
-        //     priority_queue<Node*, vector<Node*>, minF> pqueue;
-        //     for (auto it : TREE){
-        //         // Nodes that are initialized are equivalent to them being in the closed list
-        //         if (!it.second->initialized){
-        //             pqueue.push(it.second);
-        //         }
-        //     } 
-        //     r = pqueue.top();
-        // }
+        r = ties[rand() % ties.size()];
+
+
 
         while(r->parent != root){
             r = r->parent;
@@ -762,7 +743,7 @@ protected:
     double C = 1.414; // exploration parameter C
     bool goal_found = false;
     Node* root;
-    bool learn = false;
+    bool learn = true;
     bool greedyOneStep;
     string algorithm;
     string trial_expansion;
