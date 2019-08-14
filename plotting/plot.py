@@ -158,14 +158,17 @@ def boxplot(df, n, j, title):
 uctArr = ['UCT','UCTie', 'UCTiep','UCTnancy','UCTS','UCTSie', 'UCTSiep', 'UCTSnancy']
 guctArr = ['GUCT','GUCTie', 'GUCTiep','GUCTnancy','GUCTS','GUCTSie', 'GUCTSiep', 'GUCTSnancy']
 wasArr = ['WAS', 'WASie', 'WASiep','WASnancy']
-otherArr = ['RISK','FHAT','LSSLRTA','IE']
+otherArr = ['RISK','FHAT','LSSLRTA','IE','IEP']
 
 # PARAMS
+
+uctArr_greedyStep = ['UCT-H','UCTie-H', 'UCTiep-H','UCTnancy-H','UCTS-H','UCTSie-H', 'UCTSiep-H', 'UCTSnancy-H']
+guctArr_greedyStep = ['GUCT-H','GUCTie-H', 'GUCTiep-H','GUCTnancy-H','GUCTS-H','GUCTSie-H', 'GUCTSiep-H', 'GUCTSnancy-H']
 DOMAIN = sys.argv[1]
 OUTFILE = DOMAIN + '.pdf'
 DIRECTORY = sys.argv[2]
-ALGO_FILTER = guctArr
-FRONT_APPEND = '_B' # Goes in front of the name of the pdf file being output
+ALGO_FILTER = uctArr
+FRONT_APPEND = 'UCT_' # Goes in front of the name of the pdf file being output
 
 
 # First loop through all the algorithm folders to check of unsolved instances
@@ -220,8 +223,7 @@ for a in ALGO_FILTER:
             continue
         
         for dom in os.listdir(DIRECTORY + '/' + str(algorithm)):
-
-            if '.csv' in str(dom) and DOMAIN in dom:
+            if '.csv' in str(dom) and DOMAIN == dom.split('.')[0]:
                 print(DIRECTORY + '/' + str(algorithm) + '/' + str(dom))
                 df = pd.read_csv(DIRECTORY + '/' + str(algorithm) + '/' + str(dom), delimiter = ',')
                 # algostr = df.iloc[0]['Algorithm']
@@ -267,3 +269,4 @@ pointplot(result, FRONT_APPEND + OUTFILE,False, title)
 
 
 
+wasArr

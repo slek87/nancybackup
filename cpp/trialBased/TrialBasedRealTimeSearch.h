@@ -29,6 +29,7 @@ public:
         bool initialized;
         double edgeCost;
         
+        double g;
         double h;
         double d;
         double derr;
@@ -40,18 +41,23 @@ public:
                         : state(state), value(val), visits(visit), lock(lock), parent(parent), h(h), d(d), derr(derr), epsH(epsH), epsD(epsD){
             initialized = false;
             edgeCost = 0;
+            g = 0;
         }
 
         double getGValue() const { 
-            const Node *cur = this;
-            double gCost = 0;
-
-            while(cur){
-                gCost += cur->edgeCost;
-                cur = cur->parent;
-            }
-            return gCost; 
+            return g;
         }
+
+        // double getGValue() const { 
+        //     const Node *cur = this;
+        //     double gCost = 0;
+
+        //     while(cur){
+        //         gCost += cur->edgeCost;
+        //         cur = cur->parent;
+        //     }
+        //     return gCost; 
+        // }
         double getFValue() const { return getGValue() + h; }
         double getFHatValue() const { return getGValue() + getHHatValue(); }
         double getDHatValue() const { return (derr / (1.0 - epsD)); }
@@ -70,7 +76,10 @@ public:
     struct minH {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->h == n2->h){
-                return n1->getGValue() > n2->getGValue();
+                if (n1->getGValue() == n2->getGValue()){
+                    return rand() % 2;
+                }
+                return n1->getGValue() < n2->getGValue();
 			}
 			return n1->h > n2->h;
         }
@@ -79,6 +88,9 @@ public:
     struct minF {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->getFValue() == n2->getFValue()){
+                if (n1->h == n2->h){
+                    return rand() % 2;
+                }
                 return n1->h > n2->h;
 			}
 			return n1->getFValue() > n2->getFValue();
@@ -88,6 +100,9 @@ public:
     struct minValue {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->value == n2->value){
+                if (n1->getGValue() == n2->getGValue()){
+                    return rand() % 2;
+                }
                 return n1->getGValue() > n2->getGValue();
 			}
 			return n1->value > n2->value;
@@ -97,7 +112,7 @@ public:
     // In the paper, they use max pqueue on g, which make sense if g is uniform.
     typedef priority_queue<Node*, vector<Node*>, maxG> PQueue; // Max queue
     
-    THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = true) 
+    THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = false) 
                     : domain(domain), algorithm(algorithm), lookahead(lookahead), greedyOneStep(greedyOneStep){
         srand(1);
         if (algorithm == "AS"){
@@ -239,12 +254,11 @@ public:
             // if (learn){
             //     learning(TREE);
             // }
+            
 
             // Action selection phase
             root = selectOneStepAction(root, TREE);
-            root->edgeCost += root->parent->edgeCost;
-            updateParent(root->parent);
-
+            updateParent(root);
             resetNode(root);
                        
             // Add this step to the path taken so far
@@ -262,7 +276,7 @@ public:
 
         }
 
-        res.solutionCost = root->edgeCost;
+        res.solutionCost = root->g;
         delete(root);
 
         // if (res.nodesGenerated > trial_limit){
@@ -278,40 +292,33 @@ public:
         // RTA* style, update state to the second best f + edgecost to go back
         // Represents the estimated h cost of solving the problem by returning to this state
         priority_queue<double, vector<double>, greater<double>> minheap;
-        double g = n->getGValue();
-        for (Node* child : n->successors){
-            minheap.push(g + child->edgeCost + child->h);
+
+
+        for (Node* child : n->parent->successors){
+            // minheap.push(domain.heuristic(n->parent->state) + n->edgeCost + child->edgeCost);
+            minheap.push(child->h + child->edgeCost + n->edgeCost);
+
         } 
         if (minheap.size() > 1){
             minheap.pop();
         }
-        domain.updateHeuristic(n->state, minheap.top());
+        domain.updateHeuristic(n->parent->state, minheap.top());
     }
 
     void learning(unordered_map<State, Node*, Hash> TREE){
 
-        priority_queue<Node*, vector<Node*>, minH> open;
-
         for (auto it : TREE){
             if (!it.second->initialized){
-                open.push(it.second);
-            }
-        }
+                Node* cur = it.second;
+                while(cur->parent != root){
+                    if (domain.heuristic(cur->parent->state) > cur->getGValue() + domain.heuristic(cur->state)){
+                        domain.updateHeuristic(cur->parent->state, cur->getGValue() + domain.heuristic(cur->state));
+                        domain.updateDistance(cur->parent->state, domain.distance(cur->state) + 1);
+                        domain.updateDistanceErr(cur->parent->state, domain.distanceErr(cur->state));
+                    }
 
-        while(!open.empty()){
-            Node* cur = open.top();
-            open.pop();
-            while (cur->parent){
-                State s = cur->parent->state;
-                if (domain.heuristic(s) > cur->edgeCost + domain.heuristic(cur->state)){
-                    domain.updateHeuristic(s, cur->edgeCost + domain.heuristic(cur->state));
-                    domain.updateDistance(s, domain.distance(cur->state) + 1);
-                    domain.updateDistanceErr(s, domain.distanceErr(cur->state));
-                    cur->parent->d = (domain.distance(s));
-					cur->parent->derr = (domain.distanceErr(s));
-					cur->parent->h = (domain.heuristic(s));
-                }
-                cur = cur->parent;
+                    cur = cur->parent;
+                } 
             }
         }
     }
@@ -351,6 +358,13 @@ public:
                     delete(n);
                 }
             }
+        }
+    }
+
+    void updateGValues(Node* n){
+        n->g = n->parent->g + n->edgeCost;
+        for (Node* child : n->successors){
+            updateGValues(child);
         }
     }
 
@@ -394,6 +408,7 @@ public:
                 }
 
                 childNode->value  *= w;
+                childNode->g = n->g + childNode->edgeCost;
 
                 //TREE[s'] <- n'
                 TREE[child] = childNode;
@@ -421,42 +436,16 @@ public:
                     s->state = child; // Update label
                     s->edgeCost = domain.getEdgeCost(child);
                     n->successors.insert(s);
+                    updateGValues(s);
 
-                    // Duplicate node detection and debug printing
+                    // Duplicate node detection
                     unordered_set<State, Hash> dup;
                     Node* cur = s;
                     while(cur->parent){
                         if(dup.find(cur->state) == dup.end()){
                             dup.insert(cur->state);
                         } else {
-                            cout << "root" << endl;
-                            cout << root->state << endl;
-                            cout << "Duplication detected" << endl;
-                            cout << s->state << endl;
-                            cout << "old edge cost " << child_oldEdge << endl;
-                            cout << "old cost to child" << child_OldG << endl;
-                            cout << "new edge cost " << s->edgeCost << endl;
-                            cout << "new cost to child" << n_oldG +  s->edgeCost << endl;
-
-                            State ss = cur->state;
-                            cur = cur->parent;
-                            while (cur->state != ss){
-                                cout << cur->state << endl;
-                                cur = cur->parent;
-                            }
-                            cout << cur->state << endl;
-
-                            cout << "Old parent" << endl;
-                            cout << child_Oldpar->state << endl;
-                            cout << "cost to parent " << oldPar_cost << endl;
-
-                            cout << endl;
-                            while (child_Oldpar){
-                                cout << child_Oldpar->state << endl;                            
-                                cout << "edge " << child_Oldpar->edgeCost << endl;
-                                cout << "g " << child_Oldpar->getGValue() << endl;
-                                child_Oldpar = child_Oldpar->parent;
-                            }
+                            cout << "Duplication node in tree detected!" << endl;
                             exit(1);
                         }
                         cur = cur->parent;
@@ -598,47 +587,44 @@ public:
             return n;
         }
 
+        if (greedyOneStep){
+             priority_queue<Node*, vector<Node*>, minH> minheap;
+            // Best f
+            for (auto it : TREE){
+                if (!it.second->initialized){
+                    minheap.push(it.second->parent);
+                }
+            }
+
+            Node* cur = minheap.top();
+            while (cur->parent != root) {
+                cur = cur->parent;
+            }
+            return cur;
+        } 
+
 
         if (trial_expansion == "bfs"){
             return selectBFS(n);
         } else if (trial_expansion == "uct"){
             return selectActionUCT(n);
+        } else if (trial_expansion == "best-f"){
+            priority_queue<Node*, vector<Node*>, minF> minheap;
+            // Best f
+            for (auto it : TREE){
+                if (!it.second->initialized){
+                    minheap.push(it.second);
+                }
+            }
+            Node* cur = minheap.top();
+            while (cur->parent != root) {
+                cur = cur->parent;
+            }
+            return cur;
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
         }  
-        
-        Node* r; 
-
-
-        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-
-        int c = 1;
-        if (greedyOneStep){
-            c = 0;
-        }
-        for (auto it : TREE){
-            // Nodes that are initialized are equivalent to them being in the closed list
-            if (!it.second->initialized){
-                pqueue.push(make_pair(it.second->value + c * it.second->getGValue(), it.second));
-            }
-        } 
-       
-        vector<Node*> ties;
-        double best = pqueue.top().first;
-        while(!pqueue.empty() && pqueue.top().first == best){
-            ties.push_back(pqueue.top().second);
-            pqueue.pop();
-        }
-
-        r = ties[rand() % ties.size()];
-
-
-
-        while(r->parent != root){
-            r = r->parent;
-        }
-        return r;
     }
     
     Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
@@ -657,7 +643,6 @@ public:
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
         }  
-
     }
 
     void backup(Node* n, unordered_map<State, Node*, Hash>& TREE){
@@ -743,7 +728,7 @@ protected:
     double C = 1.414; // exploration parameter C
     bool goal_found = false;
     Node* root;
-    bool learn = true;
+    bool learn = false;
     bool greedyOneStep;
     string algorithm;
     string trial_expansion;

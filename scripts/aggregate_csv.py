@@ -22,6 +22,8 @@ def aggregateCvs(directory):
     print('Aggregating... ' + directory)
     i = 0
     for file in os.listdir(directory):
+        if not '.csv' in file:
+            continue
         i += 1
         with open(directory +'/' + file) as f:
             for line in f:

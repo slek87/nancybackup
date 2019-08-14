@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     int lookahead = stoi(argv[2]);
     string algorithmInput = argv[3];
     string prune_type = "erase";
-    bool greedyOneStep = true;
+    bool greedyOneStep = false;
 
     string algorithm = "";
     bool front = true;

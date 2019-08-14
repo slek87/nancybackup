@@ -36,7 +36,7 @@ for lookahead in "${lookaheadArr[@]}"
 do
     if (( notSolved > 2 ))
     then
-         echo "Few instances cannot be solved within the time limit(${timelimit} ms) , perhaps try try larger timeout?"
+         echo "Few instances cannot be solved within the time limit(${timelimit} s) , perhaps try try larger timeout?"
          exit 1
     fi
 
@@ -73,7 +73,7 @@ do
 
                 if [ ! -f ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv ]
                 then
-                    echo "Time limit(${timelimit} ms) reached: ${instance}"
+                    echo "Time limit(${timelimit} s) reached: ${instance}"
                     let notSolved++
                 fi
 
@@ -105,7 +105,7 @@ do
 
                 if [ ! -f ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv ]
                 then
-                    echo "Time limit(${timelimit} ms)  reached: ${instance}"
+                    echo "Time limit(${timelimit} s)  reached: ${instance}"
                     let notSolved++
                 fi
 
@@ -143,7 +143,7 @@ do
 
                 if [ ! -f ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv ]
                 then
-                    echo "Time limit(${timelimit} ms)  reached: ${instance}"
+                    echo "Time limit(${timelimit} s)  reached: ${instance}"
                     let notSolved++
                 fi
 
