@@ -252,13 +252,13 @@ public:
 
             // Learning phase
             // if (learn){
-            //     learning(TREE);
+            learning(TREE);
             // }
             
 
             // Action selection phase
             root = selectOneStepAction(root, TREE);
-            updateParent(root);
+            // updateParent(root);
             resetNode(root);
                        
             // Add this step to the path taken so far
@@ -289,38 +289,55 @@ public:
 
     void updateParent(Node* n){
         // Change current state h to the sencond best, RTA* style
-        // RTA* style, update state to the second best f + edgecost to go back
+        // RTA* style, update state that is leaving to the second best f of it neighbors
         // Represents the estimated h cost of solving the problem by returning to this state
+        // whereas LRTA* style uses min f, which will converge eventually
+
         priority_queue<double, vector<double>, greater<double>> minheap;
 
-
         for (Node* child : n->parent->successors){
-            // minheap.push(domain.heuristic(n->parent->state) + n->edgeCost + child->edgeCost);
-            minheap.push(child->h + child->edgeCost + n->edgeCost);
+            minheap.push(child->getFValue());
 
         } 
-        if (minheap.size() > 1){
-            minheap.pop();
+        // Lemma 11.1 from Heuristic Search: Theory and Applications
+        // if (minheap.size() > 1){
+        //     minheap.pop();
+        // }
+        if (n->h > minheap.top()){
+        } else {
+            domain.updateHeuristic(n->parent->state, minheap.top());
+
         }
-        domain.updateHeuristic(n->parent->state, minheap.top());
+
     }
 
     void learning(unordered_map<State, Node*, Hash> TREE){
-
+        
+        // Algorithm 11.2 from Heuristic Search: Theory and Applications
+                // Algorithm 11.2 from Heuristic Search: Theory and Applications
+        PQueue backUpQueue;
         for (auto it : TREE){
-            if (!it.second->initialized){
-                Node* cur = it.second;
-                while(cur->parent != root){
-                    if (domain.heuristic(cur->parent->state) > cur->getGValue() + domain.heuristic(cur->state)){
-                        domain.updateHeuristic(cur->parent->state, cur->getGValue() + domain.heuristic(cur->state));
-                        domain.updateDistance(cur->parent->state, domain.distance(cur->state) + 1);
-                        domain.updateDistanceErr(cur->parent->state, domain.distanceErr(cur->state));
-                    }
-
-                    cur = cur->parent;
-                } 
+            if (it.second->initialized){
+                backUpQueue.push(it.second);
             }
         }
+
+        while (!backUpQueue.empty()){
+            priority_queue<double, vector<double>, greater<double>> minheap;
+            Node* n = backUpQueue.top();
+            for (Node* child : n->successors){
+                minheap.push(child->h + child->edgeCost);
+            } 
+
+            if (n->h > minheap.top()){
+            } else {
+                domain.updateHeuristic(n->state, minheap.top());
+                n->h = minheap.top();
+            }
+
+            backUpQueue.pop();
+        }
+
     }
    
     void performTrial(unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
@@ -588,21 +605,60 @@ public:
         }
 
         if (greedyOneStep){
-             priority_queue<Node*, vector<Node*>, minH> minheap;
-            // Best f
+             priority_queue<Node*, vector<Node*>, minValue> minheap;
             for (auto it : TREE){
                 if (!it.second->initialized){
-                    minheap.push(it.second->parent);
+                    minheap.push(it.second);
                 }
             }
-
+            
             Node* cur = minheap.top();
             while (cur->parent != root) {
                 cur = cur->parent;
             }
             return cur;
-        } 
+        } else {
+            priority_queue<Node*, vector<Node*>, minF> minheap;
+            for (auto it : TREE){
+                if (!it.second->initialized){
+                    minheap.push(it.second);
+                }
+            }
+            Node* cur = minheap.top();
+            while (cur->parent != root) {
+                cur = cur->parent;
+            }
+            return cur;
+        }
 
+        // Backing up to for checking
+        // for (Node* child : root->successors){
+        //     if (!domain.isGoal(child->state)){
+        //         child->value = numeric_limits<double>::infinity();
+        //     } else {
+        //         return child;
+        //     }
+        // } 
+
+        // for (auto it : TREE){
+        //     if (!it.second->initialized){
+        //         Node* cur = it.second;
+        //         double f = it.second->value;
+        //         while(cur->parent != root){
+        //             f += cur->edgeCost;
+        //             cur = cur->parent;
+        //         }
+        //         f += cur->edgeCost;
+
+
+        //         if (greedyOneStep && cur->value > it.second->h){
+        //             cur->value = it.second->h;
+        //         } else if (cur->value > f){
+        //             cur->value = f;
+        //         }
+                
+        //     }
+        // }
 
         if (trial_expansion == "bfs"){
             return selectBFS(n);
@@ -728,7 +784,7 @@ protected:
     double C = 1.414; // exploration parameter C
     bool goal_found = false;
     Node* root;
-    bool learn = false;
+    bool learn = true;
     bool greedyOneStep;
     string algorithm;
     string trial_expansion;
