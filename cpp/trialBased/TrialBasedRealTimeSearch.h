@@ -105,18 +105,18 @@ public:
     THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = false) 
                     : domain(domain), algorithm(algorithm), lookahead(lookahead), greedyOneStep(greedyOneStep){
         srand(1);
-        if (algorithm == "WAS1"){
+        if (algorithm == "AS"){
             trial_expansion = "bfs";
             trial_backup = "bfs";
-        } else if (algorithm == "WAS1nancy"){
+        } else if (algorithm == "ASnancy"){
             trial_expansion = "bfs";
             trial_backup = "bfs";
             backup_type = "nancy";
-        } else if (algorithm == "WAS1ie"){
+        } else if (algorithm == "ASie"){
             trial_expansion = "bfs";
             trial_backup = "bfs";
             backup_type = "ie";
-        } else if (algorithm == "WAS1iep"){
+        } else if (algorithm == "ASiep"){
             trial_expansion = "bfs";
             trial_backup = "bfs";
             backup_type = "iep";
@@ -287,23 +287,22 @@ public:
         // Represents the estimated h cost of solving the problem by returning to this state
         // whereas LRTA* style uses min f, which will converge eventually
 
-        // priority_queue<double, vector<double>, greater<double>> minheap;
-        // for (Node* child : n->parent->successors){
-        //     // minheap.push(child->getFValue());
-        //     minheap.push(n->parent->g + child->edgeCost + child->h);
-        // } 
 
-        // if (minheap.size() > 1){
-        //     minheap.pop();
-        // }
+        // RTA*
+        priority_queue<double, vector<double>, greater<double>> minheap;
+        for (Node* child : n->parent->successors){
+            // minheap.push(child->getFValue());
+            minheap.push(child->g + child->h);
+        } 
+        if (minheap.size() > 1){
+            minheap.pop();
+        }
 
-        // if (domain.heuristic(n->parent->state) > minheap.top()){
+        if (domain.heuristic(n->parent->state) < minheap.top() - n->parent->g){
+            domain.updateHeuristic(n->parent->state, minheap.top() - n->parent->g);
+        }
 
-        // } else {
-        //     domain.updateHeuristic(n->parent->state, minheap.top());
-        // }
-
-        domain.updateHeuristic(n->parent->state, domain.heuristic(n->parent->state) + n->edgeCost);
+        // domain.updateHeuristic(n->parent->state, domain.heuristic(n->parent->state) + n->edgeCost);
         // domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
     }
 
@@ -511,22 +510,39 @@ public:
         // THTS-BFS
         // return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
         // i.e. return successor that is not locked with the lowest value
-        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-        for (Node* child : n->successors){
-            if (prune_type == "lock" && child->lock){
-                continue;
-            }
-            double child_value = child->value + k * child->edgeCost;
-            pqueue.push(make_pair(child_value, child));
-        }
-        vector<Node*> ties;
-        double best = pqueue.top().first;
-        while(!pqueue.empty() && pqueue.top().first == best){
-            ties.push_back(pqueue.top().second);
-            pqueue.pop();
+        // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
+        // for (Node* child : n->successors){
+        //     if (prune_type == "lock" && child->lock){
+        //         continue;
+        //     }
+        //     double child_value = child->value + k * child->edgeCost;
+        //     pqueue.push(make_pair(child_value, child));
+        // }
+        // vector<Node*> ties;
+        // double best = pqueue.top().first;
+        // while(!pqueue.empty() && pqueue.top().first == best){
+        //     ties.push_back(pqueue.top().second);
+        //     pqueue.pop();
+        // }
+
+        // return ties[rand() % ties.size()];
+        if (n->successors.size() == 1){
+            return *(n->successors.begin());
         }
 
-        return ties[rand() % ties.size()];
+        if (k == 0){
+            PQueueMinH pqueue;
+            for (Node* child : n->successors){
+                pqueue.push(child);
+            }
+            return pqueue.top();
+        } else {
+            PQueueMinValue pqueue;
+            for (Node* child : n->successors){
+                pqueue.push(child);
+            }
+            return pqueue.top();
+        }
     }
 
     Node* selectUCT(Node* n){
@@ -576,15 +592,16 @@ public:
         }
     
 
-        vector<Node*> ties;
+        PQueueMinH pqueueMinH;
+        // vector<Node*> ties;
         double best = pqueue.top().first;
         while(!pqueue.empty() && pqueue.top().first == best){
-            ties.push_back(pqueue.top().second);
+            // ties.push_back(pqueue.top().second);
+            pqueueMinH.push(pqueue.top().second);
             pqueue.pop();
         }
 
-        int r = rand() % ties.size();
-        return ties[r];
+        return pqueueMinH.top();
     }
 
     Node* selectOneStepAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
@@ -691,13 +708,14 @@ public:
             // Backing up the best estimated f value if k = 1
             double value = 0;
             for (Node* child : n->successors){
-                // value += child->visits * (child->value + k * child->edgeCost);
+                value += child->visits * (child->value + k * child->edgeCost);
 
-                if (k == 1){
-                    value += child->visits * child->minval;
-                } else {
-                    value += child->visits * child->minh;
-                }
+                // Not really correct...
+                // if (k == 1){
+                //     value += child->visits * child->minval;
+                // } else {
+                //     value += child->visits * child->minh;
+                // }
 
                 visits += child->visits;
                 lock = lock && child->lock;
