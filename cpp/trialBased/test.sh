@@ -1,40 +1,68 @@
 algorithm=$1
-echo "${algorithm}"
+echo -ne "${algorithm}"
 
 timeout 11 ./thrt Pancake 10 ${algorithm} < worlds/9-10.pan
+echo -ne "."
 timeout 11 ./thrt Pancake 10 ${algorithm} < worlds/20-10.pan
 
+echo -ne "."
 timeout 11 ./thrt Pancake 30 ${algorithm} < worlds/85-10.pan
+echo -ne "."
 timeout 11 ./thrt Pancake 30 ${algorithm} < worlds/86-10.pan
+echo -ne "."
 timeout 11 ./thrt Pancake 30 ${algorithm} < worlds/87-10.pan
 
+echo -ne "."
 timeout 11 ./thrt Pancake 100 ${algorithm} < worlds/9-10.pan
+echo -ne "."
 timeout 11 ./thrt Pancake 100 ${algorithm} < worlds/85-10.pan
+echo -ne "."
 timeout 11 ./thrt Pancake 1000 ${algorithm} < worlds/86-10.pan
+echo -ne "."
 timeout 11 ./thrt Pancake 1000 ${algorithm} < worlds/87-10.pan
 
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 10 ${algorithm} < worlds/9-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 10 ${algorithm} < worlds/20-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 10 ${algorithm} < worlds/85-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 10 ${algorithm} < worlds/86-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 10 ${algorithm} < worlds/87-10.pan
 
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 30 ${algorithm} < worlds/9-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 30 ${algorithm} < worlds/20-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 30 ${algorithm} < worlds/76-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 30 ${algorithm} < worlds/85-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 30 ${algorithm} < worlds/86-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 30 ${algorithm} < worlds/87-10.pan
 
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 100 ${algorithm} < worlds/9-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 100 ${algorithm} < worlds/85-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 100 ${algorithm} < worlds/86-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 100 ${algorithm} < worlds/87-10.pan
 
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 1000 ${algorithm} < worlds/9-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 1000 ${algorithm} < worlds/20-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 1000 ${algorithm} < worlds/33-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 1000 ${algorithm} < worlds/86-10.pan
+echo -ne "."
 timeout 11 ./thrt PancakeDPS 1000 ${algorithm} < worlds/87-10.pan
 
 
@@ -44,35 +72,47 @@ timeout 11 ./thrt PancakeDPS 1000 ${algorithm} < worlds/87-10.pan
 # timeout 11 ./thrt SlidingPuzzle 10 ${algorithm} < worlds/3-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 10 ${algorithm} < worlds/4-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 10 ${algorithm} < worlds/5-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 10 ${algorithm} < worlds/6-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 10 ${algorithm} < worlds/7-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 10 ${algorithm} < worlds/8-4x4.st
 
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/1-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/2-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/3-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/4-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/5-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/6-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/7-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 30 ${algorithm} < worlds/8-4x4.st
 
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/1-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/2-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/3-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/4-4x4.st
+echo -ne "."
 timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/5-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/6-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/7-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 300 ${algorithm} < worlds/8-4x4.st
 
-echo "A"
+echo -ne "A "
 timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/1-4x4.st
-echo "B"
+echo -ne "B "
 timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/2-4x4.st
-echo "C"
+echo -ne "C "
 timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/3-4x4.st
-echo "D"
+echo -ne "D "
 timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/4-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/5-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/6-4x4.st
@@ -80,25 +120,25 @@ timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/4-4x4.st
 # timeout 11 ./thrt SlidingPuzzle 1000 ${algorithm} < worlds/8-4x4.st
 
 
-echo "1"
+echo -ne "E "
 timeout 11 ./thrt HeavyTile 10 ${algorithm} < worlds/7-4x4.st
-echo "2"
+echo -ne "F "
 timeout 11 ./thrt HeavyTile 10 ${algorithm} < worlds/8-4x4.st
-echo "3"
+echo -ne "G "
 timeout 11 ./thrt HeavyTile 30 ${algorithm} < worlds/1-4x4.st
-echo "4"
+echo -ne "H "
 timeout 11 ./thrt HeavyTile 30 ${algorithm} < worlds/2-4x4.st
-echo "5"
+echo -ne "I "
 timeout 11 ./thrt HeavyTile 300 ${algorithm} < worlds/7-4x4.st
-echo "6"
+echo -ne "J "
 timeout 11 ./thrt HeavyTile 300 ${algorithm} < worlds/8-4x4.st
-echo "7"
+echo -ne "K "
 timeout 11 ./thrt HeavyTile 1000 ${algorithm} < worlds/7-4x4.st
-echo "8"
+echo -ne "L "
 timeout 11 ./thrt HeavyTile 1000 ${algorithm} < worlds/8-4x4.st
-echo "9"
+echo -ne "M "
 timeout 11 ./thrt HeavyTile 1000 ${algorithm} < worlds/1-4x4.st
-echo "10"
+echo -ne "N "
 timeout 11 ./thrt HeavyTile 1000 ${algorithm} < worlds/2-4x4.st
-echo "11"
+echo -ne "O "
 timeout 11 ./thrt HeavyTile 1000 ${algorithm} < worlds/3-4x4.st
