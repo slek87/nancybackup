@@ -63,7 +63,7 @@ do
             else
                 echo "${instance}-${dimensions}x${dimensions}"
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}.tmp
-                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
+                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]] 
                 then
                     timeout ${timelimit} ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 else

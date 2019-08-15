@@ -1,6 +1,6 @@
 #!/bin/bash
 
-algoArr=("UCT-H" "GUCT-H" "UCTS-H" "GUCTS-H" "UCTnancy-H" "GUCTnancy-H" "UCTSnancy-H" "GUCTSnancy-H" "UCTie-H" "GUCTie-H" "UCTSie-H" "GUCTSie-H" "UCTiep-H" "GUCTiep-H" "UCTSiep-H" "GUCTSiep-H" "AS-H" "WAS-H" "WASie-H" "WASiep-H" "WASnancy-H" "UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "UCTiep" "GUCTiep" "UCTSiep" "GUCTSiep" "AS" "WAS" "WASie" "WASiep" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
+algoArr=("UCT-H" "GUCT-H" "UCTS-H" "GUCTS-H" "UCTnancy-H" "GUCTnancy-H" "UCTSnancy-H" "GUCTSnancy-H" "UCTie-H" "GUCTie-H" "UCTSie-H" "GUCTSie-H" "UCTiep-H" "GUCTiep-H" "UCTSiep-H" "GUCTSiep-H" "WAS-H" "WASie-H" "WASiep-H" "WASnancy-H" "UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "UCTiep" "GUCTiep" "UCTSiep" "GUCTSiep" "WAS" "WASie" "WASiep" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
 # algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "UCTiep" "GUCTiep" "UCTSiep" "GUCTSiep" "WAS" "WASie" "WASiep" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
 default=true
 

@@ -36,6 +36,11 @@ public:
         double epsH;
         double epsD;
 
+        double minh;
+        double minf;
+        double minval;
+
+
     public:
         Node(State state, double val, int visit, bool lock, Node* parent, double h, double d, double derr, double epsH, double epsD)
                         : state(state), value(val), visits(visit), lock(lock), parent(parent), h(h), d(d), derr(derr), epsH(epsH), epsD(epsD){
@@ -56,6 +61,9 @@ public:
 
     struct maxG {
         bool operator()(const Node* n1, const Node* n2){
+            if (n1->getGValue() < n2->getGValue()){
+                return rand() % 2;
+            }
             return n1->getGValue() < n2->getGValue();
         }
     };
@@ -72,7 +80,7 @@ public:
     struct minF {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->getFValue() == n2->getFValue()){
-                return n1->h > n2->h;
+                return n1->getGValue() < n2->getGValue();
 			}
 			return n1->getFValue() > n2->getFValue();
         }
@@ -204,7 +212,11 @@ public:
         } else {
             root->value = domain.heuristic(root_state);
         }
-        actionVisits[root_state] = 1;
+        root->minh = root->h;
+        root->minf = root->h;
+        root->minval = root->value;
+
+
 
         while(true){
             if (domain.isGoal(root->state)){
@@ -230,7 +242,7 @@ public:
 
             // Learning phase
             // if (learn){
-            learning(TREE);
+            // learning(TREE);
             // }
             
 
@@ -271,18 +283,41 @@ public:
         // Represents the estimated h cost of solving the problem by returning to this state
         // whereas LRTA* style uses min f, which will converge eventually
 
-        priority_queue<double, vector<double>, greater<double>> minheap;
+        // priority_queue<double, vector<double>, greater<double>> minheap;
+        // for (Node* child : n->parent->successors){
+        //     // minheap.push(child->getFValue());
+        //     minheap.push(n->parent->g + child->edgeCost + child->h);
+        // } 
 
-        for (Node* child : n->parent->successors){
-            minheap.push(child->getFValue());
-            // minheap.push(child->h + child->edgeCost);
-        } 
-        // Lemma 11.1 from Heuristic Search: Theory and Applications
-        if (n->parent->h > minheap.top()){
+        // if (minheap.size() > 1){
+        //     minheap.pop();
+        // }
+
+        // if (domain.heuristic(n->parent->state) > minheap.top()){
+
+        // } else {
+        //     domain.updateHeuristic(n->parent->state, minheap.top());
+        // }
+        domain.updateHeuristic(n->parent->state, domain.heuristic(n->parent->state) + n->edgeCost);
+        // domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
+
+
+    }
+
+    void updateDomainH(Node* n){
+        priority_queue<double, vector<double>, greater<double>> minheap;
+        for (Node* child : n->successors){
+            minheap.push(domain.heuristic(child->state) + child->edgeCost);
+        }
+
+        if (minheap.empty()){
+            return;
+        }
+
+        if (domain.heuristic(n->state) > minheap.top()){
 
         } else {
-            domain.updateHeuristic(n->parent->state, minheap.top());
-
+            domain.updateHeuristic(n->state, minheap.top());
         }
     }
 
@@ -305,11 +340,11 @@ public:
             Node* n = backUpQueue.top();
             for (Node* child : n->successors){
                 minheap.push(child->h + child->edgeCost);
-                // if (greedyOneStep){
-                //     minval.push(child->value);
-                // } else {
-                //     minval.push(child->value + child->edgeCost);
-                // }
+                if (greedyOneStep){
+                    minval.push(child->value);
+                } else {
+                    minval.push(child->value + child->edgeCost);
+                }
             } 
 
             if (n->h > minheap.top()){
@@ -321,8 +356,8 @@ public:
                 n->h = minheap.top();
             }
             
-            // n->value = minval.top();
-            // n->visits = 1;
+            n->value = minval.top();
+            n->visits = 1;
 
             backUpQueue.pop();
         }
@@ -356,7 +391,8 @@ public:
         while (!backUpQueue.empty()){
             n = backUpQueue.top(); // m <-backUpQueue.pop()
             backUpQueue.pop();
-            backup(n, TREE);
+            backupNode(n, TREE);
+            updateDomainH(n);
 
             if (n != root){
                 backUpQueue.push(n->parent);
@@ -365,12 +401,22 @@ public:
                 }
             }
         }
+
     }
 
-    void updateGValues(Node* n){
+    void updateSuccessors(Node* n){
         n->g = n->parent->g + n->edgeCost;
+        priority_queue<double, vector<double>, greater<double>> minheapf;
+
         for (Node* child : n->successors){
-            updateGValues(child);
+            updateSuccessors(child);
+            minheapf.push(child->minf);
+        }
+
+        if (minheapf.size() != 0){
+            n->minf = minheapf.top();
+        } else {
+            n->minf = n->minh + n->g;
         }
     }
 
@@ -415,6 +461,10 @@ public:
 
                 childNode->value  *= w;
                 childNode->g = n->g + childNode->edgeCost;
+                childNode->minh = childNode->h;
+                childNode->minf = childNode->h + childNode->g;
+                childNode->minval = childNode->value;
+
 
                 //TREE[s'] <- n'
                 TREE[child] = childNode;
@@ -442,7 +492,7 @@ public:
                     s->state = child; // Update label
                     s->edgeCost = domain.getEdgeCost(child);
                     n->successors.insert(s);
-                    updateGValues(s);
+                    updateSuccessors(s);
 
                     // Duplicate node detection
                     unordered_set<State, Hash> dup;
@@ -500,15 +550,7 @@ public:
         return ties[rand() % ties.size()];
     }
 
-    Node* selectActionUCT(Node* n){
-        return selectUCT(n, true);
-    }
-
-    Node* selectTrialUCT(Node* n){
-        return selectUCT(n, false);
-    }
-
-    Node* selectUCT(Node* n, bool action){
+    Node* selectUCT(Node* n){
          // UTC
         priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
         double min = numeric_limits<double>::infinity();
@@ -543,19 +585,6 @@ public:
             int self_visits = n->visits;
             int child_visits = child->visits;
 
-            if (action){
-                if (actionVisits.find(n->state) == actionVisits.end()){
-                    actionVisits[n->state] = 1;
-                } 
-                self_visits = actionVisits[n->state];
-                if (actionVisits.find(child->state) == actionVisits.end()){
-                    child_visits = 1;
-                } else {
-                    child_visits = actionVisits[child->state];
-                }
-
-            }
-
             double csq = (C * sqrt(log(self_visits)/child_visits));
 
             if (denom != 0){
@@ -576,14 +605,6 @@ public:
         }
 
         int r = rand() % ties.size();
-
-        if (action){
-            if (actionVisits.find(ties[r]->state) == actionVisits.end()){
-                actionVisits[ties[r]->state] = 1;
-            } else {
-                actionVisits[ties[r]->state] += 1;
-            }
-        }
         return ties[r];
     }
 
@@ -592,20 +613,49 @@ public:
             return *(n->successors.begin());
         }
 
-                
         priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-        for (auto it : TREE){
-            if (!it.second->initialized){
-                if (greedyOneStep){
-                    pqueue.push(make_pair( it.second->value, it.second));
-                } else {
-                    pqueue.push(make_pair( it.second->value + it.second->g, it.second));
-                }
+        for (Node* child : n->successors){
+            if(greedyOneStep){
+                pqueue.push(make_pair(child->minh, child));
+
+            } else {
+                pqueue.push(make_pair(child->minf, child));
+
             }
         }
+        vector<Node*> ties;
+        double best = pqueue.top().first;
+        while(!pqueue.empty() && pqueue.top().first == best){
+            ties.push_back(pqueue.top().second);
+            pqueue.pop();
+        }
 
-        return pqueue.top().second;
+        return ties[rand() % ties.size()];
 
+        // for (auto it : TREE){
+        //     if (!it.second->initialized){
+        //         if (greedyOneStep){
+        //             pqueue.push(make_pair( it.second->value, it.second));
+        //         } else {
+        //             pqueue.push(make_pair( it.second->value + it.second->g, it.second));
+        //         }
+        //     }
+        // }
+
+        // for (Node* child : n->successors){
+        //     if (greedyOneStep){
+        //         pqueue.push(make_pair(child->h, child));
+        //     } else {
+        //         pqueue.push(make_pair(child->h + child->edgeCost, child));
+        //     }
+        // } 
+
+        
+        // Node* cur = pqueue.top().second;
+        // while (cur->parent != root) {
+        //     cur = cur->parent;
+        // }
+        // return cur;
 
         // if (greedyOneStep){
         //      priority_queue<Node*, vector<Node*>, minValue> minheap;
@@ -633,17 +683,6 @@ public:
         //     }
         //     return cur;
         // }
-
-
-        // if (trial_expansion == "bfs"){
-        //     return selectBFS(n);
-        // } else if (trial_expansion == "uct"){
-        //     return selectTrialUCT(n);
-        // } else {
-        //     cout << "Invalid algorithm: " << algorithm << endl;
-        //     exit(1);
-        // }  
-
     }
     
     Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
@@ -656,14 +695,14 @@ public:
         if (trial_expansion == "bfs"){
             return selectBFS(n);
         } else if (trial_expansion == "uct"){
-            return selectTrialUCT(n);
+            return selectUCT(n);
         } else {
             cout << "Invalid algorithm: " << algorithm << endl;
             exit(1);
         }  
     }
 
-    void backup(Node* n, unordered_map<State, Node*, Hash>& TREE){
+    void backupNode(Node* n, unordered_map<State, Node*, Hash>& TREE){
         // cout << "Back up:\n" << n->state << endl;
 
         if (n->successors.size() == 0){
@@ -679,6 +718,11 @@ public:
         int visits = 0;
         bool lock = true;
 
+        priority_queue<double, vector<double>, greater<double>> minheaph;
+        priority_queue<double, vector<double>, greater<double>> minheapf;
+        priority_queue<double, vector<double>, greater<double>> minheapval;
+
+
         if (trial_backup == "bfs" ){
             // THTS-BFS
             // Backing up the best h value if k = 0
@@ -692,6 +736,11 @@ public:
                 }
                 visits += child->visits; // v(n) <- sum of n' in N(n) {v(n')}
                 lock = lock && child->lock; // l(n) <- bools of n' in N(n) {l(n')}
+                minheaph.push(child->minh);
+                minheapf.push(child->minf);
+                minheapval.push(child->minval);
+                
+                
             }
             n->value = best_value;
         } else if (trial_backup == "uct"){
@@ -702,6 +751,9 @@ public:
                 value += child->visits * (child->value + k * child->edgeCost);
                 visits += child->visits;
                 lock = lock && child->lock;
+                minheaph.push(child->minh);
+                minheapf.push(child->minf);
+                minheapval.push(child->minval);
             }
             n->value = value/visits;
         } else {
@@ -711,6 +763,9 @@ public:
 
         n->visits = visits;
         n->lock = lock;
+        n->minh = minheaph.top();
+        n->minf = minheapf.top();
+        n->minval = minheapval.top();
     }
 
     void setK(double v){
@@ -753,6 +808,5 @@ protected:
     string trial_backup;
     string backup_type;
     string prune_type = "erase"; // default to removing deadends
-    unordered_map<State, int, Hash> actionVisits;
     bool record_plan = false;
 };
