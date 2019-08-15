@@ -56,9 +56,6 @@ public:
 
     struct maxG {
         bool operator()(const Node* n1, const Node* n2){
-            if (n1->getGValue()  == n2->getGValue()){
-                return rand() % 2;
-            }
             return n1->getGValue() < n2->getGValue();
         }
     };
@@ -66,9 +63,6 @@ public:
     struct minH {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->h == n2->h){
-                if (n1->getGValue() == n2->getGValue()){
-                    return rand() % 2;
-                }
                 return n1->getGValue() < n2->getGValue();
 			}
 			return n1->h > n2->h;
@@ -78,9 +72,6 @@ public:
     struct minF {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->getFValue() == n2->getFValue()){
-                if (n1->h == n2->h){
-                    return rand() % 2;
-                }
                 return n1->h > n2->h;
 			}
 			return n1->getFValue() > n2->getFValue();
@@ -90,9 +81,6 @@ public:
     struct minValue {
         bool operator()(const Node* n1, const Node* n2){
 			if (n1->value == n2->value){
-                if (n1->getGValue() == n2->getGValue()){
-                    return rand() % 2;
-                }
                 return n1->getGValue() > n2->getGValue();
 			}
 			return n1->value > n2->value;
@@ -287,10 +275,11 @@ public:
 
         for (Node* child : n->parent->successors){
             minheap.push(child->getFValue());
-
+            // minheap.push(child->h + child->edgeCost);
         } 
         // Lemma 11.1 from Heuristic Search: Theory and Applications
-        if (n->h > minheap.top()){
+        if (n->parent->h > minheap.top()){
+
         } else {
             domain.updateHeuristic(n->parent->state, minheap.top());
 
@@ -302,13 +291,13 @@ public:
         // Algorithm 11.2 from Heuristic Search: Theory and Applications
         PQueue backUpQueue;
         for (auto it : TREE){
-            if (it.second->initialized){
+            if (it.second->initialized && it.second != root){
                 backUpQueue.push(it.second);
             }
         }
 
         // Since we are traversing the leaf to the root, mind as well back up the information
-        // to be used for the one step action procedure :)
+        // to be used for the one step action procedure 
         while (!backUpQueue.empty()){
             priority_queue<double, vector<double>, greater<double>> minheap;
             priority_queue<double, vector<double>, greater<double>> minval;
@@ -316,19 +305,25 @@ public:
             Node* n = backUpQueue.top();
             for (Node* child : n->successors){
                 minheap.push(child->h + child->edgeCost);
-                if (greedyOneStep){
-                    minval.push(child->value / w);
-                } else {
-                    minval.push(child->value / w + child->edgeCost);
-                }
+                // if (greedyOneStep){
+                //     minval.push(child->value);
+                // } else {
+                //     minval.push(child->value + child->edgeCost);
+                // }
             } 
 
             if (n->h > minheap.top()){
+                // domain.updateHeuristic(n->state, minheap.top());    
+                // n->h = minheap.top();
+
             } else {
                 domain.updateHeuristic(n->state, minheap.top());
                 n->h = minheap.top();
             }
-            n->value = minval.top();
+            
+            // n->value = minval.top();
+            // n->visits = 1;
+
             backUpQueue.pop();
         }
 
@@ -594,41 +589,70 @@ public:
 
     Node* selectOneStepAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
         if (n->successors.size() == 1){
-            n = *(n->successors.begin());
-            return n;
+            return *(n->successors.begin());
         }
 
-        if (trial_expansion == "bfs"){
-            return selectBFS(n);
-        } else if (trial_expansion == "uct"){
-            return selectActionUCT(n);
-        } else if (trial_expansion == "best-f"){
-            priority_queue<Node*, vector<Node*>, minF> minheap;
-            // Best f
-            for (auto it : TREE){
-                if (!it.second->initialized){
-                    minheap.push(it.second);
+                
+        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
+        for (auto it : TREE){
+            if (!it.second->initialized){
+                if (greedyOneStep){
+                    pqueue.push(make_pair( it.second->value, it.second));
+                } else {
+                    pqueue.push(make_pair( it.second->value + it.second->g, it.second));
                 }
             }
-            Node* cur = minheap.top();
-            while (cur->parent != root) {
-                cur = cur->parent;
-            }
-            return cur;
-        } else {
-            cout << "Invalid algorithm: " << algorithm << endl;
-            exit(1);
-        }  
+        }
+
+        return pqueue.top().second;
+
+
+        // if (greedyOneStep){
+        //      priority_queue<Node*, vector<Node*>, minValue> minheap;
+        //     for (auto it : TREE){
+        //         if (!it.second->initialized){
+        //             minheap.push(it.second);
+        //         }
+        //     }
+            
+        //     Node* cur = minheap.top();
+        //     while (cur->parent != root) {
+        //         cur = cur->parent;
+        //     }
+        //     return cur;
+        // } else {
+        //     priority_queue<Node*, vector<Node*>, minF> minheap;
+        //     for (auto it : TREE){
+        //         if (!it.second->initialized){
+        //             minheap.push(it.second);
+        //         }
+        //     }
+        //     Node* cur = minheap.top();
+        //     while (cur->parent != root) {
+        //         cur = cur->parent;
+        //     }
+        //     return cur;
+        // }
+
+
+        // if (trial_expansion == "bfs"){
+        //     return selectBFS(n);
+        // } else if (trial_expansion == "uct"){
+        //     return selectTrialUCT(n);
+        // } else {
+        //     cout << "Invalid algorithm: " << algorithm << endl;
+        //     exit(1);
+        // }  
+
     }
     
     Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
         // cout << "Select action:" << endl;
         // If there's only one child   
         if (n->successors.size() == 1){
-            n = *(n->successors.begin());
-            return n;
+            return *(n->successors.begin());
         }
-        // Min queue to be used for tie breaking
+
         if (trial_expansion == "bfs"){
             return selectBFS(n);
         } else if (trial_expansion == "uct"){
