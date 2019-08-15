@@ -70,33 +70,37 @@ public:
 
     struct minH {
         bool operator()(const Node* n1, const Node* n2){
-			if (n1->h == n2->h){
-                return n1->getGValue() < n2->getGValue();
+			if (n1->minh == n2->minh){
+                // return n1->getGValue() < n2->getGValue();
+                return n1->edgeCost > n2->edgeCost;
 			}
-			return n1->h > n2->h;
+			return n1->minh > n2->minh;
         }
     };
 
     struct minF {
         bool operator()(const Node* n1, const Node* n2){
-			if (n1->getFValue() == n2->getFValue()){
+			if (n1->minf == n2->minf){
                 return n1->getGValue() < n2->getGValue();
 			}
-			return n1->getFValue() > n2->getFValue();
+			return n1->minf > n2->minf;
         }
     };
 
     struct minValue {
         bool operator()(const Node* n1, const Node* n2){
-			if (n1->value == n2->value){
-                return n1->getGValue() > n2->getGValue();
+			if (n1->minval == n2->minval){
+                return n1->minh > n2->minh;
 			}
-			return n1->value > n2->value;
+			return n1->minval > n2->minval;
         }
     };
 
     // In the paper, they use max pqueue on g, which make sense if g is uniform.
-    typedef priority_queue<Node*, vector<Node*>, maxG> PQueue; // Max queue
+    typedef priority_queue<Node*, vector<Node*>, maxG> PQueueMaxG;
+    typedef priority_queue<Node*, vector<Node*>, minH> PQueueMinH; 
+    typedef priority_queue<Node*, vector<Node*>, minValue> PQueueMinValue; 
+
     
     THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = false) 
                     : domain(domain), algorithm(algorithm), lookahead(lookahead), greedyOneStep(greedyOneStep){
@@ -303,61 +307,9 @@ public:
         // domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
     }
 
-    void updateLearningH(Node* n){
-        // Algorithm 11.2 from Heuristic Search: Theory and Applications
-        priority_queue<double, vector<double>, greater<double>> minheap;
-
-        // for (Node* child : n->successors){
-        //     minheap.push(child->h + child->edgeCost);
-        // }
-        // if (minheap.empty()){
-        //     return;
-        // }
-        // if (n->h > minheap.top()){
-        // } else {
-        //    n->h = minheap.top();
-        // }
-
-
-        // for (Node* child : n->successors){
-        //     minheap.push(domain.heuristic(child->state) + child->edgeCost);
-        // }
-        // if (minheap.empty()){
-        //     return;
-        // }
-        // if (domain.heuristic(n->state) > minheap.top()){
-        // } else {
-        //     domain.updateHeuristic(n->state, minheap.top());
-        // }
-
-        
-        for (Node* child : n->successors){
-            minheap.push(domain.heuristic(child->state) + child->edgeCost);
-        }
-        if (minheap.empty()){
-            return;
-        }
-   
-        domain.updateHeuristic(n->state, minheap.top());
-        
-
-        // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-        // for (Node* child : n->successors){
-        //     pqueue.push(make_pair(domain.heuristic(child->state) + child->edgeCost, child));
-        // }
-        // if (minheap.empty()){
-        //     return;
-        // }
-        // if (domain.heuristic(n->state) > pqueue.top().first){
-        //     domain.updateHeuristic(n->state,  pqueue.top().first);
-		// 	domain.updateDistance(n->state, domain.distance(pqueue.top().second->state) + 1);
-		// 	domain.updateDistanceErr(n->state, domain.distanceErr(pqueue.top().second->state));
-        // } 
-    }
-
     void learning(unordered_map<State, Node*, Hash> TREE){
         // Algorithm 11.2 from Heuristic Search: Theory and Applications
-        PQueue backUpQueue;
+        PQueueMaxG backUpQueue;
         for (auto it : TREE){
             if (it.second->initialized && it.second != root){
                 backUpQueue.push(it.second);
@@ -383,7 +335,7 @@ public:
     }
    
     void performTrial(unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
-        PQueue backUpQueue;
+        PQueueMaxG backUpQueue;
         Node* n = root;
 
         while (n->initialized){           
@@ -442,7 +394,7 @@ public:
         }
     }
 
-    void expandNode(Node* n, PQueue& backUpQueue, unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
+    void expandNode(Node* n, PQueueMaxG& backUpQueue, unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
         res.nodesExpanded++;
         vector <State> children = domain.successors(n->state);
         res.nodesGenerated += children.size();
@@ -451,9 +403,9 @@ public:
 
         // For each action... In this case for each children
         for (State child : children){
-            if (domain.heuristic(child) == numeric_limits<double>::infinity()){
-                continue;
-            }
+            // if (domain.heuristic(child) == numeric_limits<double>::infinity()){
+            //     continue;
+            // }
 
             // child = s'
             auto it = TREE.find(child);
@@ -640,24 +592,38 @@ public:
             return *(n->successors.begin());
         }
 
-        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-        for (Node* child : n->successors){
-            if(greedyOneStep){
-                pqueue.push(make_pair(child->minh, child));
-
-            } else {
-                pqueue.push(make_pair(child->minval, child));
-
+        if (greedyOneStep){
+            PQueueMinH pqueue;
+            for (Node* child : n->successors){
+                pqueue.push(child);
             }
-        }
-        vector<Node*> ties;
-        double best = pqueue.top().first;
-        while(!pqueue.empty() && pqueue.top().first == best){
-            ties.push_back(pqueue.top().second);
-            pqueue.pop();
+            return pqueue.top();
+        } else {
+            PQueueMinValue pqueue;
+            for (Node* child : n->successors){
+                pqueue.push(child);
+            }
+            return pqueue.top();
         }
 
-        return ties[rand() % ties.size()];
+        // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
+        // for (Node* child : n->successors){
+        //     if(greedyOneStep){
+        //         pqueue.push(make_pair(child->minh, child));
+
+        //     } else {
+        //         pqueue.push(make_pair(child->minval, child));
+
+        //     }
+        // }
+        // vector<Node*> ties;
+        // double best = pqueue.top().first;
+        // while(!pqueue.empty() && pqueue.top().first == best){
+        //     ties.push_back(pqueue.top().second);
+        //     pqueue.pop();
+        // }
+
+        // return ties[rand() % ties.size()];
 
     }
     
@@ -689,7 +655,7 @@ public:
                 n->lock = true;
             }
 
-            domain.updateHeuristic(n->state, numeric_limits<double>::infinity());
+            // domain.updateHeuristic(n->state, numeric_limits<double>::infinity());
             return;
         }
 
@@ -701,17 +667,10 @@ public:
         priority_queue<double, vector<double>, greater<double>> pq_minval;
         priority_queue<double, vector<double>, greater<double>> pq_h;
 
-        
-
         if (trial_backup == "bfs" ){
             // THTS-BFS
             double best_value = numeric_limits<double>::infinity();
             for (Node* child : n->successors){
-                // f(n) <- min (n' in N(n)) { f(n') + k * c(n, n') }
-                double child_value = child->value + k * child->edgeCost;
-                if (child_value < best_value){
-                    best_value = child_value;
-                }
                 visits += child->visits; // v(n) <- sum of n' in N(n) {v(n')}
                 lock = lock && child->lock; // l(n) <- bools of n' in N(n) {l(n')}
                 pq_minh.push(child->minh);
@@ -719,13 +678,27 @@ public:
                 pq_minval.push(child->minval);
                 pq_h.push(domain.heuristic(child->state) + child->edgeCost);
             }
-            n->value = best_value;
+
+            // f(n) <- min (n' in N(n)) { f(n') + k * c(n, n') }
+            if (k == 1){
+                n->value = pq_minval.top();
+            } else {
+                n->value = pq_minh.top();
+            }
+            // n->value = best_value;
         } else if (trial_backup == "uct"){
             // Backing up the best estimated h value if k = 0
             // Backing up the best estimated f value if k = 1
             double value = 0;
             for (Node* child : n->successors){
-                value += child->visits * (child->value + k * child->edgeCost);
+                // value += child->visits * (child->value + k * child->edgeCost);
+
+                if (k == 1){
+                    value += child->visits * child->minval;
+                } else {
+                    value += child->visits * child->minh;
+                }
+
                 visits += child->visits;
                 lock = lock && child->lock;
                 pq_minh.push(child->minh);
@@ -746,9 +719,10 @@ public:
         n->minval = pq_minval.top();
         
         // updateLearningH(n);
-        if (n->h > pq_h.top()){
+        // domain.updateHeuristic(n->state, pq_h.top());
+        // n->h = pq_h.top();
 
-        } else {
+        if (n->h < pq_h.top()){
             domain.updateHeuristic(n->state, pq_h.top());
             n->h = pq_h.top();
         }
