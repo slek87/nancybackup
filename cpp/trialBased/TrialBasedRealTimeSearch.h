@@ -298,27 +298,48 @@ public:
         // } else {
         //     domain.updateHeuristic(n->parent->state, minheap.top());
         // }
-        domain.updateHeuristic(n->parent->state, domain.heuristic(n->parent->state) + n->edgeCost);
+
+        // domain.updateHeuristic(n->parent->state, domain.heuristic(n->parent->state) + n->edgeCost);
+
+        domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
+
         // domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
 
 
     }
 
-    void updateDomainH(Node* n){
+    void updateLearningH(Node* n){
+        // Algorithm 11.2 from Heuristic Search: Theory and Applications
         priority_queue<double, vector<double>, greater<double>> minheap;
         for (Node* child : n->successors){
-            minheap.push(domain.heuristic(child->state) + child->edgeCost);
+            minheap.push(child->h + child->edgeCost);
         }
 
         if (minheap.empty()){
             return;
         }
 
-        if (domain.heuristic(n->state) > minheap.top()){
+        if (n->h > minheap.top()){
 
         } else {
-            domain.updateHeuristic(n->state, minheap.top());
+           n->h = minheap.top();
         }
+
+
+        // priority_queue<double, vector<double>, greater<double>> minheap;
+        // for (Node* child : n->successors){
+        //     minheap.push(domain.heuristic(child->state) + child->edgeCost);
+        // }
+
+        // if (minheap.empty()){
+        //     return;
+        // }
+
+        // if (domain.heuristic(n->state) > minheap.top()){
+
+        // } else {
+        //     domain.updateHeuristic(n->state, minheap.top());
+        // }
     }
 
     void learning(unordered_map<State, Node*, Hash> TREE){
@@ -392,7 +413,7 @@ public:
             n = backUpQueue.top(); // m <-backUpQueue.pop()
             backUpQueue.pop();
             backupNode(n, TREE);
-            updateDomainH(n);
+            updateLearningH(n);
 
             if (n != root){
                 backUpQueue.push(n->parent);
@@ -492,7 +513,9 @@ public:
                     s->state = child; // Update label
                     s->edgeCost = domain.getEdgeCost(child);
                     n->successors.insert(s);
+
                     updateSuccessors(s);
+                    updateLearningH(s);
 
                     // Duplicate node detection
                     unordered_set<State, Hash> dup;
@@ -520,7 +543,7 @@ public:
          // Learn one-step error
         if (best_f != numeric_limits<double>::infinity()){
             double epsD = (1 + domain.distance(bestChild)) - n->d;
-            double epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) - n->h;
+            double epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) -  domain.heuristic(n->state);
             domain.pushEpsilonHGlobal(epsH);
             domain.pushEpsilonDGlobal(epsD);
         }
