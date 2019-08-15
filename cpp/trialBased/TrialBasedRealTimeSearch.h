@@ -48,16 +48,6 @@ public:
             return g;
         }
 
-        // double getGValue() const { 
-        //     const Node *cur = this;
-        //     double gCost = 0;
-
-        //     while(cur){
-        //         gCost += cur->edgeCost;
-        //         cur = cur->parent;
-        //     }
-        //     return gCost; 
-        // }
         double getFValue() const { return getGValue() + h; }
         double getFHatValue() const { return getGValue() + getHHatValue(); }
         double getDHatValue() const { return (derr / (1.0 - epsD)); }
@@ -258,7 +248,7 @@ public:
 
             // Action selection phase
             root = selectOneStepAction(root, TREE);
-            // updateParent(root);
+            updateParent(root);
             resetNode(root);
                        
             // Add this step to the path taken so far
@@ -300,21 +290,16 @@ public:
 
         } 
         // Lemma 11.1 from Heuristic Search: Theory and Applications
-        // if (minheap.size() > 1){
-        //     minheap.pop();
-        // }
         if (n->h > minheap.top()){
         } else {
             domain.updateHeuristic(n->parent->state, minheap.top());
 
         }
-
     }
 
     void learning(unordered_map<State, Node*, Hash> TREE){
         
         // Algorithm 11.2 from Heuristic Search: Theory and Applications
-                // Algorithm 11.2 from Heuristic Search: Theory and Applications
         PQueue backUpQueue;
         for (auto it : TREE){
             if (it.second->initialized){
@@ -322,11 +307,20 @@ public:
             }
         }
 
+        // Since we are traversing the leaf to the root, mind as well back up the information
+        // to be used for the one step action procedure :)
         while (!backUpQueue.empty()){
             priority_queue<double, vector<double>, greater<double>> minheap;
+            priority_queue<double, vector<double>, greater<double>> minval;
+
             Node* n = backUpQueue.top();
             for (Node* child : n->successors){
                 minheap.push(child->h + child->edgeCost);
+                if (greedyOneStep){
+                    minval.push(child->value / w);
+                } else {
+                    minval.push(child->value / w + child->edgeCost);
+                }
             } 
 
             if (n->h > minheap.top()){
@@ -334,7 +328,7 @@ public:
                 domain.updateHeuristic(n->state, minheap.top());
                 n->h = minheap.top();
             }
-
+            n->value = minval.top();
             backUpQueue.pop();
         }
 
@@ -603,62 +597,6 @@ public:
             n = *(n->successors.begin());
             return n;
         }
-
-        if (greedyOneStep){
-             priority_queue<Node*, vector<Node*>, minValue> minheap;
-            for (auto it : TREE){
-                if (!it.second->initialized){
-                    minheap.push(it.second);
-                }
-            }
-            
-            Node* cur = minheap.top();
-            while (cur->parent != root) {
-                cur = cur->parent;
-            }
-            return cur;
-        } else {
-            priority_queue<Node*, vector<Node*>, minF> minheap;
-            for (auto it : TREE){
-                if (!it.second->initialized){
-                    minheap.push(it.second);
-                }
-            }
-            Node* cur = minheap.top();
-            while (cur->parent != root) {
-                cur = cur->parent;
-            }
-            return cur;
-        }
-
-        // Backing up to for checking
-        // for (Node* child : root->successors){
-        //     if (!domain.isGoal(child->state)){
-        //         child->value = numeric_limits<double>::infinity();
-        //     } else {
-        //         return child;
-        //     }
-        // } 
-
-        // for (auto it : TREE){
-        //     if (!it.second->initialized){
-        //         Node* cur = it.second;
-        //         double f = it.second->value;
-        //         while(cur->parent != root){
-        //             f += cur->edgeCost;
-        //             cur = cur->parent;
-        //         }
-        //         f += cur->edgeCost;
-
-
-        //         if (greedyOneStep && cur->value > it.second->h){
-        //             cur->value = it.second->h;
-        //         } else if (cur->value > f){
-        //             cur->value = f;
-        //         }
-                
-        //     }
-        // }
 
         if (trial_expansion == "bfs"){
             return selectBFS(n);
