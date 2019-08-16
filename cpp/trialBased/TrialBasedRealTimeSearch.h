@@ -19,49 +19,43 @@ class THTS_RT{
 
 public:
     struct Node {
+		Node* parent;
         State state; // State
         unordered_set<Node*> successors; // Children
-        double value; // Means the heuristic for greedy algorithms, f for non greedy
-        int visits; // Number of visits
-        bool lock; // Lock
-
-		Node* parent;
+        double value; 
+        int visits; 
         bool initialized;
         double edgeCost;
-        
         double g;
         double h;
         double d;
         double derr;
         double epsH;
         double epsD;
-
-        double minh;
-        double minf;
-        double minval;
-
+        double frontierH;
 
     public:
-        Node(State state, double val, int visit, bool lock, Node* parent, double h, double d, double derr, double epsH, double epsD)
-                        : state(state), value(val), visits(visit), lock(lock), parent(parent), h(h), d(d), derr(derr), epsH(epsH), epsD(epsD){
+        Node(State state, int visit, Node* parent, double g, double h, double d, double derr, double epsH, double epsD, double edgeCost)
+                        : state(state), visits(visit), parent(parent), g(g), h(h), d(d), derr(derr), epsH(epsH), epsD(epsD), edgeCost(edgeCost){
             initialized = false;
-            edgeCost = 0;
-            g = 0;
+            value = 0;
+            frontierH = 0;
         }
 
-        double getGValue() const { 
-            return g;
-        }
-
-        double getFValue() const { return getGValue() + h; }
-        double getFHatValue() const { return getGValue() + getHHatValue(); }
-        double getDHatValue() const { return (derr / (1.0 - epsD)); }
-        double getHHatValue() const { return h + getDHatValue() * epsH; }
+        State getState() const {return state;}
+        double getEdgeCost() const {return edgeCost;}
+        double getGValue() const {return g;}
+        double getDValue() const {return d;}
+        double getHValue() const {return h;}
+        double getFValue() const {return getGValue() + h;}
+        double getFHatValue() const {return getGValue() + getHHatValue();}
+        double getDHatValue() const {return (derr / (1.0 - epsD));}
+        double getHHatValue() const {return h + getDHatValue() * epsH;}
     };
 
     struct maxG {
         bool operator()(const Node* n1, const Node* n2){
-            if (n1->getGValue() < n2->getGValue()){
+            if (n1->getGValue() == n2->getGValue()){
                 return rand() % 2;
             }
             return n1->getGValue() < n2->getGValue();
@@ -70,40 +64,28 @@ public:
 
     struct minH {
         bool operator()(const Node* n1, const Node* n2){
-			if (n1->minh == n2->minh){
-                // return n1->getGValue() < n2->getGValue();
-                return n1->edgeCost > n2->edgeCost;
+			if (n1->h == n2->h){
+                n1->getEdgeCost() > n2->getEdgeCost();
 			}
-			return n1->minh > n2->minh;
+			return n1->h > n2->h;
         }
     };
 
-    struct minF {
+    struct minFrontierH {
         bool operator()(const Node* n1, const Node* n2){
-			if (n1->minf == n2->minf){
-                return n1->getGValue() < n2->getGValue();
+			if (n1->frontierH == n2->frontierH){
+                n1->getEdgeCost() > n2->getEdgeCost();
 			}
-			return n1->minf > n2->minf;
+			return n1->frontierH > n2->frontierH;
         }
     };
 
-    struct minValue {
-        bool operator()(const Node* n1, const Node* n2){
-			if (n1->minval == n2->minval){
-                return n1->minh > n2->minh;
-			}
-			return n1->minval > n2->minval;
-        }
-    };
-
-    // In the paper, they use max pqueue on g, which make sense if g is uniform.
     typedef priority_queue<Node*, vector<Node*>, maxG> PQueueMaxG;
     typedef priority_queue<Node*, vector<Node*>, minH> PQueueMinH; 
-    typedef priority_queue<Node*, vector<Node*>, minValue> PQueueMinValue; 
-
+    typedef priority_queue<Node*, vector<Node*>, minH> PQueueMinFrontierH;
     
-    THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = false) 
-                    : domain(domain), algorithm(algorithm), lookahead(lookahead), greedyOneStep(greedyOneStep){
+    THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = false, bool hLearning = false) 
+                    : domain(domain), algorithm(algorithm), lookahead(lookahead), greedyOneStep(greedyOneStep), hLearning(hLearning) {
         srand(1);
         if (algorithm == "AS"){
             trial_expansion = "bfs";
@@ -179,7 +161,8 @@ public:
         }
     }
 
-    double getLowerConfidence(Node* n)    {
+    double getIE(Node* n, double z){
+        // lower = -z, higher = +z
         double mean =  n->getHHatValue();
         if (n->h == mean){
             return n->h;
@@ -188,25 +171,43 @@ public:
         double stdDev = error / 2.0;
         double var = pow(stdDev, 2);
         // 1.96 is the Z value from the Z table to get the 2.5 confidence
-        return max(n->h, mean - (1.96 * var));
+        return max(n->h, mean + (z * var));
     }
 
-    double getUpperConfidence(Node* n)    {
-        double mean =  n->getHHatValue();
-        if (n->h == mean){
-            return n->h;
-        }
-        double error = mean - n->h;
-        double stdDev = error / 2.0;
-        double var = pow(stdDev, 2);
-        // 1.96 is the Z value from the Z table to get the 2.5 confidence
-        return max(n->h, mean + (1.96 * var));
-    }
-    
     void resetNode(Node* n){
-        root->parent = NULL;
-        root->successors.clear();
-        root->initialized = false;
+        n->parent = NULL;
+        n->successors.clear();
+        n->initialized = false;
+    }
+
+    void updateValue(Node* n){
+        if (backup_type == "nancy"){
+            n->value = DiscreteDistribution(100, n->getHValue(), n->getHHatValue(), 
+                            n->getDValue(), n->getHHatValue() - n->getHValue()).expectedCost();
+        } else if (backup_type == "ie"){
+            n->value = getIE(n, -1.96);
+         } else if (backup_type == "iep"){
+            n->value = getIE(n, 1.96);
+        } else {
+            n->value = w * domain.heuristic(n->getState());
+        }
+    }
+
+    void updatePrevNode(Node* n){
+        // Change current state h to the sencond best, RTA* style
+        // RTA* style, update state that is leaving to the second best f of it neighbors
+        // Represents the estimated h cost of solving the problem by returning to this state
+        // whereas LRTA* style uses min f, which will converge eventually
+        priority_queue<double, vector<double>, greater<double>> minheap;
+        for (Node* child : n->successors){
+            minheap.push(n->g + child->edgeCost + child->h);
+        } 
+        if (minheap.size() > 1){
+            minheap.pop();
+        }
+       if (domain.heuristic(n->state) < minheap.top()){
+            domain.updateHeuristic(n->state, minheap.top());
+        }
     }
 
     ResultContainer getPlan(){
@@ -215,24 +216,10 @@ public:
         res.solutionCost = 0;
         domain.initialize(algorithm, lookahead);
 
-        root = new Node(root_state, 0, 1, false, NULL, domain.heuristic(root_state), domain.distance(root_state), 
-                            domain.distanceErr(root_state), domain.epsilonHGlobal(), domain.epsilonDGlobal());
-        if (backup_type == "nancy"){
-            root->value =
-            DiscreteDistribution(100, root->h, root->getHHatValue(),
-                root->d, root->getHHatValue() - root->h).expectedCost();
-        } else if (backup_type == "ie"){
-            root->value = getLowerConfidence(root);
-         } else if (backup_type == "iep"){
-            root->value = getUpperConfidence(root);
-        } else {
-            root->value = domain.heuristic(root_state);
-        }
-        root->minh = root->h;
-        root->minf = root->h;
-        root->minval = root->value;
-
-
+        Node* root = new Node(root_state, 1, NULL, 0, domain.heuristic(root_state), domain.distance(root_state), 
+                            domain.distanceErr(root_state), domain.epsilonHGlobal(), domain.epsilonDGlobal(), 0);
+        updateValue(root);
+        root->frontierH = root->h;
 
         while(true){
             if (domain.isGoal(root->state)){
@@ -240,27 +227,22 @@ public:
                 break;
             }
 
-            int exp = res.nodesExpanded;
             unordered_map<State, Node*, Hash> TREE;
             TREE[root->state] = root;
-
-            // Update epsilons
             domain.updateEpsilons();
 
             // Expansion phase
-            while (res.nodesExpanded - exp < lookahead){
-                performTrial(TREE, res);
-                if (goal_found){
-                    goal_found = false;
+            for(int exp = 0; exp < lookahead; ++exp){
+                if (performTrial(TREE, res, root)){
+                    // Goal is reached
                     break;
                 }
             }
-            
-            // Action selection phase
-            root = selectOneStepAction(root, TREE);
-            // updateParent(root);
+
+            root = oneStepAction(root, TREE);
+            updatePrevNode(root->parent);
             resetNode(root);
-                       
+
             // Add this step to the path taken so far
             if (record_plan){
                 res.path.push(root->state.getLabel());
@@ -272,458 +254,81 @@ public:
                     delete(it.second);
                 }
             }
-
         }
 
-        res.solutionCost = root->g;
+        res.solutionCost = root->getGValue();
         delete(root);
-
         return res;
     }
 
-    void updateParent(Node* n){
-        // Change current state h to the sencond best, RTA* style
-        // RTA* style, update state that is leaving to the second best f of it neighbors
-        // Represents the estimated h cost of solving the problem by returning to this state
-        // whereas LRTA* style uses min f, which will converge eventually
-
-
-        // RTA*
-        priority_queue<double, vector<double>, greater<double>> minheap;
-        for (Node* child : n->parent->successors){
-            // minheap.push(child->getFValue());
-            minheap.push(child->g + child->h);
-        } 
-        if (minheap.size() > 1){
-            minheap.pop();
-        }
-
-        if (domain.heuristic(n->parent->state) < minheap.top() - n->parent->g){
-            domain.updateHeuristic(n->parent->state, minheap.top() - n->parent->g);
-        }
-
-        // domain.updateHeuristic(n->parent->state, domain.heuristic(n->parent->state) + n->edgeCost);
-        // domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
-    }
-
-    void learning(unordered_map<State, Node*, Hash> TREE){
-        // Algorithm 11.2 from Heuristic Search: Theory and Applications
-        PQueueMaxG backUpQueue;
-        for (auto it : TREE){
-            if (it.second->initialized && it.second != root){
-                backUpQueue.push(it.second);
-            }
-        }
-
-        while (!backUpQueue.empty()){
-            priority_queue<double, vector<double>, greater<double>> minheap;
-
-            Node* n = backUpQueue.top();
-            for (Node* child : n->successors){
-                minheap.push(child->h + child->edgeCost);
-            } 
-
-            if (n->h > minheap.top()){
-
-            } else {
-                domain.updateHeuristic(n->state, minheap.top());
-                n->h = minheap.top();
-            }
-            backUpQueue.pop();
-        }
-    }
-   
-    void performTrial(unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
-        PQueueMaxG backUpQueue;
+    bool performTrial(unordered_map<State, Node*, Hash>& TREE, ResultContainer& res, Node* root){
+        PQueueMaxG pqMaxG;
         Node* n = root;
-
         while (n->initialized){           
-            State old = n->state;
-            n = selectTrialAction(n, TREE);
-            if (old == n->state){
-                cout << "Deadend..." << endl;
+            State tmp_state = n->state;
+            n = trialAction(n, TREE);
+            if (tmp_state == n->state){
+                cout << "Deadend" << endl;
                 exit(1);
             }
         }
 
-        // If n is goal
-        if (domain.isGoal(n->state)){
-            goal_found = true;
+        if (domain.isGoal(n->getState())){
             res.solutionFound = true;
-            return; // Extract plan and return
+            return true; 
         }
 
-        expandNode(n, backUpQueue, TREE, res);
-        backUpQueue.push(n);
+        expandNode(n, pqMaxG, TREE, res);
+        pqMaxG.push(n);
 
-        // while backUpQueue is not empty do
-        while (!backUpQueue.empty()){
-            n = backUpQueue.top(); // m <-backUpQueue.pop()
-            backUpQueue.pop();
+        while (!pqMaxG.empty()){
+            n = pqMaxG.top();
+            pqMaxG.pop();
             backupNode(n, TREE);
 
             if (n != root){
-                backUpQueue.push(n->parent);
+                pqMaxG.push(n->parent);
                 if(TREE.find(n->state) == TREE.end()){
                     delete(n);
                 }
             }
         }
 
-    }
-
-    void updateSuccessors(Node* n){
-        n->g = n->parent->g + n->edgeCost;
-        priority_queue<double, vector<double>, greater<double>> pq_minval;
-        priority_queue<double, vector<double>, greater<double>> pq_minf;
-
-
-        for (Node* child : n->successors){
-            updateSuccessors(child);
-            pq_minval.push(child->minval);
-            pq_minf.push(child->minf);
-        }
-
-        if (pq_minval.size() != 0){
-            n->minval = pq_minval.top();
-            n->minf = pq_minf.top();
-        } else {
-            n->minval = n->minval + n->g;
-            n->minf = n->h + n->g;
-        }
-    }
-
-    void expandNode(Node* n, PQueueMaxG& backUpQueue, unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
-        res.nodesExpanded++;
-        vector <State> children = domain.successors(n->state);
-        res.nodesGenerated += children.size();
-        State bestChild;
-		double best_f = numeric_limits<double>::infinity();
-
-        // For each action... In this case for each children
-        for (State child : children){
-            // if (domain.heuristic(child) == numeric_limits<double>::infinity()){
-            //     continue;
-            // }
-
-            // child = s'
-            auto it = TREE.find(child);
-
-            // If s' not in TREE and not is not deadend then
-            // TODO check deadend
-            if (it == TREE.end()){
-                // Node(State state, int N, Cost f, int v, Node* parent)
-                // n' <- <s', 0, w*h(s'), l, isGoal(s')>
-                // Node* childNode(new Node(child, w * domain.heuristic(child), 1, domain.isGoal(child), n)); // n'
-
-
-                // Don't lock the child if it's goal even when the paper says to. Otherwise, goal cannot be reached.
-                // n'
-                Node* childNode = new Node(child, 0, 1, false, n,
-                                domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
-                                domain.epsilonHGlobal(), domain.epsilonDGlobal());
-                childNode->edgeCost = domain.getEdgeCost(child);  
-                
-                if (backup_type == "nancy"){
-                    childNode->value =
-                    DiscreteDistribution(100, childNode->h, childNode->getHHatValue(),
-						childNode->d, childNode->getHHatValue() - childNode->h).expectedCost();
-                } else if (backup_type == "ie"){
-                    childNode->value = getLowerConfidence(childNode);
-                } else if (backup_type == "iep"){
-                    childNode->value = getUpperConfidence(childNode);
-                } else {
-                    childNode->value = domain.heuristic(child);
-                }
-
-                childNode->value  *= w;
-                childNode->g = n->g + childNode->edgeCost;
-                childNode->minh = childNode->h;
-                childNode->minf = childNode->h + childNode->g;
-                childNode->minval = childNode->value + childNode->g;
-
-
-                //TREE[s'] <- n'
-                TREE[child] = childNode;
-                // cout << child << endl;
-
-                //N(n) <- N(n) union {n'} N = succesor nodes
-                n->successors.insert(childNode);
-
-            } else {
-                // State already in the tree, check to see if it's a better path
-                if (n->getGValue() + domain.getEdgeCost(child) < TREE[child]->getGValue()) {
-
-                    Node* s = (TREE[child]);
-
-                    double child_OldG = s->getGValue();
-                    double child_oldEdge = s->edgeCost;
-                    double n_oldG = n->getGValue();
-                    Node* child_Oldpar = s->parent;
-                    double oldPar_cost = child_Oldpar->getGValue();
-
-                    backUpQueue.push(s->parent);
-                    // N(par(TREE[s'])) <- N(par(TREE[s'])) \ {n'}
-                    s->parent->successors.erase(s);
-                    s->parent = n;
-                    s->state = child; // Update label
-                    s->edgeCost = domain.getEdgeCost(child);
-                    n->successors.insert(s);
-
-                    updateSuccessors(s);
-
-                    // Duplicate node detection
-                    unordered_set<State, Hash> dup;
-                    Node* cur = s;
-                    while(cur->parent){
-                        if(dup.find(cur->state) == dup.end()){
-                            dup.insert(cur->state);
-                        } else {
-                            cout << "Duplication node in tree detected!" << endl;
-                            exit(1);
-                        }
-                        cur = cur->parent;
-                    }
-                }
-            }
-
-            if (!TREE[child]->initialized){
-                if (TREE[child]->getFValue() < best_f){
-                    best_f = TREE[child]->getFValue();
-                    bestChild = child;
-                }
-            }
-        }
-        
-         // Learn one-step error
-        if (best_f != numeric_limits<double>::infinity()){
-            double epsD = (1 + domain.distance(bestChild)) - n->d;
-            double epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) -  domain.heuristic(n->state);
-            domain.pushEpsilonHGlobal(epsH);
-            domain.pushEpsilonDGlobal(epsD);
-        }
-
-        n->initialized = true;
-    }
-
-    Node* selectBFS(Node* n){
-        // THTS-BFS
-        // return arg min n' in N(n) that is not locked minizing: f(n') + k * c(n, n')
-        // i.e. return successor that is not locked with the lowest value
-        // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-        // for (Node* child : n->successors){
-        //     if (prune_type == "lock" && child->lock){
-        //         continue;
-        //     }
-        //     double child_value = child->value + k * child->edgeCost;
-        //     pqueue.push(make_pair(child_value, child));
-        // }
-        // vector<Node*> ties;
-        // double best = pqueue.top().first;
-        // while(!pqueue.empty() && pqueue.top().first == best){
-        //     ties.push_back(pqueue.top().second);
-        //     pqueue.pop();
-        // }
-
-        // return ties[rand() % ties.size()];
-        if (n->successors.size() == 1){
-            return *(n->successors.begin());
-        }
-
-        if (k == 0){
-            PQueueMinH pqueue;
-            for (Node* child : n->successors){
-                pqueue.push(child);
-            }
-            return pqueue.top();
-        } else {
-            PQueueMinValue pqueue;
-            for (Node* child : n->successors){
-                pqueue.push(child);
-            }
-            return pqueue.top();
-        }
-    }
-
-    Node* selectUCT(Node* n){
-         // UTC
-        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-        double min = numeric_limits<double>::infinity();
-        double max = 0;
-        vector <double> children_fbar;
-
-        // Finiding the max and min to use for normalization
-        for (Node* child : n->successors){
-            if (prune_type == "lock" && child->lock){
-                continue;
-            }
-            double child_value = child->value + k * child->edgeCost;
-
-            if (child_value < min){
-                min = child_value;
-            }
-            if (child_value > max){
-                max = child_value;
-            }
-            children_fbar.push_back(child_value);
-        }
-
-        int i  = 0;
-        double denom = max - min;
-        for (Node* child : n->successors){
-            if (prune_type == "lock" && child->lock){
-                continue;
-            }
-            double child_value;
-            double fb = 0;
-
-            int self_visits = n->visits;
-            int child_visits = child->visits;
-
-            double csq = (C * sqrt(log(self_visits)/child_visits));
-
-            if (denom != 0){
-                fb = (children_fbar[i] - min)/denom;
-            }
-
-            child_value = fb - csq;
-            pqueue.push(make_pair(child_value, child));
-            ++i;
-        }
-    
-
-        PQueueMinH pqueueMinH;
-        // vector<Node*> ties;
-        double best = pqueue.top().first;
-        while(!pqueue.empty() && pqueue.top().first == best){
-            // ties.push_back(pqueue.top().second);
-            pqueueMinH.push(pqueue.top().second);
-            pqueue.pop();
-        }
-
-        return pqueueMinH.top();
-    }
-
-    Node* selectOneStepAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
-        if (n->successors.size() == 1){
-            return *(n->successors.begin());
-        }
-
-        if (greedyOneStep){
-            PQueueMinH pqueue;
-            for (Node* child : n->successors){
-                pqueue.push(child);
-            }
-            return pqueue.top();
-        } else {
-            PQueueMinValue pqueue;
-            for (Node* child : n->successors){
-                pqueue.push(child);
-            }
-            return pqueue.top();
-        }
-
-        // priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqueue; 
-        // for (Node* child : n->successors){
-        //     if(greedyOneStep){
-        //         pqueue.push(make_pair(child->minh, child));
-
-        //     } else {
-        //         pqueue.push(make_pair(child->minval, child));
-
-        //     }
-        // }
-        // vector<Node*> ties;
-        // double best = pqueue.top().first;
-        // while(!pqueue.empty() && pqueue.top().first == best){
-        //     ties.push_back(pqueue.top().second);
-        //     pqueue.pop();
-        // }
-
-        // return ties[rand() % ties.size()];
-
-    }
-    
-    Node* selectTrialAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
-        // cout << "Select action:" << endl;
-        // If there's only one child   
-        if (n->successors.size() == 1){
-            return *(n->successors.begin());
-        }
-
-        if (trial_expansion == "bfs"){
-            return selectBFS(n);
-        } else if (trial_expansion == "uct"){
-            return selectUCT(n);
-        } else {
-            cout << "Invalid algorithm: " << algorithm << endl;
-            exit(1);
-        }  
+        return false;
     }
 
     void backupNode(Node* n, unordered_map<State, Node*, Hash>& TREE){
-        // cout << "Back up:\n" << n->state << endl;
-
         if (n->successors.size() == 0){
-            if (prune_type == "erase"){
-                n->parent->successors.erase(n);
-                TREE.erase(n->state);
-            } else if (prune_type == "lock"){
-                n->lock = true;
-            }
-
-            // domain.updateHeuristic(n->state, numeric_limits<double>::infinity());
+            n->parent->successors.erase(n);
+            TREE.erase(n->state);
             return;
         }
+        priority_queue<double, vector<double>, greater<double>> pqMinHEdge;
+        priority_queue<double, vector<double>, greater<double>> pqminFrontierH;        
 
         int visits = 0;
-        bool lock = true;
-
-        priority_queue<double, vector<double>, greater<double>> pq_minh;
-        priority_queue<double, vector<double>, greater<double>> pq_minf;
-        priority_queue<double, vector<double>, greater<double>> pq_minval;
-        priority_queue<double, vector<double>, greater<double>> pq_h;
-
         if (trial_backup == "bfs" ){
-            // THTS-BFS
-            double best_value = numeric_limits<double>::infinity();
+
+            priority_queue<double, vector<double>, greater<double>> pqminValue;
             for (Node* child : n->successors){
-                visits += child->visits; // v(n) <- sum of n' in N(n) {v(n')}
-                lock = lock && child->lock; // l(n) <- bools of n' in N(n) {l(n')}
-                pq_minh.push(child->minh);
-                pq_minf.push(child->minf);
-                pq_minval.push(child->minval);
-                pq_h.push(domain.heuristic(child->state) + child->edgeCost);
+                visits += child->visits;
+                pqMinHEdge.push(domain.heuristic(child->state) + child->getEdgeCost());
+                pqminFrontierH.push(child->frontierH);
+
+                pqminValue.push(child->value + k * child->getEdgeCost());
             }
 
-            // f(n) <- min (n' in N(n)) { f(n') + k * c(n, n') }
-            if (k == 1){
-                n->value = pq_minval.top();
-            } else {
-                n->value = pq_minh.top();
-            }
-            // n->value = best_value;
+            n->value = pqminValue.top();
         } else if (trial_backup == "uct"){
-            // Backing up the best estimated h value if k = 0
-            // Backing up the best estimated f value if k = 1
             double value = 0;
             for (Node* child : n->successors){
-                value += child->visits * (child->value + k * child->edgeCost);
-
-                // Not really correct...
-                // if (k == 1){
-                //     value += child->visits * child->minval;
-                // } else {
-                //     value += child->visits * child->minh;
-                // }
-
                 visits += child->visits;
-                lock = lock && child->lock;
-                pq_minh.push(child->minh);
-                pq_minf.push(child->minf);
-                pq_minval.push(child->minval);
-                pq_h.push(domain.heuristic(child->state) + child->edgeCost);
+                pqMinHEdge.push(domain.heuristic(child->state) + child->getEdgeCost());
+                pqminFrontierH.push(child->frontierH);
+
+                value += child->visits * (child->value + k * child->edgeCost);
             }
+
             n->value = value/visits;
         } else {
             cout << "Invalid backup algorithm: " << trial_backup << endl;
@@ -731,36 +336,158 @@ public:
         }
 
         n->visits = visits;
-        n->lock = lock;
-        n->minh = pq_minh.top();
-        n->minf = pq_minf.top();
-        n->minval = pq_minval.top();
-        
-        // updateLearningH(n);
-        // domain.updateHeuristic(n->state, pq_h.top());
-        // n->h = pq_h.top();
+        n->frontierH = pqminFrontierH.top();
+        if (hLearning && domain.heuristic(n->state) < pqMinHEdge.top()){
+            domain.updateHeuristic(n->state, pqMinHEdge.top());
+        }
+    }
 
-        if (n->h < pq_h.top()){
-            domain.updateHeuristic(n->state, pq_h.top());
-            n->h = pq_h.top();
+    void updateSuccessors(Node* n){
+        n->g = n->parent->g + n->edgeCost;
+        for (Node* child : n->successors){
+            updateSuccessors(child);
+        }
+    }
+
+    void expandNode(Node* n, PQueueMaxG& backUpQueue, unordered_map<State, Node*, Hash>& TREE, ResultContainer& res){
+        res.nodesExpanded++;
+        vector <State> children = domain.successors(n->state);
+        res.nodesGenerated += children.size();
+
+        State bestChild;
+		double bestF = numeric_limits<double>::infinity();
+
+        for (State child : children){
+            auto it = TREE.find(child);
+                
+            if (it == TREE.end()){
+                double edgeCost = domain.getEdgeCost(child);
+                Node* childNode = new Node(child, 1, n, edgeCost + n->getGValue(), domain.heuristic(child), domain.distance(child), 
+                            domain.distanceErr(child), domain.epsilonHGlobal(), domain.epsilonDGlobal(), edgeCost);
+                updateValue(childNode);
+                childNode->frontierH = childNode->getHValue();
+                TREE[child] = childNode;
+                n->successors.insert(childNode);
+            } else {
+                Node* s = (TREE[child]);
+                if (n->getGValue() + s->getEdgeCost() < s->getGValue()) {
+                    backUpQueue.push(s->parent);
+                    s->parent->successors.erase(s);
+                    s->parent = n;
+                    s->state = child; // update label
+                    s->edgeCost = domain.getEdgeCost(child);
+                    n->successors.insert(s);
+                    updateSuccessors(s);
+                }
+            }
+
+            if (!TREE[child]->initialized){
+                if (TREE[child]->getFValue() < bestF){
+                    bestF = TREE[child]->getFValue();
+                    bestChild = child;
+                }
+            }
         }
 
+        // Learn one-step error
+        if (bestF != numeric_limits<double>::infinity()){
+            double epsD = (1 + domain.distance(bestChild)) - n->d;
+            double epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) - n->h;
+            domain.pushEpsilonHGlobal(epsH);
+            domain.pushEpsilonDGlobal(epsD);
+        }
+        n->initialized = true;
+    }
+    
+    Node* oneStepAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
+        if (greedyOneStep){
+            PQueueMinFrontierH pqMinFrontierH;
+            for (Node* child : n->successors){
+                pqMinFrontierH.push(child);
+            }
+            return pqMinFrontierH.top();
+        } else {
+            return selectBestFirst(n);
+        }
     }
 
-    void setK(double v){
-        k = v;
+    Node* selectBestFirst(Node* n){
+        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqMin; 
+        for (Node* child : n->successors){
+            pqMin.push(make_pair(child->value + k * child->edgeCost, child));
+        }
+
+        // Break ties on h
+        PQueueMinH pqMinH;
+        double best = pqMin.top().first;
+        while(!pqMin.empty() && pqMin.top().first == best){
+            pqMinH.push(pqMin.top().second);
+            pqMin.pop();
+        }
+        return pqMinH.top();
     }
 
-    void setW(double v){
-        w = v;
-    }
+    Node* selectUCT(Node* n){
+        priority_queue<pair<double, Node*>, vector<pair<double, Node*>>, greater<pair<double, Node*>> > pqMin; 
+        double min = numeric_limits<double>::infinity();
+        double max = 0;
+        vector <double> childrenFBar;
 
-    void setC(double v){
-        C = v;
-    }
+        // Finiding the max and min for normalization
+        for (Node* child : n->successors){
+            double child_value = child->value + k * child->edgeCost;
+            if (child_value < min){
+                min = child_value;
+            }
+            if (child_value > max){
+                max = child_value;
+            }
+            childrenFBar.push_back(child_value);
+        }
 
-    void setPruning(string type){
-        prune_type = type;
+        int i  = 0;
+        double denom = max - min;
+        for (Node* child : n->successors){
+            double child_value;
+            double fb = 0;
+
+            int self_visits = n->visits;
+            int child_visits = child->visits;
+            double csq = (C * sqrt(log(self_visits)/child_visits));
+
+            if (denom != 0){
+                fb = (childrenFBar[i] - min)/denom;
+            }
+
+            child_value = fb - csq;
+            pqMin.push(make_pair(child_value, child));
+            ++i;
+        }
+        
+        // Break ties on h
+        PQueueMinH pqMinH;
+        double best = pqMin.top().first;
+        while(!pqMin.empty() && pqMin.top().first == best){
+            pqMinH.push(pqMin.top().second);
+            pqMin.pop();
+        }
+        return pqMinH.top();
+    }
+    
+    
+    Node* trialAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
+        if (n->successors.size() == 1){
+            n = *(n->successors.begin());
+            return n;
+        }
+        if (trial_expansion == "bfs"){
+            return selectBestFirst(n);
+        } else if (trial_expansion == "uct"){
+            return selectUCT(n);
+        } else {
+            cout << "Invalid decision algorithm" << endl;
+            exit(1);
+        }  
     }
 
     void setRecordPlan(bool b){
@@ -773,13 +500,11 @@ protected:
     double k = 1;
     int lookahead;
     double C = 1.414; // exploration parameter C
-    bool goal_found = false;
-    Node* root;
     bool greedyOneStep;
+    bool hLearning;
     string algorithm;
     string trial_expansion;
     string trial_backup;
     string backup_type;
-    string prune_type = "erase"; // default to removing deadends
     bool record_plan = false;
 };

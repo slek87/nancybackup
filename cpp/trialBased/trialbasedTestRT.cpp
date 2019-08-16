@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
     string algorithmInput = argv[3];
     string prune_type = "erase";
     bool greedyOneStep = false;
+    bool hLearning = false;
 
     string algorithm = "";
     bool front = true;
@@ -36,14 +37,11 @@ int main(int argc, char** argv) {
             if (front){
                 algorithm += algorithmInput[i];
             } else {
-                if (algorithmInput[i] == 'F'){
-                    greedyOneStep = false;
+                if (algorithmInput[i] == 'L'){
+                    hLearning = true;
                 } else if (algorithmInput[i] == 'H'){
                     greedyOneStep = true;
-                } else {
-                    cout << "Invalid algorithm!" << endl;
-                    exit(1);
-                }
+                } 
             }
         }
     }
@@ -57,10 +55,7 @@ int main(int argc, char** argv) {
         if (domain == "PancakeDPS"){
 			world.setVariant(1);
 		}
-        THTS_RT <PancakePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
-        if (prune_type == "lock"){
-            thts.setPruning(prune_type);
-        }
+        THTS_RT <PancakePuzzle> thts(world, algorithm, lookahead, greedyOneStep, hLearning);
 
         thts.setRecordPlan(check);
 
@@ -71,23 +66,16 @@ int main(int argc, char** argv) {
         }
     } else if (domain == "TreeWorld"){
         TreeWorld world = TreeWorld(cin);
-        THTS_RT <TreeWorld> thts(world, algorithm, lookahead, greedyOneStep);
-        if (prune_type == "lock"){
-            thts.setPruning(prune_type);
-        }
+        THTS_RT <TreeWorld> thts(world, algorithm, lookahead, greedyOneStep, hLearning);
 
         thts.setRecordPlan(check);
 
         res = thts.getPlan();
     } else if (domain == "SlidingPuzzle"){
         SlidingTilePuzzle world = SlidingTilePuzzle(cin);
-        THTS_RT <SlidingTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
-        if (prune_type == "lock"){
-            thts.setPruning(prune_type);
-        }
+        THTS_RT <SlidingTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep, hLearning);
 
         thts.setRecordPlan(check);
-
 
         res = thts.getPlan();
         if (check && !world.validatePath(res.path)) {
@@ -97,10 +85,7 @@ int main(int argc, char** argv) {
 
     } else if (domain == "HeavyTile"){
         HeavyTilePuzzle world = HeavyTilePuzzle(cin);
-        THTS_RT <HeavyTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
-        if (prune_type == "lock"){
-            thts.setPruning(prune_type);
-        }
+        THTS_RT <HeavyTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep, hLearning);
 
         thts.setRecordPlan(check);
 
@@ -111,10 +96,7 @@ int main(int argc, char** argv) {
         }
     } else if (domain == "InverseTile"){
         InverseTilePuzzle world = InverseTilePuzzle(cin);
-        THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep);
-        if (prune_type == "lock"){
-            thts.setPruning(prune_type);
-        }
+        THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep, hLearning);
 
         thts.setRecordPlan(check);
 
