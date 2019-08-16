@@ -7,6 +7,7 @@ default=true
 domainType="All"
 reverse=""
 tout=300
+limitunsolved=3
 
 if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ] || [ "$1" = "-h" ]
 then
@@ -34,6 +35,13 @@ for (( i=1; i <= "$#"; i++ )); do
             tout=${!var}
         fi
     fi
+
+    if [ ${!i} == "-l" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+            limitunsolved=${!var}
+        fi
+    fi
 done
 
 
@@ -42,8 +50,8 @@ if [ "$domainType" = "All" ]
 then
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 100 1 SlidingPuzzle ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 100 1 SlidingPuzzle ${algo} ${tout} 
+        echo "./expansionTest${reverse}.sh 1 100 1 SlidingPuzzle ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 SlidingPuzzle ${algo} ${tout} ${limitunsolved} 
         if [ $? -eq 1 ]
         then
             exit 1
@@ -52,8 +60,8 @@ then
 
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 100 1 Pancake ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 100 1 Pancake ${algo} ${tout} 10
+        echo "./expansionTest${reverse}.sh 1 100 1 Pancake ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 Pancake ${algo} ${tout} ${limitunsolved} 10
         if [ $? -eq 1 ]
         then
             exit 1
@@ -62,8 +70,8 @@ then
 
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 100 1 PancakeDPS ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 100 1 PancakeDPS ${algo} ${tout}
+        echo "./expansionTest${reverse}.sh 1 100 1 PancakeDPS ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 PancakeDPS ${algo} ${tout} ${limitunsolved}
         if [ $? -eq 1 ]
         then
             exit 1
@@ -72,8 +80,8 @@ then
 
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo} ${tout}
+        echo "./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 1000 1 TreeWorld ${algo} ${tout} ${limitunsolved}
         if [ $? -eq 1 ]
         then
             exit 1
@@ -82,8 +90,8 @@ then
 
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 100 1 HeavyTile ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 100 1 HeavyTile ${algo} ${tout} 
+        echo "./expansionTest${reverse}.sh 1 100 1 HeavyTile ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 HeavyTile ${algo} ${tout} ${limitunsolved} 
         if [ $? -eq 1 ]
         then
             exit 1
@@ -92,8 +100,8 @@ then
 
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} 
+        echo "./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 InverseTile ${algo} ${tout} ${limitunsolved} 
         if [ $? -eq 1 ]
         then
             exit 1
@@ -103,8 +111,8 @@ elif [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] || 
 then
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 1000 1 ${domainType} ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout}
+        echo "./expansionTest${reverse}.sh 1 1000 1 ${domainType} ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} ${limitunsolved}
         if [ $? -eq 1 ]
         then
             exit 1
@@ -114,8 +122,8 @@ elif [ "$domainType" = "TreeWorld" ]
 then
     for algo in "${algoArr[@]}"
     do
-        echo "./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} "
-        ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} 
+        echo "./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} ${limitunsolved} 
         if [ $? -eq 1 ]
         then
             exit 1

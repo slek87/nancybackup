@@ -32,9 +32,10 @@ timelimit=$6
 
 numProcs=0
 notSolved=0
+notSolvedLimit=
 for lookahead in "${lookaheadArr[@]}"
 do
-    if (( notSolved > 3 ))
+    if (( notSolved > notSolvedLimit ))
     then
          echo "Few instances cannot be solved within the time limit(${timelimit} s) , perhaps try try larger timeout?"
          exit 1
