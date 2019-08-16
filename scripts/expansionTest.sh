@@ -32,7 +32,7 @@ timelimit=$6
 
 numProcs=0
 notSolved=0
-notSolvedLimit=
+notSolvedLimit=$7
 for lookahead in "${lookaheadArr[@]}"
 do
     if (( notSolved > notSolvedLimit ))
