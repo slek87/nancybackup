@@ -258,7 +258,7 @@ public:
             
             // Action selection phase
             root = selectOneStepAction(root, TREE);
-            updateParent(root);
+            // updateParent(root);
             resetNode(root);
                        
             // Add this step to the path taken so far
@@ -439,7 +439,7 @@ public:
                 childNode->value  *= w;
                 childNode->g = n->g + childNode->edgeCost;
                 childNode->minh = childNode->h;
-                // childNode->minf = childNode->h + childNode->g;
+                childNode->minf = childNode->h + childNode->g;
                 childNode->minval = childNode->value + childNode->g;
 
 

@@ -167,8 +167,8 @@ guctArr_greedyStep = ['GUCT-H','GUCTie-H', 'GUCTiep-H','GUCTnancy-H','GUCTS-H','
 DOMAIN = sys.argv[1]
 OUTFILE = DOMAIN + '.pdf'
 DIRECTORY = sys.argv[2]
-ALGO_FILTER = uctArr
-FRONT_APPEND = 'UCT_' # Goes in front of the name of the pdf file being output
+ALGO_FILTER = ['UCTS-H', 'GUCT-H',  'GUCTS-H', 'UCT-H'  ]
+FRONT_APPEND = 'guctArr' # Goes in front of the name of the pdf file being output
 
 
 # First loop through all the algorithm folders to check of unsolved instances
