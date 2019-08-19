@@ -19,14 +19,17 @@ markerList=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<"
 totalMissing = 0
 algoMissing = 0
 unsolvedInstance = {}
+skipList = {} # If less than 95% of instance is unsolved, it gets skipped
+algoGlobal = ''
 
 def aggregateCvs(loc):
-    global algoMissing, first
+    global algoMissing, first, algoGlobal
 
     alert = False
     i = 0
     found = []
     missing = []
+    lookahead = ''
     for file in os.listdir(loc):
         if 'csv' not in file:
             continue
@@ -59,11 +62,9 @@ def aggregateCvs(loc):
             missing.remove(f)
         compress = ''
         for num, inst in enumerate(missing):
-            if lookahead in unsolvedInstance:
-                 unsolvedInstance[lookahead].append(str(inst))
-            else:
+            if not lookahead in unsolvedInstance:
                 unsolvedInstance[lookahead] = []
-                unsolvedInstance[lookahead].append(str(inst))
+            unsolvedInstance[lookahead].append(str(inst))
 
 
             if num == len(missing) - 1:
@@ -79,7 +80,11 @@ def aggregateCvs(loc):
 
         print('    Missing: ' + compress)
         algoMissing = algoMissing + len(missing)
-
+    
+        if ('Tree' in loc and len(missing) > 50) or ('Tree' not in loc and len(missing) > 5):
+            if not algo in skipList:
+                skipList[algo] = []
+            skipList[algo].append(lookahead)
 
 
 def fixTitle(t):
@@ -155,20 +160,23 @@ def boxplot(df, n, j, title):
     plt.cla()
     return
 
-uctArr = ['UCT','UCTie', 'UCTiep','UCTnancy','UCTS','UCTSie', 'UCTSiep', 'UCTSnancy']
-guctArr = ['GUCT','GUCTie', 'GUCTiep','GUCTnancy','GUCTS','GUCTSie', 'GUCTSiep', 'GUCTSnancy']
-wasArr = ['WAS', 'WASie', 'WASiep','WASnancy']
-otherArr = ['RISK','FHAT','LSSLRTA','IE','IEP']
+uct = ['UCT','UCTie', 'UCTiep','UCTnancy','UCTS','UCTSie', 'UCTSiep', 'UCTSnancy']
+guct = ['GUCT','GUCTie', 'GUCTiep','GUCTnancy','GUCTS','GUCTSie', 'GUCTSiep', 'GUCTSnancy']
+was = ['WAS', 'WASie', 'WASiep','WASnancy']
+other = ['RISK','FHAT','LSSLRTA','IE','IEP', 'IEPP']
 
 # PARAMS
 
-uctArr_greedyStep = ['UCT-H','UCTie-H', 'UCTiep-H','UCTnancy-H','UCTS-H','UCTSie-H', 'UCTSiep-H', 'UCTSnancy-H']
-guctArr_greedyStep = ['GUCT-H','GUCTie-H', 'GUCTiep-H','GUCTnancy-H','GUCTS-H','GUCTSie-H', 'GUCTSiep-H', 'GUCTSnancy-H']
+uctLearn = ['UCT-L','UCTie-L', 'UCTiep-L','UCTnancy-L','UCTS-L','UCTSie-L', 'UCTSiep-L', 'UCTSnancy-L']
+guctLearn = ['GUCT-L','GUCTie-L', 'GUCTiep-L','GUCTnancy-L','GUCTS-L','GUCTSie-L', 'GUCTSiep-L', 'GUCTSnancy-L']
+wasLearn = ['WAS-L', 'WASie-L', 'WASiep-L','WASnancy-L']
 DOMAIN = sys.argv[1]
-OUTFILE = DOMAIN + '.pdf'
+OUTFILE = DOMAIN 
 DIRECTORY = sys.argv[2]
-ALGO_FILTER = ['UCTS-H', 'GUCT-H',  'GUCTS-H', 'UCT-H'  ]
-FRONT_APPEND = 'guctArr' # Goes in front of the name of the pdf file being output
+ALGO_FILTER = uct
+FRONT_APPEND = 'best' + '_' # Goes in front of the name of the pdf file being output
+FINEFILTER = []
+
 
 
 # First loop through all the algorithm folders to check of unsolved instances
@@ -178,9 +186,11 @@ FRONT_APPEND = 'guctArr' # Goes in front of the name of the pdf file being outpu
 for algo in os.listdir(DIRECTORY):
     if not algo in ALGO_FILTER:
             continue
+    if len(FINEFILTER) > 0 and str(algo) in FINEFILTER:
+        continue
 
     algoMissing = 0
-
+    algoGlobal = algo
     loc = DIRECTORY + '/' + algo 
     print(algo)
 
@@ -188,7 +198,6 @@ for algo in os.listdir(DIRECTORY):
         first = True
         if '.' in str(dom) or not dom == DOMAIN:
             continue
-
 
         for subfolder in os.listdir( loc + '/' + str(dom)):
 
@@ -221,16 +230,14 @@ for a in ALGO_FILTER:
 
         if not algorithm == a:
             continue
-        
+
+        if len(FINEFILTER) > 0 and str(algorithm) in FINEFILTER:
+            continue
         for dom in os.listdir(DIRECTORY + '/' + str(algorithm)):
             if '.csv' in str(dom) and DOMAIN == dom.split('.')[0]:
                 print(DIRECTORY + '/' + str(algorithm) + '/' + str(dom))
                 df = pd.read_csv(DIRECTORY + '/' + str(algorithm) + '/' + str(dom), delimiter = ',')
                 # algostr = df.iloc[0]['Algorithm']
-                df['Algorithm'] = fixName(algorithm)
-
-
-
                 # Remove rows that cannot be solved by all algorithms
                 for lookahead, instances in unsolvedInstance.items():
                     for instance in instances:
@@ -241,6 +248,14 @@ for a in ALGO_FILTER:
                         else:
                             instance = instance + '-4x4.csv'
                         df = df[(str(df.Lookahead) != lookahead) & (df.FileID != instance)]
+
+                # Remove solved < 95%
+                if algorithm in skipList:
+                        for lookahead in skipList[algorithm]:
+                            print('Skipping' + algorithm + ' ' + lookahead)
+                            df = df[(str(df.Lookahead) != int(lookahead[2:])) & (df.Algorithm != algorithm)]
+
+                df['Algorithm'] = fixName(algorithm)
                 frames.append(df)
 
 
@@ -256,17 +271,20 @@ result = pd.concat(frames)
 # Filter out the following algorithms     
 # result = result[result.Lookahead != 10]
 # result = result[result.Lookahead != 30]
-# result = result[result.Lookahead != 100]
-# result = result[result.Lookahead != 300]
-# result = result[result.Lookahead != 1000]
+result = result[result.Lookahead != 100]
+result = result[result.Lookahead != 300]
+result = result[result.Lookahead != 1000]
 
 title = fixTitle(DOMAIN)
 
-pointplot(result, FRONT_APPEND + OUTFILE,False, title)
-# violinplot(result,FRONT_APPEND + 'Violin' + OUTFILE,False, title)
-# boxplot(result,FRONT_APPEND + 'Box' + OUTFILE,False, title)
+# pointplot(result, FRONT_APPEND + OUTFILE + '.pdf', False, title)
+# violinplot(result,FRONT_APPEND  + OUTFILE + '_vio.pdf', False, title)
+# boxplot(result,FRONT_APPEND  + OUTFILE + '_box.pdf', False, title)
 
 
+del result['Lookahead']
+result = result.groupby('Algorithm').mean()
+with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+    print(result)
 
-
-wasArr
+print(result.to_latex(index=True))

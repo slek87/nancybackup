@@ -8,14 +8,21 @@
 
 import sys
 import os
+import re    
 
 
 # outfileName = outfileName + '.csv'
 base = sys.argv[1]
 totalMissing = 0
 algoMissing = 0
-
 first = True
+domFilter = ''
+# algoArr is use for filtering
+algoArr=[]
+
+if len(sys.argv) > 2:
+    domFilter = sys.argv[2] 
+
 
 def aggregateCvs(directory):
     global algoMissing, first
@@ -45,11 +52,10 @@ def aggregateCvs(directory):
         missing = [i for i in range(1, 101)]
         alert = True
 
+    if first:
+        first = False
+        print(' ' + str(directory.split('/')[-3]) + ' ' + str(directory.split('/')[-2]))
     if alert:
-        if first:
-            print(' ' + str(directory.split('/')[-3]) + ' ' + str(directory.split('/')[-2]))
-
-            first = False
         print('   ' + directory.split('/')[-1] + ' ' + str(i) + '/' + str(len(missing)))
         for f in found:
             missing.remove(f)
@@ -65,34 +71,64 @@ def aggregateCvs(directory):
             else:
                 compress = compress + str(inst) + ' '
     
-
+        compress = re.sub('-+', '--', compress)
         print('    M: ' + compress)
         algoMissing = algoMissing + len(missing)
+    else:
+        print('   ' + directory.split('/')[-1] + ' ' + str(i))
+    
         
-
+algoSort = []
 for algo in os.listdir(base):
+    algoSort.append(algo)
+
+algoSort.sort()
+
+
+
+for algo in algoSort:
+    if len(algoArr) > 0 and not algo in algoArr:
+        continue
+
     algoMissing = 0
 
     loc = base + algo 
     print(algo)
     for domain in os.listdir(loc):
         first = True
+        if domFilter != '' and domain != domFilter:
+            continue
         if '.' in str(domain):
             continue
 
 
+        lookaheadArr = []
         for subfolder in os.listdir( loc + '/' + str(domain)):
 
             if 'Tile' in str(domain) or 'Sliding' in str(domain):
                 for lookahead in os.listdir( loc + '/' + str(domain) + '/4x4/'):
-                    aggregateCvs(loc + '/' + str(domain) + '/4x4/' + lookahead)
+                    lookaheadArr.append(int(lookahead[2:]))
+                lookaheadArr.sort()
+                for lookahead in lookaheadArr:
+                    aggregateCvs(loc + '/' + str(domain) + '/4x4/LA' + str(lookahead))
+                lookaheadArr.clear()
             elif 'Pancake' in str(domain):
                 for lookahead in os.listdir( loc + '/' + str(domain) + '/10/'):
-                    aggregateCvs(loc + '/' + str(domain) + '/10/' + lookahead)
+                    lookaheadArr.append(int(lookahead[2:]))
+                lookaheadArr.sort()
+                for lookahead in lookaheadArr:
+                    aggregateCvs(loc + '/' + str(domain) + '/10/LA' + str(lookahead))
+                lookaheadArr.clear()
+                
             else:
+                lookaheadArr.append(int(subfolder[2:]))
                 # for lookahead in os.listdir( loc + '/' + str(domain) ):
-                aggregateCvs(loc + '/' + str(domain) + '/' + subfolder)
 
+        if len(lookaheadArr) > 0:
+            lookaheadArr.sort()
+            for lookahead in lookaheadArr:
+                aggregateCvs(loc + '/' + str(domain) + '/LA' + str(lookahead))
+      
     if (algoMissing > 0):
         print ('  -TOTAL: ' + str(algoMissing) + '\n')
     totalMissing = totalMissing + algoMissing

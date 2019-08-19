@@ -1,7 +1,16 @@
 #!/bin/bash
 
-algoArr=("UCT-L" "GUCT-L" "UCTS-L" "GUCTS-L" "UCTnancy-L" "GUCTnancy-L" "UCTSnancy-L" "GUCTSnancy-L" "UCTie-L" "GUCTie-L" "UCTSie-L" "GUCTSie-L" "UCTiep-L" "GUCTiep-L" "UCTSiep-L" "GUCTSiep-L" "WAS-L" "WASie-L" "WASiep-L" "WASnancy-L" "UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "UCTiep" "GUCTiep" "UCTSiep" "GUCTSiep" "WAS" "WASie" "WASiep" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
-# algoArr=("UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "UCTiep" "GUCTiep" "UCTSiep" "GUCTSiep" "WAS" "WASie" "WASiep" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
+# algoArr=("UCT-L" "GUCT-L" "UCTS-L" "GUCTS-L" "UCTnancy-L" "GUCTnancy-L" "UCTSnancy-L" "GUCTSnancy-L" "UCTie-L" "GUCTie-L" "UCTSie-L" "GUCTSie-L" "UCTiep-L" "GUCTiep-L" "UCTSiep-L" "GUCTSiep-L" "WAS-L" "WASie-L" "WASiep-L" "WASnancy-L" "UCT" "GUCT" "UCTS" "GUCTS" "UCTnancy" "GUCTnancy" "UCTSnancy" "GUCTSnancy" "UCTie" "GUCTie" "UCTSie" "GUCTSie" "UCTiep" "GUCTiep" "UCTSiep" "GUCTSiep" "WAS" "WASie" "WASiep" "WASnancy" "FHAT" "RISK" "IE" "IEP" "LSSLRTA")
+
+
+
+
+algoArr=("UCT" "UCTnancy" "UCTie" "UCTiep" "UCTS" "UCTSnancy" "UCTSie" "UCTSiep" "GUCT" "GUCTnancy" "GUCTie" "GUCTiep" "GUCTS" "GUCTSnancy" "GUCTSie" "GUCTSiep" "AS" "ASnancy" "ASie" "ASiep" "WAS" "WASie" "WASiep" "WASnancy" "UCT-L" "UCTnancy-L" "UCTie-L" "UCTiep-L" "UCTS-L" "UCTSnancy-L" "UCTSie-L" "UCTSiep-L" "GUCT-L" "GUCTnancy-L" "GUCTie-L" "GUCTiep-L" "GUCTS-L" "GUCTSnancy-L" "GUCTSie-L" "GUCTSiep-L" "AS-L" "ASnancy-L" "ASie-L" "ASiep-L" "WAS-L" "WASie-L" "WASiep-L" "WASnancy-L" "UCT-H" "UCTnancy-H" "UCTie-H" "UCTiep-H" "UCTS-H" "UCTSnancy-H" "UCTSie-H" "UCTSiep-H" "GUCT-H" "GUCTnancy-H" "GUCTie-H" "GUCTiep-H" "GUCTS-H" "GUCTSnancy-H" "GUCTSie-H" "GUCTSiep-H" "AS-H" "ASnancy-H" "ASie-H" "ASiep-H" "WAS-H" "WASie-H" "WASiep-H" "WASnancy-H" "UCT-LH" "UCTnancy-LH" "UCTie-LH" "UCTiep-LH" "UCTS-LH" "UCTSnancy-LH" "UCTSie-LH" "UCTSiep-LH" "GUCT-LH" "GUCTnancy-LH" "GUCTie-LH" "GUCTiep-LH" "GUCTS-LH" "GUCTSnancy-LH" "GUCTSie-LH" "GUCTSiep-LH" "AS-LH" "ASnancy-LH" "ASie-LH" "ASiep-LH" "WAS-LH" "WASie-LH" "WASiep-LH" "WASnancy-LH")
+
+# algoArr=("AS-H" "ASie-H" "ASiep" "ASiep-H" "GUCT" "GUCT-H" "GUCTS-H" "GUCTSie-H" "GUCTSiep" "GUCTSiep-H" "GUCTSnancy" "GUCTie" "GUCTie-H" "GUCTiep" "GUCTiep-H" "GUCTnancy" "UCT-H" "UCTS-H" "UCTSie-H" "UCTSiep" "UCTSiep-H" "UCTSnancy-H" "UCTie-H" "UCTiep" "UCTiep-H" "UCTnancy")
+
+# algoArr=("ASiep-LH" "GUCTSiep-LH" "GUCTiep-LH" "UCTSiep-LH" "UCTiep-LH")
+
 default=true
 
 domainType="All"
@@ -123,7 +132,7 @@ then
     for algo in "${algoArr[@]}"
     do
         echo "./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} ${limitunsolved} "
-        ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${algo} ${tout} ${limitunsolved} 
+        ./expansionTest${reverse}.sh 1 1000 1 ${domainType} ${algo} ${tout} ${limitunsolved} 
         if [ $? -eq 1 ]
         then
             exit 1

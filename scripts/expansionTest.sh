@@ -35,22 +35,10 @@ notSolved=0
 notSolvedLimit=$7
 for lookahead in "${lookaheadArr[@]}"
 do
-    if (( notSolved > notSolvedLimit ))
-    then
-         echo "Few instances cannot be solved within the time limit(${timelimit} s) , perhaps try try larger timeout?"
-         exit 1
-    fi
-
+    notSolved=0
     echo "Domain:${domainType} Lookahead:${lookahead} Algorithm:${algorithm}"
     if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ]
     then
-        if [ "$domainType" = "InverseTile" ]
-            then
-            if (( lookahead == 1000 ))
-            then
-                exit 0
-            fi
-        fi
         dimensions=4
         mkdir -p ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}
         instance=1
@@ -64,7 +52,7 @@ do
             else
                 echo "${instance}-${dimensions}x${dimensions}"
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}.tmp
-                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]] 
+                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == "AS"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
                     timeout ${timelimit} ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv < ${file}
                 else
@@ -74,12 +62,18 @@ do
 
                 if [ ! -f ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}-${dimensions}x${dimensions}.csv ]
                 then
-                    echo "Time limit(${timelimit} s) reached: ${instance}"
                     let notSolved++
+                    echo "Time limit(${timelimit} s) reached: ${instance}  unsolved: ${notSolved} / ${notSolvedLimit}"
+                else
+                    rm ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}.tmp
                 fi
 
-                rm ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}/${instance}.tmp
                 let instance++
+                if (( notSolved > notSolvedLimit ))
+                then
+                    echo "Few instances cannot be solved within the time limit(${timelimit} s) , perhaps try try larger timeout?"
+                    exit 1
+                fi
             fi
         done
     elif [ "$domainType" = "TreeWorld" ]
@@ -96,7 +90,7 @@ do
             else
                 echo "b2d100-${instance}"
                 echo "A" > ../../results/${algorithm}/${domainType}/LA${lookahead}/${instance}.tmp
-                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
+                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == "AS"* ]] || [[ $algorithm == *"WAS"* ]]
                 then
                     timeout ${timelimit} ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv < ${file}
                 else
@@ -106,12 +100,18 @@ do
 
                 if [ ! -f ../../results/${algorithm}/${domainType}/LA${lookahead}/b2d100-${instance}.csv ]
                 then
-                    echo "Time limit(${timelimit} s)  reached: ${instance}"
                     let notSolved++
+                    echo "Time limit(${timelimit} s)  reached: ${instance}  unsolved: ${notSolved} / ${notSolvedLimit}"
+                else
+                    rm ../../results/${algorithm}/${domainType}/LA${lookahead}/${instance}.tmp
                 fi
 
-                rm ../../results/${algorithm}/${domainType}/LA${lookahead}/${instance}.tmp
                 let instance++
+                if (( notSolved > notSolvedLimit ))
+                then
+                    echo "Few instances cannot be solved within the time limit(${timelimit} s) , perhaps try try larger timeout?"
+                    exit 1
+                fi
             fi
         done
     elif [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ]
@@ -134,7 +134,7 @@ do
             else
                 echo "${instance}-${dimensions}"
                 echo "A" > ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}.tmp
-                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == *"WAS"* ]]
+                if [[ $algorithm == *"UCT"* ]] || [[ $algorithm == "AS"* ]]  || [[ $algorithm == *"WAS"* ]]
                 then
                     timeout ${timelimit} ../../build_release/trialBasedTest ${domainType} ${lookahead} ${algorithm}   ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv < ${file}
                 else
@@ -144,12 +144,18 @@ do
 
                 if [ ! -f ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}-${dimensions}.csv ]
                 then
-                    echo "Time limit(${timelimit} s)  reached: ${instance}"
                     let notSolved++
+                    echo "Time limit(${timelimit} s)  reached: ${instance}  unsolved: ${notSolved} / ${notSolvedLimit}"
+                else
+                    rm ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}.tmp
                 fi
 
-                rm ../../results/${algorithm}/${domainType}/${dimensions}/LA${lookahead}/${instance}.tmp
                 let instance++
+                if (( notSolved > notSolvedLimit ))
+                then
+                    echo "Few instances cannot be solved within the time limit(${timelimit} s) , perhaps try try larger timeout?"
+                    exit 1
+                fi
             fi
         done
     else

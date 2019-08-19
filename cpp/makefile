@@ -1,6 +1,6 @@
 CC=g++ 
 
-all: risk fhat lsslrta ie iep
+all: risk fhat lsslrta ie iep iepp
 
 risk: expansionTestRisk.cpp
 	$(CC) -g -O3 -std=c++11 expansionTestRisk.cpp -o RISKexpansionTest
@@ -16,6 +16,9 @@ ie: expansionTestIE.cpp
 
 iep: expansionTestIEP.cpp
 	$(CC) -g -O3 -std=c++11 expansionTestIEP.cpp -o IEPexpansionTest
+
+iepp: expansionTestIEPP.cpp
+	$(CC) -g -O3 -std=c++11 expansionTestIEPP.cpp -o IEPPexpansionTest
 	
 clean:
-	rm -f risk  fhat  lsslrta  ie iep
+	rm -f risk  fhat  lsslrta  ie iep iepp

@@ -33,6 +33,8 @@ public:
         double epsH;
         double epsD;
         double frontierH;
+        double frontierG;
+
 
     public:
         Node(State state, int visit, Node* parent, double g, double h, double d, double derr, double epsH, double epsD, double edgeCost)
@@ -40,6 +42,8 @@ public:
             initialized = false;
             value = 0;
             frontierH = 0;
+            frontierG = 0;
+
         }
 
         State getState() const {return state;}
@@ -80,9 +84,19 @@ public:
         }
     };
 
+    struct minFrontierF {
+        bool operator()(const Node* n1, const Node* n2){
+			if (n1->frontierH + n1->frontierG == n2->frontierH + n2->frontierG){
+                n1->frontierH > n1->frontierH;
+			}
+			return n1->frontierH + n1->frontierG > n2->frontierH + n2->frontierG;
+        }
+    };
+
     typedef priority_queue<Node*, vector<Node*>, maxG> PQueueMaxG;
     typedef priority_queue<Node*, vector<Node*>, minH> PQueueMinH; 
     typedef priority_queue<Node*, vector<Node*>, minH> PQueueMinFrontierH;
+    typedef priority_queue<Node*, vector<Node*>, minH> PQueueMinFrontierF;
     
     THTS_RT(Domain& domain, string algorithm, int lookahead, bool greedyOneStep = false, bool hLearning = false) 
                     : domain(domain), algorithm(algorithm), lookahead(lookahead), greedyOneStep(greedyOneStep), hLearning(hLearning) {
@@ -198,15 +212,23 @@ public:
         // RTA* style, update state that is leaving to the second best f of it neighbors
         // Represents the estimated h cost of solving the problem by returning to this state
         // whereas LRTA* style uses min f, which will converge eventually
+
+        if (hLearning){
+            domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
+            return;
+        }
+
+        // Should I do both RTA* and LRTA* method of updating? i.e. erase the above 
+        // code that updates the heuristic and remove the return.
         priority_queue<double, vector<double>, greater<double>> minheap;
-        for (Node* child : n->successors){
-            minheap.push(n->g + child->edgeCost + child->h);
+        for (Node* child : n->parent->successors){
+            minheap.push(n->parent->g + child->edgeCost + child->h);
         } 
         if (minheap.size() > 1){
             minheap.pop();
         }
-       if (domain.heuristic(n->state) < minheap.top()){
-            domain.updateHeuristic(n->state, minheap.top());
+        if (domain.heuristic(n->parent->state) < minheap.top()){
+            domain.updateHeuristic(n->parent->state, minheap.top());
         }
     }
 
@@ -240,7 +262,7 @@ public:
             }
 
             root = oneStepAction(root, TREE);
-            updatePrevNode(root->parent);
+            updatePrevNode(root);
             resetNode(root);
 
             // Add this step to the path taken so far
@@ -337,15 +359,25 @@ public:
 
         n->visits = visits;
         n->frontierH = pqminFrontierH.top();
-        if (hLearning && domain.heuristic(n->state) < pqMinHEdge.top()){
+        if (hLearning && domain.heuristic(n->state) > pqMinHEdge.top()){
             domain.updateHeuristic(n->state, pqMinHEdge.top());
+            n->h = pqMinHEdge.top();
         }
     }
 
     void updateSuccessors(Node* n){
         n->g = n->parent->g + n->edgeCost;
+        priority_queue<double, vector<double>, greater<double>> pqminFrontierG;        
+
         for (Node* child : n->successors){
             updateSuccessors(child);
+            pqminFrontierG.push(child->frontierG);
+        }
+
+        if (n->successors.size() == 0){
+            n->frontierG = n->getGValue();
+        } else {
+            n->frontierG = pqminFrontierG.top();
         }
     }
 
@@ -366,6 +398,7 @@ public:
                             domain.distanceErr(child), domain.epsilonHGlobal(), domain.epsilonDGlobal(), edgeCost);
                 updateValue(childNode);
                 childNode->frontierH = childNode->getHValue();
+                childNode->frontierG = childNode->getGValue();
                 TREE[child] = childNode;
                 n->successors.insert(childNode);
             } else {
@@ -401,7 +434,7 @@ public:
     
     Node* oneStepAction(Node* n, unordered_map<State, Node*, Hash>& TREE){
         if (greedyOneStep){
-            PQueueMinFrontierH pqMinFrontierH;
+            PQueueMinH pqMinFrontierH;
             for (Node* child : n->successors){
                 pqMinFrontierH.push(child);
             }

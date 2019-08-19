@@ -37,6 +37,13 @@ do
                 echo "rm ${f}/HeavyTile/4x4/${l}/${i}.tmp"
                 rm ${f}/HeavyTile/4x4/${l}/${i}.tmp
             fi
+
+            if [ -f ${f}/InverseTile/4x4/${l}/${i}.tmp ] 
+            then 
+                echo "rm ${f}/InverseTile/4x4/${l}/${i}.tmp"
+                rm ${f}/InverseTile/4x4/${l}/${i}.tmp
+            fi
+
         done
 
         for (( i=1; i <= 1000; i++ )); do
