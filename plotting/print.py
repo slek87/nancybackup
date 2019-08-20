@@ -19,14 +19,17 @@ markerList=["o", "v", "s", "<", "p", "h", "^", "D", "X", ">", "o", "v", "s", "<"
 totalMissing = 0
 algoMissing = 0
 unsolvedInstance = {}
+skipList = {} # If less than 95% of instance is unsolved, it gets skipped
+algoGlobal = ''
 
 def aggregateCvs(loc):
-    global algoMissing, first
+    global algoMissing, first, algoGlobal
 
     alert = False
     i = 0
     found = []
     missing = []
+    lookahead = ''
     for file in os.listdir(loc):
         if 'csv' not in file:
             continue
@@ -58,28 +61,36 @@ def aggregateCvs(loc):
         for f in found:
             missing.remove(f)
         compress = ''
-        for num, inst in enumerate(missing):
-            if lookahead in unsolvedInstance:
-                 unsolvedInstance[lookahead].append(str(inst))
-            else:
-                unsolvedInstance[lookahead] = []
-                unsolvedInstance[lookahead].append(str(inst))
-
-
-            if num == len(missing) - 1:
+        for indx, inst in enumerate(missing):
+            if indx == len(missing) - 1:
                 compress = compress + str(inst)
-            elif num == 0:
+            elif indx == 0:
                 compress = str(inst) + ' '
-            elif inst - 1 == missing[num - 1] and inst + 1 == missing[num + 1]:
+            elif inst - 1 == missing[indx - 1] and inst + 1 == missing[indx + 1]:
                 compress = compress.strip()
                 compress = compress + '-'
             else:
                 compress = compress + str(inst) + ' '
     
-
-        print('    Missing: ' + compress)
+        compress = re.sub('-+', '--', compress)
+        print('    M: ' + compress)
         algoMissing = algoMissing + len(missing)
-
+    else:
+        print('   ' + loc.split('/')[-1] + ' ' + str(i))
+    
+    # By the time code gets here, the missing array contains all the unsolved instances for this algorithm/lookahead
+    if ('Tree' in loc and len(missing) > 50) or ('Tree' not in loc and len(missing) > 5):
+        if not algoGlobal in skipList:
+            skipList[algoGlobal] = []
+        skipList[algoGlobal].append(lookahead)
+        print('[!] Not adding ' + algoGlobal + ' ' + lookahead + ' to commonly solved for this lookahead')
+    else:
+        # 95% was solved add it to the common list of filter
+        if not lookahead in unsolvedInstance:
+            unsolvedInstance[lookahead] = {}
+        for inst in missing:
+            print('[+] ' + lookahead + ' Adding ' + str(inst))
+            unsolvedInstance[lookahead][str(inst)] = True
 
 
 def fixTitle(t):
@@ -94,11 +105,13 @@ def fixTitle(t):
     return t
 
 def fixName(a):
-    if 'UCT' in a or 'WA' in a:
+    if 'UCT' in a or 'WA' in a or 'AS' in a[0:2]:
         a = a.replace('S', '*')
         a = a.replace('iep', '-IEP')
         a = a.replace('ie', '-IE')
         a = a.replace('nancy', '-Nancy')
+        a = a.replace('-', ' -')
+
     else:
         if a == 'RISK':
             a = 'Risk'
@@ -113,7 +126,7 @@ def fixName(a):
 def pointplot(df, n, j, title):
     sns.set(rc={'figure.figsize': (12, 8), 'font.size': 14, 'text.color': 'black'})
     ax = sns.pointplot(x='Lookahead', y='SolCost', data=df, hue = 'Algorithm', dodge=0.3, join=j, markers=markerList, errwidth=3, ci=95)
-    ax.legend(loc='upper right')
+    # ax.legend(loc='upper right')
     plt.title(title, fontsize=18)
     plt.ylabel('Solution Cost', color='black', fontsize=14)
     plt.xlabel('Node Expansion Limit', color='black', fontsize=14)
@@ -155,24 +168,45 @@ def boxplot(df, n, j, title):
     plt.cla()
     return
 
-uct = ['UCT','UCTie', 'UCTiep','UCTnancy','UCTS','UCTSie', 'UCTSiep', 'UCTSnancy']
-guct = ['GUCT','GUCTie', 'GUCTiep','GUCTnancy','GUCTS','GUCTSie', 'GUCTSiep', 'GUCTSnancy']
+uct = ['UCT','UCTie', 'UCTiep','UCTnancy']
+ucts = ['UCTS','UCTSie', 'UCTSiep', 'UCTSnancy']
+guct = ['GUCT','GUCTie', 'GUCTiep','GUCTnancy']
+gucts = ['GUCTS','GUCTSie', 'GUCTSiep', 'GUCTSnancy']
+aas = ['AS', 'ASie', 'ASiep','ASnancy']
 was = ['WAS', 'WASie', 'WASiep','WASnancy']
+
 other = ['RISK','FHAT','LSSLRTA','IE','IEP', 'IEPP']
 
 # PARAMS
 
-uctLearn = ['UCT-L','UCTie-L', 'UCTiep-L','UCTnancy-L','UCTS-L','UCTSie-L', 'UCTSiep-L', 'UCTSnancy-L']
-guctLearn = ['GUCT-L','GUCTie-L', 'GUCTiep-L','GUCTnancy-L','GUCTS-L','GUCTSie-L', 'GUCTSiep-L', 'GUCTSnancy-L']
+mix = ['UCTiep','UCTnancy', 'UCTSiep', 'UCTSnancy']
+
+uctLearn = ['UCT-L','UCTie-L', 'UCTiep-L','UCTnancy-L']
+uctsLearn = ['UCTS-L','UCTSie-L', 'UCTSiep-L', 'UCTSnancy-L']
+
+guctLearn = ['GUCT-L','GUCTie-L', 'GUCTiep-L','GUCTnancy-L']
+guctsLearn = ['GUCTS-L','GUCTSie-L', 'GUCTSiep-L', 'GUCTSnancy-L']
+
+aasLearn = ['AS-L', 'ASie-L', 'ASiep-L','ASnancy-L']
 wasLearn = ['WAS-L', 'WASie-L', 'WASiep-L','WASnancy-L']
+
+best = ['ASiep', 'WASiep', 'UCTiep', 'UCTnancy', 'GUCT', 'GUCTie', 'GUCTiep', 'GUCTnancy', 'GUCTiep'] 
+
 DOMAIN = sys.argv[1]
 OUTFILE = DOMAIN 
 DIRECTORY = sys.argv[2]
-ALGO_FILTER = ['RISK', 'ASiep-L', 'WASiep-L']
-FRONT_APPEND = 'best' + '_' # Goes in front of the name of the pdf file being output
+# ALL = ['UCT','UCTnancy','UCTie','UCTiep','UCTS','UCTSnancy','UCTSie','UCTSiep','GUCT','GUCTnancy','GUCTie','GUCTiep','GUCTS','GUCTSnancy','GUCTSie','GUCTSiep','AS','ASnancy','ASie','ASiep','WAS','WASie','WASiep','WASnancy','UCT-L','UCTnancy-L','UCTie-L','UCTiep-L','UCTS-L','UCTSnancy-L','UCTSie-L','UCTSiep-L','GUCT-L','GUCTnancy-L','GUCTie-L','GUCTiep-L','GUCTS-L','GUCTSnancy-L','GUCTSie-L','GUCTSiep-L','AS-L','ASnancy-L','ASie-L','ASiep-L','WAS-L','WASie-L','WASiep-L','WASnancy-L','UCT-H','UCTnancy-H','UCTie-H','UCTiep-H','UCTS-H','UCTSnancy-H','UCTSie-H','UCTSiep-H','GUCT-H','GUCTnancy-H','GUCTie-H','GUCTiep-H','GUCTS-H','GUCTSnancy-H','GUCTSie-H','GUCTSiep-H','AS-H','ASnancy-H','ASie-H','ASiep-H','WAS-H','WASie-H','WASiep-H','WASnancy-H','UCT-LH','UCTnancy-LH','UCTie-LH','UCTiep-LH','UCTS-LH','UCTSnancy-LH','UCTSie-LH','UCTSiep-LH','GUCT-LH','GUCTnancy-LH','GUCTie-LH','GUCTiep-LH','GUCTS-LH','GUCTSnancy-LH','GUCTSie-LH','GUCTSiep-LH','AS-LH','ASnancy-LH','ASie-LH','ASiep-LH','WAS-LH','WASie-LH','WASiep-LH','WASnancy-LH', 'RISK', 'LSSLRTA', 'FHAT', 'IE', 'IEP', 'IEPP']
+
+ALL = ['UCT','UCTnancy','GUCTiep','UCTiep','UCTS','UCTSnancy','UCTSie','UCTSiep','GUCT','GUCTnancy','GUCTie','GUCTiep','GUCTS','GUCTSnancy','GUCTSie','GUCTSiep','AS','ASnancy','ASie','ASiep','WAS','WASie','WASiep','WASnancy','UCT-L','UCTnancy-L','UCTie-L','UCTiep-L','UCTS-L','UCTSnancy-L','UCTSie-L','UCTSiep-L','GUCT-L','GUCTnancy-L','GUCTie-L','GUCTiep-L','GUCTS-L','GUCTSnancy-L','GUCTSie-L','GUCTSiep-L','AS-L','ASnancy-L','ASie-L','ASiep-L','WAS-L','WASie-L','WASiep-L','WASnancy-L', 'RISK', 'LSSLRTA', 'FHAT', 'IE', 'IEP', 'IEPP']
+
+
+FRONT_APPEND = 'bestB' + '_' # Goes in front of the name of the pdf file being output
 FINEFILTER = []
+ALGO_FILTER = ALL
+PLOT = False
 
-
+# if not PLOT:
+#     ALGO_FILTER = ALL
 
 # First loop through all the algorithm folders to check of unsolved instances
 # Missing instances will be shown in the output
@@ -185,7 +219,7 @@ for algo in os.listdir(DIRECTORY):
         continue
 
     algoMissing = 0
-
+    algoGlobal = algo
     loc = DIRECTORY + '/' + algo 
     print(algo)
 
@@ -207,7 +241,7 @@ for algo in os.listdir(DIRECTORY):
                 aggregateCvs(loc + '/' + str(dom) + '/' + subfolder)
 
     if (algoMissing > 0):
-        print ('  -TOTAL: ' + str(algoMissing) + '\n')
+        print ('===[TOTAL] ' + str(algoMissing) + '\n')
     totalMissing = totalMissing + algoMissing
 
 
@@ -226,6 +260,11 @@ for a in ALGO_FILTER:
         if not algorithm == a:
             continue
 
+        if PLOT and algorithm in skipList:
+            if len(skipList[algorithm]) == 5:
+                print('[!] Skipping ' + algorithm + ' entirely for plotting')
+                continue
+
         if len(FINEFILTER) > 0 and str(algorithm) in FINEFILTER:
             continue
         for dom in os.listdir(DIRECTORY + '/' + str(algorithm)):
@@ -233,13 +272,24 @@ for a in ALGO_FILTER:
                 print(DIRECTORY + '/' + str(algorithm) + '/' + str(dom))
                 df = pd.read_csv(DIRECTORY + '/' + str(algorithm) + '/' + str(dom), delimiter = ',')
                 # algostr = df.iloc[0]['Algorithm']
-                df['Algorithm'] = fixName(algorithm)
-
-
-
                 # Remove rows that cannot be solved by all algorithms
+                # Remove solved < 95%
+                if algorithm in skipList:
+                        for lookahead in skipList[algorithm]:
+                            # print('Skipping ' + algorithm + ' ' + lookahead)
+                            intLookahead = int(lookahead[2:])
+                            # indexNames = df[ (df['Lookahead'] == intLookahead) & (df['Algorithm'] == algorithm) ].index
+                            df.loc[(df.Lookahead == intLookahead) & (df.Algorithm == algorithm),'SolCost'] = 0
+                            indexNames = df[ (df['Lookahead'] == intLookahead) ].index
+                            df.loc[indexNames,'SolCost'] = 0
+
+                            if (PLOT):
+                                indexNames = df[ (df['Lookahead'] == intLookahead) & (df['Algorithm'] == algorithm) ].index
+                                df.drop(indexNames , inplace=True)
+                
+                            
                 for lookahead, instances in unsolvedInstance.items():
-                    for instance in instances:
+                    for instance, val in instances.items():
                         if 'Tree' in dom:
                             instance = 'b2d100-' + instance + '.csv'
                         elif 'Pancake' in dom:
@@ -248,7 +298,20 @@ for a in ALGO_FILTER:
                             instance = instance + '-4x4.csv'
                         intLookahead = int(lookahead[2:])
                         indexNames = df[ (df['Lookahead'] == intLookahead) & (df['FileID'] == instance) ].index
+                        print('[-] ' + lookahead + ' ' + instance)
                         df.drop(indexNames , inplace=True)
+                
+
+
+                # df = df[df.Lookahead != 10]
+                # df = df[df.Lookahead != 30]
+                # df = df[df.Lookahead != 100]
+                # df = df[df.Lookahead != 300]
+                # df = df[df.Lookahead != 1000]
+
+                # df.SolCost = df.SolCost.round(2)
+
+                df['Algorithm'] = fixName(algorithm)
                 frames.append(df)
 
 if len(frames) == 0:
@@ -263,9 +326,27 @@ result = pd.concat(frames)
 # result = result[result.Lookahead != 300]
 # result = result[result.Lookahead != 1000]
 
-title = fixTitle(DOMAIN)
+for indx, inst in enumerate(skipList):
+    print(inst)
+    print(skipList[inst])
 
-pointplot(result, FRONT_APPEND + OUTFILE + '.pdf', False, title)
-violinplot(result,FRONT_APPEND  + OUTFILE + '_vio.pdf', False, title)
-boxplot(result,FRONT_APPEND  + OUTFILE + '_box.pdf', False, title)
 
+if (PLOT):
+    result = result[result.SolCost != 0]
+    title = fixTitle(DOMAIN)
+    pointplot(result, FRONT_APPEND + OUTFILE + '.pdf', False, title)
+    violinplot(result,FRONT_APPEND  + OUTFILE + '_vio.pdf', False, title)
+    boxplot(result,FRONT_APPEND  + OUTFILE + '_box.pdf', False, title)
+else:
+    # del result['Lookahead']
+    del result['NodeGen']
+    del result['NodeExp']
+
+    table = pd.pivot_table(result, values='SolCost', index=['Algorithm'], columns=['Lookahead'], aggfunc=np.mean)
+    # table = np.round(table, 2)
+
+    # result = result.groupby('Algorithm').mean()
+
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+    #     print(result)
+    print(table.to_latex(index=True))

@@ -10,6 +10,7 @@
 #include "domain/PancakePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
 #include "domain/InverseTilePuzzle.h"
+#include "domain/SqrtTilePuzzle.h"
 
 using namespace std;
 
@@ -57,7 +58,11 @@ int main(int argc, char** argv){
 		RealTimeSearch<InverseTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
 		if (!world.validatePath(res.path)) exit(1);
-		
+	} else if (domain == "SqrtTile") {
+		SqrtTilePuzzle world = SqrtTilePuzzle(cin);
+		RealTimeSearch<SqrtTilePuzzle> iep(world, "iep", "learn", "minimin", lookaheadDepth);
+		res = iep.search();
+		if (!world.validatePath(res.path)) exit(1);
 	} else {
 		cout << "Available domains are TreeWorld and SlidingPuzzle" << endl;
 		exit(1);

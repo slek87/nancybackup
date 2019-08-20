@@ -5,11 +5,11 @@
 
 
 
-algoArr=("UCT" "UCTnancy" "UCTie" "UCTiep" "UCTS" "UCTSnancy" "UCTSie" "UCTSiep" "GUCT" "GUCTnancy" "GUCTie" "GUCTiep" "GUCTS" "GUCTSnancy" "GUCTSie" "GUCTSiep" "AS" "ASnancy" "ASie" "ASiep" "WAS" "WASie" "WASiep" "WASnancy" "UCT-L" "UCTnancy-L" "UCTie-L" "UCTiep-L" "UCTS-L" "UCTSnancy-L" "UCTSie-L" "UCTSiep-L" "GUCT-L" "GUCTnancy-L" "GUCTie-L" "GUCTiep-L" "GUCTS-L" "GUCTSnancy-L" "GUCTSie-L" "GUCTSiep-L" "AS-L" "ASnancy-L" "ASie-L" "ASiep-L" "WAS-L" "WASie-L" "WASiep-L" "WASnancy-L" "UCT-H" "UCTnancy-H" "UCTie-H" "UCTiep-H" "UCTS-H" "UCTSnancy-H" "UCTSie-H" "UCTSiep-H" "GUCT-H" "GUCTnancy-H" "GUCTie-H" "GUCTiep-H" "GUCTS-H" "GUCTSnancy-H" "GUCTSie-H" "GUCTSiep-H" "AS-H" "ASnancy-H" "ASie-H" "ASiep-H" "WAS-H" "WASie-H" "WASiep-H" "WASnancy-H" "UCT-LH" "UCTnancy-LH" "UCTie-LH" "UCTiep-LH" "UCTS-LH" "UCTSnancy-LH" "UCTSie-LH" "UCTSiep-LH" "GUCT-LH" "GUCTnancy-LH" "GUCTie-LH" "GUCTiep-LH" "GUCTS-LH" "GUCTSnancy-LH" "GUCTSie-LH" "GUCTSiep-LH" "AS-LH" "ASnancy-LH" "ASie-LH" "ASiep-LH" "WAS-LH" "WASie-LH" "WASiep-LH" "WASnancy-LH")
+algoArr=("FHAT" "LSSLRTA" "IE" "IEP" "IEPP" "RISK" "UCT" "UCTnancy" "UCTie" "UCTiep" "UCTS" "UCTSnancy" "UCTSie" "UCTSiep" "GUCT" "GUCTnancy" "GUCTie" "GUCTiep" "GUCTS" "GUCTSnancy" "GUCTSie" "GUCTSiep" "AS" "ASnancy" "ASie" "ASiep" "WAS" "WASie" "WASiep" "WASnancy" "UCT-L" "UCTnancy-L" "UCTie-L" "UCTiep-L" "UCTS-L" "UCTSnancy-L" "UCTSie-L" "UCTSiep-L" "GUCT-L" "GUCTnancy-L" "GUCTie-L" "GUCTiep-L" "GUCTS-L" "GUCTSnancy-L" "GUCTSie-L" "GUCTSiep-L" "AS-L" "ASnancy-L" "ASie-L" "ASiep-L" "WAS-L" "WASie-L" "WASiep-L" "WASnancy-L" "UCT-H" "UCTnancy-H" "UCTie-H" "UCTiep-H" "UCTS-H" "UCTSnancy-H" "UCTSie-H" "UCTSiep-H" "GUCT-H" "GUCTnancy-H" "GUCTie-H" "GUCTiep-H" "GUCTS-H" "GUCTSnancy-H" "GUCTSie-H" "GUCTSiep-H" "AS-H" "ASnancy-H" "ASie-H" "ASiep-H" "WAS-H" "WASie-H" "WASiep-H" "WASnancy-H" "UCT-LH" "UCTnancy-LH" "UCTie-LH" "UCTiep-LH" "UCTS-LH" "UCTSnancy-LH" "UCTSie-LH" "UCTSiep-LH" "GUCT-LH" "GUCTnancy-LH" "GUCTie-LH" "GUCTiep-LH" "GUCTS-LH" "GUCTSnancy-LH" "GUCTSie-LH" "GUCTSiep-LH" "AS-LH" "ASnancy-LH" "ASie-LH" "ASiep-LH" "WAS-LH" "WASie-LH" "WASiep-LH" "WASnancy-LH")
 
 # algoArr=("AS-H" "ASie-H" "ASiep" "ASiep-H" "GUCT" "GUCT-H" "GUCTS-H" "GUCTSie-H" "GUCTSiep" "GUCTSiep-H" "GUCTSnancy" "GUCTie" "GUCTie-H" "GUCTiep" "GUCTiep-H" "GUCTnancy" "UCT-H" "UCTS-H" "UCTSie-H" "UCTSiep" "UCTSiep-H" "UCTSnancy-H" "UCTie-H" "UCTiep" "UCTiep-H" "UCTnancy")
 
-# algoArr=("ASiep-LH" "GUCTSiep-LH" "GUCTiep-LH" "UCTSiep-LH" "UCTiep-LH")
+# algoArr=("RISK")
 
 default=true
 
@@ -17,6 +17,7 @@ domainType="All"
 reverse=""
 tout=300
 limitunsolved=3
+specificAlgo=""
 
 if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ] || [ "$1" = "-h" ]
 then
@@ -51,9 +52,26 @@ for (( i=1; i <= "$#"; i++ )); do
             limitunsolved=${!var}
         fi
     fi
+
+    if [ ${!i} == "-a" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+            algo=${!var}
+        fi
+    fi
 done
 
-
+if [ ! "$specificAlgo" = "" ] 
+then
+    if [ "$domainType" = "All" ] 
+    then
+        echo "Specify a domain"
+        exit 1
+    fi
+    echo "./expansionTest${reverse}.sh 1 100 1 ${domainType} ${specificAlgo} ${tout} ${limitunsolved} "
+    ./expansionTest${reverse}.sh 1 100 1 ${domainType} ${specificAlgo} ${tout} ${limitunsolved} 
+    exit 1
+fi
 
 if [ "$domainType" = "All" ] 
 then

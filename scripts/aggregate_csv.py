@@ -13,6 +13,9 @@ import os
 # outfileName = outfileName + '.csv'
 lines = []
 base = sys.argv[1]
+domFilter = ''
+if len(sys.argv) > 2:
+    domFilter = sys.argv[2] 
 
 def clearLine():
     lines.clear()
@@ -21,6 +24,7 @@ def clearLine():
 def aggregateCvs(directory):
     print('Aggregating... ' + directory)
     i = 0
+    look = directory.split('/')[-1][2:]
     for file in os.listdir(directory):
         if not '.csv' in file:
             continue
@@ -28,6 +32,12 @@ def aggregateCvs(directory):
         with open(directory +'/' + file) as f:
             for line in f:
                 line = line.rstrip('\n')
+                
+                if(line.split(',')[-1] != look):
+                    print('Mismatch look ahead!', file)
+                    print(line.split(',')[-1] , look)
+                    exit(1)
+
                 lines.append(line + ',' + file + '\n')
     print('Aggregated ' + str(i) + ' lines')
 
@@ -39,6 +49,9 @@ for algo in os.listdir(base):
         if '.' in str(domain):
             continue
 
+        if domFilter != '' and domain != domFilter:
+            continue
+            
         clearLine()
 
         print(domain)
