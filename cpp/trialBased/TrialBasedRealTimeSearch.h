@@ -213,10 +213,10 @@ public:
         // Represents the estimated h cost of solving the problem by returning to this state
         // whereas LRTA* style uses min f, which will converge eventually
 
-        if (hLearning){
-            domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
-            return;
-        }
+        // if (hLearning){
+        //     domain.updateHeuristic(n->parent->state, n->parent->h + n->edgeCost);
+        //     return;
+        // }
 
         // Should I do both RTA* and LRTA* method of updating? i.e. erase the above 
         // code that updates the heuristic and remove the return.
