@@ -25,7 +25,8 @@ maxProcs=$3
 # The domain to run on
 domainType=$4
 # lookahead=$5
-lookaheadArr=(10 30)
+lookaheadArr=(10 30
+)
 
 algorithm=$5
 timelimit=$6
@@ -37,7 +38,7 @@ for lookahead in "${lookaheadArr[@]}"
 do
     notSolved=0
     echo "Domain:${domainType} Lookahead:${lookahead} Algorithm:${algorithm}"
-    if [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ]
+    if [ "$domainType" = "SlidingPuzzle" ] || [ "$domainType" = "HeavyTile" ] || [ "$domainType" = "InverseTile" ] ||  [ "$domainType" = "SqrtTile" ]
     then
         dimensions=4
         mkdir -p ../../results/${algorithm}/${domainType}/${dimensions}x${dimensions}/LA${lookahead}

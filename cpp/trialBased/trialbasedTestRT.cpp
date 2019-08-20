@@ -9,6 +9,7 @@
 #include "../domain/InverseTilePuzzle.h"
 #include "../domain/PancakePuzzle.h"
 #include "../domain/TreeWorld.h"
+#include "../domain/SqrtTilePuzzle.h"
 #include "../utility/ResultContainer.h"
 
 using namespace std;
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
     }
 
 
-    bool check = false;
+    bool check = true;
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){
         ResultContainer result;
@@ -97,6 +98,17 @@ int main(int argc, char** argv) {
     } else if (domain == "InverseTile"){
         InverseTilePuzzle world = InverseTilePuzzle(cin);
         THTS_RT <InverseTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep, hLearning);
+
+        thts.setRecordPlan(check);
+
+        res = thts.getPlan();
+        if (check && !world.validatePath(res.path)) {
+            cout << "INVALID PATH!" << endl;            
+            exit(1);
+        }
+    } else if (domain == "SqrtTile"){
+        SqrtTilePuzzle world = SqrtTilePuzzle(cin);
+        THTS_RT <SqrtTilePuzzle> thts(world, algorithm, lookahead, greedyOneStep, hLearning);
 
         thts.setRecordPlan(check);
 

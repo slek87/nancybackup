@@ -134,7 +134,18 @@ then
             exit 1
         fi
     done
-elif [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] 
+
+    for algo in "${algoArr[@]}"
+    do
+        echo "./expansionTest${reverse}.sh 1 100 1 SqrtTile ${algo} ${tout} ${limitunsolved} "
+        ./expansionTest${reverse}.sh 1 100 1 SqrtTile ${algo} ${tout} ${limitunsolved} 
+        if [ $? -eq 1 ]
+        then
+            exit 1
+        fi
+    done
+
+elif [ "$domainType" = "SlidingPuzzle" ] ||  [ "$domainType" = "HeavyTile" ] ||  [ "$domainType" = "InverseTile" ]  ||  [ "$domainType" = "SqrtTile" ] || [ "$domainType" = "Pancake" ] ||  [ "$domainType" = "PancakeDPS" ] 
 then
     for algo in "${algoArr[@]}"
     do
