@@ -28,9 +28,12 @@ int main(int argc, char** argv) {
     string prune_type = "erase";
     bool greedyOneStep = false;
     bool hLearning = false;
+    bool check = true; // Check validate solution
 
     string algorithm = "";
     bool front = true;
+
+
     for(int i = 0; i < algorithmInput.length(); ++i){
         if (algorithmInput[i] == '-'){
             front = !front;
@@ -48,7 +51,6 @@ int main(int argc, char** argv) {
     }
 
 
-    bool check = true;
 
     if (domain == "Pancake" || domain == "PancakeDPS" ){
         ResultContainer result;

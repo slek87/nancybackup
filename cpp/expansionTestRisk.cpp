@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 	}
 	// Get the lookahead depth
 	int lookaheadDepth = stoi(argv[2]);
-    bool check = false;
+    bool check = true;
 
 	// Get the domain type
 	string domain = argv[1];

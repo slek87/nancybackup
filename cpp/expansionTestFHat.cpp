@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 	}
 	// Get the lookahead depth
 	int lookaheadDepth = stoi(argv[2]);
-	bool check = false;
+	bool check = true;
 	// Get the domain type
 	string domain = argv[1];
 
@@ -60,9 +60,9 @@ int main(int argc, char** argv){
 		if (check && !world.validatePath(res.path)) exit(1);
 	} else if (domain == "SqrtTile") {
 		SqrtTilePuzzle world = SqrtTilePuzzle(cin);
-		RealTimeSearch<SqrtTilePuzzle> iep(world, "iep", "learn", "minimin", lookaheadDepth);
-		res = iep.search();
-		if (!world.validatePath(res.path)) exit(1);
+		RealTimeSearch<SqrtTilePuzzle> fhat(world, "f-hat", "learn", "k-best", lookaheadDepth);
+		res = fhat.search();
+		if (check && !world.validatePath(res.path)) exit(1);
 	} else {
 		cout << "Available domains are TreeWorld and SlidingPuzzle" << endl;
 		exit(1);

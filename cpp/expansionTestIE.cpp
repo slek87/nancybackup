@@ -21,6 +21,7 @@ int main(int argc, char** argv){
 	}
 	// Get the lookahead depth
 	int lookaheadDepth = stoi(argv[2]);
+    bool check = true;
 
 	// Get the domain type
 	string domain = argv[1];
@@ -34,7 +35,7 @@ int main(int argc, char** argv){
 		}
 		RealTimeSearch<PancakePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
-		if (!world.validatePath(res.path)) exit(1);
+		if (check && !world.validatePath(res.path)) exit(1);
 
 	} else if (domain == "TreeWorld"){
 		TreeWorld world = TreeWorld(cin);
@@ -45,24 +46,24 @@ int main(int argc, char** argv){
 		SlidingTilePuzzle world = SlidingTilePuzzle(cin);
 		RealTimeSearch<SlidingTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
-		if (!world.validatePath(res.path)) exit(1);
+		if (check && !world.validatePath(res.path)) exit(1);
 
 	} else if (domain == "HeavyTile") {
 		HeavyTilePuzzle world = HeavyTilePuzzle(cin);
 		RealTimeSearch<HeavyTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
-		if (!world.validatePath(res.path)) exit(1);
+		if (check && !world.validatePath(res.path)) exit(1);
 
 	} else if (domain == "InverseTile") {
 		InverseTilePuzzle world = InverseTilePuzzle(cin);
 		RealTimeSearch<InverseTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
 		res = ie.search();
-		if (!world.validatePath(res.path)) exit(1);
+		if (check && !world.validatePath(res.path)) exit(1);
 	} else if (domain == "SqrtTile") {
 		SqrtTilePuzzle world = SqrtTilePuzzle(cin);
-		RealTimeSearch<SqrtTilePuzzle> iep(world, "iep", "learn", "minimin", lookaheadDepth);
-		res = iep.search();
-		if (!world.validatePath(res.path)) exit(1);
+		RealTimeSearch<SqrtTilePuzzle> ie(world, "ie", "learn", "minimin", lookaheadDepth);
+		res = ie.search();
+		if (check && !world.validatePath(res.path)) exit(1);
 	} else {
 		cout << "Available domains are TreeWorld and SlidingPuzzle" << endl;
 		exit(1);
