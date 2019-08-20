@@ -56,7 +56,7 @@ for (( i=1; i <= "$#"; i++ )); do
     if [ ${!i} == "-a" ]; then
         if [ $((i+1)) -le "$#" ]; then
             var=$((i+1))
-            algo=${!var}
+            specificAlgo=${!var}
         fi
     fi
 done

@@ -334,7 +334,7 @@ public:
 
 			// Decision-making Phase
 			start = decisionAlgo->backup(open, tlas, start);
-
+			cout << start -> getState() << endl;
 			// Add this step to the path taken so far
             res.path.push(start->getState().getLabel());
 		}
