@@ -190,7 +190,7 @@ guctsLearn = ['GUCTS-L','GUCTSie-L', 'GUCTSiep-L', 'GUCTSnancy-L']
 aasLearn = ['AS-L', 'ASie-L', 'ASiep-L','ASnancy-L']
 wasLearn = ['WAS-L', 'WASie-L', 'WASiep-L','WASnancy-L']
 
-best = ['ASiep', 'WASiep', 'UCTiep', 'UCTnancy', 'GUCT', 'GUCTie', 'GUCTiep', 'GUCTnancy', 'GUCTiep'] 
+best = ['ASiep', 'WASiep', 'UCTSiep', 'UCTnancy', 'GUCT', 'GUCTie', 'GUCTiep', 'GUCTnancy', 'GUCTiep', 'RISK'] 
 
 DOMAIN = sys.argv[1]
 OUTFILE = DOMAIN 
@@ -200,9 +200,9 @@ DIRECTORY = sys.argv[2]
 ALL = ['UCT','UCTnancy','GUCTiep','UCTiep','UCTS','UCTSnancy','UCTSie','UCTSiep','GUCT','GUCTnancy','GUCTie','GUCTiep','GUCTS','GUCTSnancy','GUCTSie','GUCTSiep','AS','ASnancy','ASie','ASiep','WAS','WASie','WASiep','WASnancy','UCT-L','UCTnancy-L','UCTie-L','UCTiep-L','UCTS-L','UCTSnancy-L','UCTSie-L','UCTSiep-L','GUCT-L','GUCTnancy-L','GUCTie-L','GUCTiep-L','GUCTS-L','GUCTSnancy-L','GUCTSie-L','GUCTSiep-L','AS-L','ASnancy-L','ASie-L','ASiep-L','WAS-L','WASie-L','WASiep-L','WASnancy-L', 'RISK', 'LSSLRTA', 'FHAT', 'IE', 'IEP', 'IEPP']
 
 
-FRONT_APPEND = 'bestB' + '_' # Goes in front of the name of the pdf file being output
+FRONT_APPEND = 'best' + '_' # Goes in front of the name of the pdf file being output
 FINEFILTER = []
-ALGO_FILTER = ALL
+ALGO_FILTER = best
 PLOT = False
 
 # if not PLOT:
