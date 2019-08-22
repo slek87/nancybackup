@@ -102,6 +102,8 @@ def fixTitle(t):
         return 'Random Binary Tree'
     if t == 'InverseTile':
         return 'Inverse Sliding Puzzle'
+    if t == 'SqrtTile':
+        return 'Square Root Sliding Puzzle'
     return t
 
 def fixName(a):
@@ -190,7 +192,8 @@ guctsLearn = ['GUCTS-L','GUCTSie-L', 'GUCTSiep-L', 'GUCTSnancy-L']
 aasLearn = ['AS-L', 'ASie-L', 'ASiep-L','ASnancy-L']
 wasLearn = ['WAS-L', 'WASie-L', 'WASiep-L','WASnancy-L']
 
-best = ['ASiep', 'WASiep', 'UCTSiep', 'UCTnancy', 'GUCT', 'GUCTie', 'GUCTiep', 'GUCTnancy', 'GUCTiep', 'RISK'] 
+best = ['WASiep', 'GUCTSiep', 'RISK', 'IE'] 
+best2 = ['WASiep', 'GUCTSiep', 'RISK'] 
 
 DOMAIN = sys.argv[1]
 OUTFILE = DOMAIN 
@@ -200,10 +203,10 @@ DIRECTORY = sys.argv[2]
 ALL = ['UCT','UCTnancy','GUCTiep','UCTiep','UCTS','UCTSnancy','UCTSie','UCTSiep','GUCT','GUCTnancy','GUCTie','GUCTiep','GUCTS','GUCTSnancy','GUCTSie','GUCTSiep','AS','ASnancy','ASie','ASiep','WAS','WASie','WASiep','WASnancy','UCT-L','UCTnancy-L','UCTie-L','UCTiep-L','UCTS-L','UCTSnancy-L','UCTSie-L','UCTSiep-L','GUCT-L','GUCTnancy-L','GUCTie-L','GUCTiep-L','GUCTS-L','GUCTSnancy-L','GUCTSie-L','GUCTSiep-L','AS-L','ASnancy-L','ASie-L','ASiep-L','WAS-L','WASie-L','WASiep-L','WASnancy-L', 'RISK', 'LSSLRTA', 'FHAT', 'IE', 'IEP', 'IEPP']
 
 
-FRONT_APPEND = 'best' + '_' # Goes in front of the name of the pdf file being output
+FRONT_APPEND = 'aas' + '_' # Goes in front of the name of the pdf file being output
 FINEFILTER = []
-ALGO_FILTER = best
-PLOT = False
+ALGO_FILTER = aas + was
+PLOT = True
 
 # if not PLOT:
 #     ALGO_FILTER = ALL
@@ -343,7 +346,7 @@ else:
     del result['NodeExp']
 
     table = pd.pivot_table(result, values='SolCost', index=['Algorithm'], columns=['Lookahead'], aggfunc=np.mean)
-    # table = np.round(table, 2)
+    table = np.round(table, 2)
 
     # result = result.groupby('Algorithm').mean()
 
